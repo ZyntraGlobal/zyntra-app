@@ -1,69 +1,64 @@
+/* ============================================================
+   ZYNTRA GESTÃO — MOBILE CSS
+   Mesma lógica do FC: body faz scroll vertical, .pg transparente
+   ============================================================ */
+
 @media (max-width: 768px) {
 
-  /* ── BASE ── */
-  html {
-    height: 100%;
-    overflow-x: hidden;
-  }
   body {
-    flex-direction: column !important;
-    min-height: 100dvh;
+    display: block !important;
     height: auto !important;
+    min-height: 100dvh;
     overflow-x: hidden !important;
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch;
+    padding-bottom: calc(62px + env(safe-area-inset-bottom)) !important;
   }
 
-  /* ── Sidebar → escondida ── */
   .sb { display: none !important; }
 
-  /* ── Main ── */
   .main {
+    display: block !important;
     width: 100% !important;
     height: auto !important;
-    min-height: 100dvh;
-    display: flex !important;
-    flex-direction: column !important;
     overflow: visible !important;
-  }
-
-  /* ── Topbar ── */
-  .topbar {
-    height: auto !important;
-    min-height: 48px;
-    padding: 10px 12px !important;
-    padding-top: calc(10px + env(safe-area-inset-top)) !important;
-    flex-wrap: wrap;
-    gap: 6px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-  .topbar-title { font-size: 13px; }
-  #frase { display: none; }
-  .chip { display: none; }
-  #fs-status { font-size: 10px; }
-
-  /* ── PÁGINA: SEM overflow-x hidden (bloquearia scroll lateral das tabelas) ── */
-  .pg {
-    flex: 1 !important;
-    height: auto !important;
     min-height: 0 !important;
-    max-height: none !important;
-    overflow-x: visible !important;
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch !important;
-    overscroll-behavior-y: contain;
-    padding: 12px !important;
-    padding-bottom: calc(80px + env(safe-area-inset-bottom)) !important;
   }
 
-  /* ── TABELAS: scroll horizontal ── */
+  .topbar {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 100 !important;
+    height: auto !important;
+    min-height: 46px;
+    padding: 8px 12px !important;
+    padding-top: calc(8px + env(safe-area-inset-top)) !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+  }
+  .topbar-title { font-size: 13px !important; }
+  #frase        { display: none !important; }
+  .chip         { display: none !important; }
+  #fs-status    { font-size: 10px !important; }
+
+  /* PG transparente — sem overflow, sem height fixo */
+  .pg {
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    padding: 12px !important;
+    padding-bottom: 20px !important;
+    flex: none !important;
+  }
+
+  /* Tabelas: scroll horizontal livre */
   .tw {
     display: block !important;
     overflow-x: auto !important;
     -webkit-overflow-scrolling: touch !important;
     width: 100% !important;
+    max-width: 100% !important;
   }
   table {
     display: table !important;
@@ -75,54 +70,45 @@
   tbody  { display: table-row-group !important; }
   tfoot  { display: table-footer-group !important; }
   th, td { padding: 7px 8px !important; white-space: nowrap !important; }
-
-  /* ── Containers de tabela ── */
-  .ts { max-height: none !important; overflow: visible !important; }
+  .ts    { max-height: none !important; overflow: visible !important; }
   .pb, .panel, .card { overflow: visible !important; }
 
-  /* ── Grids → responsivos ── */
-  .g2 { grid-template-columns: 1fr 1fr !important; }
-  .g3, .g4, .g5 { grid-template-columns: 1fr 1fr !important; }
-  .row2 { grid-template-columns: 1fr !important; }
+  /* Grids */
+  .g2, .cockpit           { grid-template-columns: 1fr 1fr !important; }
+  .g3, .g4, .g5           { grid-template-columns: 1fr 1fr !important; }
+  .row2                   { grid-template-columns: 1fr !important; }
+  div[style*="grid-template-columns:1fr 1fr 1fr"] { grid-template-columns: 1fr !important; }
 
-  /* ── Cards ── */
+  /* Cards */
   .card .val { font-size: 16px !important; }
   .card .lbl { font-size: 10px !important; }
 
-  /* ── Botões ── */
+  /* Botões */
   .btn {
     padding: 9px 12px !important;
     font-size: 13px !important;
     touch-action: manipulation !important;
-    cursor: pointer !important;
     min-height: 38px;
   }
-  .bsm { padding: 7px 10px !important; font-size: 12px !important; }
+  .bsm  { padding: 7px 10px !important; font-size: 12px !important; }
   .brow { gap: 6px !important; flex-wrap: wrap !important; }
 
-  /* ── Todos os elementos clicáveis ── */
   .ni, .pill, [onclick], button, select, .sel, .btn {
     touch-action: manipulation !important;
-    cursor: pointer !important;
     -webkit-tap-highlight-color: rgba(201,168,76,.15);
   }
 
-  /* ── Inputs: sem zoom iOS ── */
   input, select, textarea, .inp, .sel,
   .fg input, .fg select, .fg textarea {
     font-size: 16px !important;
     padding: 10px !important;
   }
 
-  /* ── Formulários ── */
   .f2, .f3 { grid-template-columns: 1fr !important; }
-  .fg { gap: 12px !important; }
+  .fg      { gap: 12px !important; }
 
-  /* ── Modal: abre de baixo ── */
-  .mbg {
-    padding: 0 !important;
-    align-items: flex-end !important;
-  }
+  /* Modal */
+  .mbg { padding: 0 !important; align-items: flex-end !important; }
   .modal {
     width: 100% !important;
     max-height: 92dvh !important;
@@ -134,70 +120,52 @@
     margin: 0 !important;
   }
   .modal.lg { width: 100% !important; }
-  .macts { gap: 8px !important; flex-wrap: wrap !important; }
+  .macts    { gap: 8px !important; flex-wrap: wrap !important; }
   .macts .btn { flex: 1 !important; justify-content: center !important; min-width: 120px; }
 
-  /* ── LOGIN MOBILE ── */
+  /* Login */
   .login-wrap {
-    flex-direction: column !important;
-    width: 100% !important;
-    min-height: 100dvh !important;
-    border-radius: 0 !important;
-    border: none !important;
-    box-shadow: none !important;
+    flex-direction: column !important; width: 100% !important;
+    min-height: 100dvh !important; border-radius: 0 !important;
+    border: none !important; box-shadow: none !important;
   }
   .login-brand { display: none !important; }
   .login-form-side {
-    width: 100% !important;
-    flex: 1 !important;
+    width: 100% !important; flex: 1 !important;
     padding: 40px 28px 32px !important;
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: center !important;
+    display: flex !important; flex-direction: column !important; justify-content: center !important;
   }
   .login-logo-mob {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    margin-bottom: 28px !important;
+    display: flex !important; flex-direction: column !important;
+    align-items: center !important; margin-bottom: 28px !important;
   }
   .login-logo-mob img {
-    width: 130px !important;
-    height: auto !important;
-    object-fit: contain !important;
-    display: block !important;
-    margin: 0 auto 16px !important;
+    width: 120px !important; height: auto !important;
+    display: block !important; margin: 0 auto 16px !important;
     filter: drop-shadow(0 0 28px rgba(107,33,168,.9)) !important;
   }
   .login-logo-mob .t1 {
-    font-size: 18px !important;
-    font-weight: 900 !important;
-    letter-spacing: 4px !important;
-    color: #fff !important;
-    text-transform: uppercase !important;
-    text-align: center !important;
+    font-size: 18px !important; font-weight: 900 !important;
+    letter-spacing: 4px !important; color: #fff !important;
+    text-transform: uppercase !important; text-align: center !important;
   }
   .login-logo-mob .t1 em { color: #c9a84c !important; font-style: normal !important; }
-  .login-input { font-size: 16px !important; padding: 14px 16px !important; border-radius: 10px !important; }
-  .login-btn { padding: 15px !important; font-size: 14px !important; border-radius: 10px !important; margin-top: 6px !important; }
-  .login-field { margin-bottom: 12px !important; }
-  .login-label { font-size: 11px !important; font-weight: 700 !important; letter-spacing: .5px !important; margin-bottom: 6px !important; display: block !important; }
+  .login-input  { font-size: 16px !important; padding: 14px 16px !important; border-radius: 10px !important; }
+  .login-btn    { padding: 15px !important; font-size: 14px !important; margin-top: 6px !important; }
+  .login-field  { margin-bottom: 12px !important; }
+  .login-label  { font-size: 11px !important; font-weight: 700 !important; display: block !important; }
 
-  /* ── Notificações acima do bottom nav ── */
+  /* Notificações */
   div[style*="z-index:9000"] {
-    bottom: calc(72px + env(safe-area-inset-bottom)) !important;
-    right: 12px !important;
-    left: 12px !important;
-    max-width: none !important;
+    bottom: calc(70px + env(safe-area-inset-bottom)) !important;
+    right: 12px !important; left: 12px !important; max-width: none !important;
   }
 
-  /* ── BOTTOM NAV ── */
+  /* Bottom nav */
   .mob-nav {
     display: flex !important;
     position: fixed !important;
-    bottom: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
+    bottom: 0 !important; left: 0 !important; right: 0 !important;
     height: calc(58px + env(safe-area-inset-bottom)) !important;
     padding-bottom: env(safe-area-inset-bottom) !important;
     background: var(--w) !important;
@@ -205,23 +173,15 @@
     z-index: 1000 !important;
   }
   .mob-nav-btn {
-    flex: 1 !important;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 2px !important;
+    flex: 1 !important; display: flex !important;
+    flex-direction: column !important; align-items: center !important; justify-content: center !important;
+    gap: 2px !important; color: var(--t3) !important;
+    font-size: 9px !important; font-weight: 600 !important;
+    padding: 6px 2px !important; border: none !important; background: none !important;
+    touch-action: manipulation !important; -webkit-tap-highlight-color: transparent !important;
     cursor: pointer !important;
-    color: var(--t3) !important;
-    font-size: 9px !important;
-    font-weight: 600 !important;
-    padding: 6px 2px !important;
-    border: none !important;
-    background: none !important;
-    touch-action: manipulation !important;
-    -webkit-tap-highlight-color: transparent !important;
   }
   .mob-nav-btn .ico { font-size: 19px !important; line-height: 1 !important; }
-  .mob-nav-btn.on { color: var(--gold) !important; }
+  .mob-nav-btn.on   { color: var(--gold) !important; }
 
 }
