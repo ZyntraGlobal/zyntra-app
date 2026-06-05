@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Zyntra">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Zyntra Global</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d0d0d;color:#e0e0e0;min-height:100vh;padding-bottom:80px}
+.header{background:#111;padding:16px;padding-top:calc(16px + env(safe-area-inset-top));display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;border-bottom:1px solid #222}
+.logo{font-size:18px;font-weight:700;letter-spacing:2px;color:#fff}.logo span{color:#7c3aed}
+.update{font-size:10px;color:#555;text-align:right}
+.tabs{display:flex;background:#111;border-bottom:1px solid #222;position:sticky;top:57px;z-index:99}
+.tab{flex:1;padding:12px 4px;text-align:center;font-size:11px;font-weight:600;color:#555;border-bottom:2px solid transparent;transition:.2s;cursor:pointer}
+.tab.active{color:#7c3aed;border-bottom-color:#7c3aed}
+.page{display:none;padding:16px}.page.active{display:block}
+.card{background:#1a1a1a;border-radius:14px;padding:16px;margin-bottom:12px}
+.card-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#7c3aed;margin-bottom:12px}
+.resumo{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:4px}
+.res-box{background:#111;border-radius:10px;padding:10px 6px;text-align:center}
+.res-val{font-size:12px;font-weight:700;color:#fff;word-break:break-all}
+.res-val.verde{color:#22c55e}.res-val.vermelho{color:#ef4444}.res-val.amarelo{color:#f59e0b}
+.res-lab{font-size:9px;color:#555;margin-top:3px}
+.item{padding:10px 0;border-bottom:1px solid #222}
+.item:last-child{border-bottom:none}
+.item-nome{font-size:13px;color:#e0e0e0;margin-bottom:3px;line-height:1.3}
+.item-info{font-size:11px;color:#666;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.badge{font-size:10px;padding:2px 7px;border-radius:4px;font-weight:600;white-space:nowrap}
+.b-pago{background:#14532d;color:#22c55e}.b-pend{background:#450a0a;color:#ef4444}
+.b-alta{background:#451a03;color:#f97316}.b-media{background:#1c1917;color:#a8a29e}
+.alerta .item-nome{color:#fbbf24}
+.empty{color:#444;font-size:12px;text-align:center;padding:16px 0}
+.mes-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.mes-btn{background:#222;border:none;color:#e0e0e0;width:32px;height:32px;border-radius:8px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.mes-nome{font-size:14px;font-weight:600;color:#fff}
+.loading{text-align:center;padding:40px;color:#444;font-size:14px}
+.refresh-btn{background:#7c3aed;border:none;color:#fff;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer}
+.status-bar{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.status-chip{font-size:10px;padding:4px 10px;border-radius:20px;font-weight:600;cursor:pointer;border:1px solid transparent}
+.status-chip.all{background:#222;color:#e0e0e0}
+.status-chip.pago{background:#14532d;color:#22c55e}
+.status-chip.pend{background:#450a0a;color:#ef4444}
+.status-chip.active{border-color:#7c3aed}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">ZYNTRA<span> · </span>FC</div>
+  <div style="text-align:right">
+    <div class="update" id="upd">Carregando...</div>
+    <button class="refresh-btn" onclick="carregarDados()">↻ Atualizar</button>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="mudarAba('pagamentos')">💳 Pagamentos</div>
+  <div class="tab" onclick="mudarAba('rtu')">📦 RTU</div>
+  <div class="tab" onclick="mudarAba('estoque')">🏪 Estoque</div>
+</div>
+
+<div id="pagamentos" class="page active"><div class="loading">Carregando...</div></div>
+<div id="rtu" class="page"><div class="loading">Carregando...</div></div>
+<div id="estoque" class="page"><div class="loading">Carregando...</div></div>
+
+<script>
+const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+let DB = null, mesSel = new Date().getMonth(), filtro = 'all';
+
+function fmt(v){ return 'R$ ' + (v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+
+async function carregarDados(){
+  document.getElementById('upd').textContent = 'Atualizando...';
+  try {
+    const r = await fetch('data.json?t=' + Date.now());
+    DB = await r.json();
+    const agora = new Date();
+    document.getElementById('upd').textContent = 'Atualizado ' + agora.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    renderAll();
+  } catch(e) {
+    document.getElementById('upd').textContent = 'Erro ao carregar';
+  }
+}
+
+function mudarAba(id){
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',['pagamentos','rtu','estoque'][i]===id));
+  document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===id));
+}
+
+function renderAll(){ renderPag(); renderRtu(); renderEstoque(); }
+
+function renderPag(){
+  const pag = (DB.pag && DB.pag[mesSel]) ? DB.pag[mesSel] : [];
+  const total = pag.reduce((s,p)=>s+(p.valor||0),0);
+  const pago  = pag.filter(p=>p.status==='Pago').reduce((s,p)=>s+(p.valor||0),0);
+  const pend  = pag.filter(p=>p.status!=='Pago').reduce((s,p)=>s+(p.valor||0),0);
+  const lista = filtro==='all' ? pag : filtro==='pago' ? pag.filter(p=>p.status==='Pago') : pag.filter(p=>p.status!=='Pago');
+
+  document.getElementById('pagamentos').innerHTML = `
+    <div class="card">
+      <div class="mes-nav">
+        <button class="mes-btn" onclick="mudarMes(-1)">‹</button>
+        <span class="mes-nome">${MESES[mesSel]}</span>
+        <button class="mes-btn" onclick="mudarMes(1)">›</button>
+      </div>
+      <div class="resumo">
+        <div class="res-box"><div class="res-val">${fmt(total)}</div><div class="res-lab">Total</div></div>
+        <div class="res-box"><div class="res-val verde">${fmt(pago)}</div><div class="res-lab">Pago</div></div>
+        <div class="res-box"><div class="res-val vermelho">${fmt(pend)}</div><div class="res-lab">Pendente</div></div>
+      </div>
+    </div>
+    <div class="status-bar">
+      <div class="status-chip all ${filtro==='all'?'active':''}" onclick="setFiltro('all')">Todas (${pag.length})</div>
+      <div class="status-chip pago ${filtro==='pago'?'active':''}" onclick="setFiltro('pago')">✅ Pagas</div>
+      <div class="status-chip pend ${filtro==='pend'?'active':''}" onclick="setFiltro('pend')">⏳ Pendentes</div>
+    </div>
+    <div class="card">
+      ${lista.length ? lista.map(p=>`
+        <div class="item">
+          <div class="item-nome">${p.desc}</div>
+          <div class="item-info">
+            <span class="badge ${p.status==='Pago'?'b-pago':'b-pend'}">${p.status}</span>
+            <span>${fmt(p.valor)}</span>
+            <span>venc ${p.datavenc}</span>
+            ${p.prior==='Alta'?'<span class="badge b-alta">Alta</span>':''}
+          </div>
+        </div>`).join('') : '<div class="empty">Nenhuma conta neste mês</div>'}
+    </div>`;
+}
+
+function mudarMes(d){ mesSel = Math.max(0,Math.min(11,mesSel+d)); renderPag(); }
+function setFiltro(f){ filtro=f; renderPag(); }
+
+function renderRtu(){
+  const rtu = (DB.rtu||[]).slice().reverse().slice(0,20);
+  const totalRtu = (DB.rtu||[]).reduce((s,r)=>s+(r.totalPagar||0),0);
+  document.getElementById('rtu').innerHTML = `
+    <div class="card">
+      <div class="resumo">
+        <div class="res-box"><div class="res-val">${(DB.rtu||[]).length}</div><div class="res-lab">Lançamentos</div></div>
+        <div class="res-box" style="grid-column:span 2"><div class="res-val amarelo">${fmt(totalRtu)}</div><div class="res-lab">Total Compras</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Últimas Compras</div>
+      ${rtu.length ? rtu.map(r=>`
+        <div class="item">
+          <div class="item-nome">${r.produto}</div>
+          <div class="item-info">
+            <span>${fmt(r.totalPagar)}</span>
+            <span>${r.data}</span>
+            <span>${r.cat||''}</span>
+          </div>
+        </div>`).join('') : '<div class="empty">Nenhum lançamento</div>'}
+    </div>`;
+}
+
+function renderEstoque(){
+  const prods = DB.produtos||[];
+  const alertas = prods.filter(p=>p.qty<=p.min&&p.min>0);
+  const cats = [...new Set(prods.map(p=>p.cat))].filter(Boolean);
+  document.getElementById('estoque').innerHTML = `
+    <div class="card">
+      <div class="resumo">
+        <div class="res-box"><div class="res-val">${prods.length}</div><div class="res-lab">Produtos</div></div>
+        <div class="res-box"><div class="res-val vermelho">${alertas.length}</div><div class="res-lab">Alertas</div></div>
+        <div class="res-box"><div class="res-val">${cats.length}</div><div class="res-lab">Categorias</div></div>
+      </div>
+    </div>
+    ${alertas.length ? `<div class="card">
+      <div class="card-title">⚠ Abaixo do Mínimo</div>
+      ${alertas.map(p=>`
+        <div class="item alerta">
+          <div class="item-nome">${p.nome}</div>
+          <div class="item-info"><span>Estoque: <b>${p.qty}</b></span><span>Mínimo: ${p.min}</span><span>${p.cat}</span></div>
+        </div>`).join('')}
+    </div>` : '<div class="card"><div class="empty">✅ Estoque dentro do esperado</div></div>'}
+    <div class="card">
+      <div class="card-title">Todos os Produtos</div>
+      ${prods.map(p=>`
+        <div class="item ${p.qty<=p.min&&p.min>0?'alerta':''}">
+          <div class="item-nome">${p.nome}</div>
+          <div class="item-info"><span>${p.cat}</span><span>Qtd: ${p.qty}</span><span>Mín: ${p.min}</span></div>
+        </div>`).join('')}
+    </div>`;
+}
+
+if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+carregarDados();
+setInterval(carregarDados, 60000);
+</script>
+</body>
+</html>
