@@ -1202,36 +1202,52 @@ checkSessao();
     return Uint8Array.from(raw, c => c.charCodeAt(0));
   }
   async function salvarSubGitHub(sub) {
-    const content = btoa(JSON.stringify(sub));
-    let sha = null;
     try {
-      const r = await fetch('https://api.github.com/repos/' + REPO + '/contents/push-sub.json',
+      // btoa pode falhar com chars especiais — usar encodeURIComponent como fallback
+      const json = JSON.stringify(sub);
+      const content = btoa(unescape(encodeURIComponent(json)));
+      let sha = null;
+      const rGet = await fetch('https://api.github.com/repos/' + REPO + '/contents/push-sub.json',
         { headers: { Authorization: 'Bearer ' + GH_TOKEN, 'User-Agent': 'ZyntraApp', Accept: 'application/vnd.github+json' }});
-      if (r.ok) { const j = await r.json(); sha = j.sha; }
-    } catch(e) {}
-    const body = JSON.stringify({ message: 'update push subscription', content, ...(sha ? {sha} : {}) });
-    await fetch('https://api.github.com/repos/' + REPO + '/contents/push-sub.json', {
-      method: 'PUT',
-      headers: { Authorization: 'Bearer ' + GH_TOKEN, 'User-Agent': 'ZyntraApp', Accept: 'application/vnd.github+json', 'Content-Type': 'application/json' },
-      body
-    });
+      if (rGet.ok) { const j = await rGet.json(); sha = j.sha; }
+      const body = JSON.stringify({ message: 'update push subscription', content, ...(sha ? {sha} : {}) });
+      const rPut = await fetch('https://api.github.com/repos/' + REPO + '/contents/push-sub.json', {
+        method: 'PUT',
+        headers: { Authorization: 'Bearer ' + GH_TOKEN, 'User-Agent': 'ZyntraApp', Accept: 'application/vnd.github+json', 'Content-Type': 'application/json' },
+        body
+      });
+      if (!rPut.ok) { const err = await rPut.json(); throw new Error(JSON.stringify(err)); }
+      return true;
+    } catch(e) {
+      alert('Erro ao salvar subscription:\n' + e.message);
+      return false;
+    }
   }
   async function registrarPush() {
-    if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
-    if (Notification.permission === 'denied') return;
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+      alert('Web Push não suportado neste navegador/iOS.');
+      return false;
+    }
+    if (Notification.permission === 'denied') {
+      alert('Notificações bloqueadas.\nVá em Ajustes → Zyntra Gestão → Notificações → Ativar.');
+      return false;
+    }
     try {
       const reg = await navigator.serviceWorker.ready;
       let sub = await reg.pushManager.getSubscription();
       if (!sub) {
         const perm = await Notification.requestPermission();
-        if (perm !== 'granted') { mostrarBannerNotif(); return; }
+        if (perm !== 'granted') return false;
         sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC) });
-        await salvarSubGitHub(sub.toJSON());
-        esconderBannerNotif();
-      } else {
-        esconderBannerNotif();
       }
-    } catch(e) { mostrarBannerNotif(); }
+      // Sempre salva no GitHub (mesmo que subscription já exista)
+      const ok = await salvarSubGitHub(sub.toJSON());
+      esconderBannerNotif();
+      return ok;
+    } catch(e) {
+      alert('Erro ao registrar: ' + e.message);
+      return false;
+    }
   }
 
   function mostrarBannerNotif() {
@@ -1250,8 +1266,18 @@ checkSessao();
   }
 
   window._ativarNotif = async function() {
+    const btn = document.getElementById('mn-notif');
+    if (btn) { btn.querySelector('span:first-child').textContent = '⏳'; btn.querySelector('span:last-child').textContent = 'Salvando'; }
     esconderBannerNotif();
-    await registrarPush();
+    const ok = await registrarPush();
+    if (ok && btn) {
+      btn.querySelector('span:first-child').textContent = '✅';
+      btn.querySelector('span:last-child').textContent = 'Ativo';
+      setTimeout(function(){ btn.style.display='none'; }, 3000);
+    } else if (btn) {
+      btn.querySelector('span:first-child').textContent = '🔔';
+      btn.querySelector('span:last-child').textContent = 'Notifics';
+    }
   };
 
   function atualizarBotaoNotif() {
@@ -1283,7 +1309,7 @@ checkSessao();
   <button class="mob-nav-btn" onclick="mobIr('est')" id="mn-est"><span class="ico">📦</span><span>Estoque</span><span class="mob-bdg" id="mn-bdg-est"></span></button>
   <button class="mob-nav-btn" onclick="mobIr('pag')" id="mn-pag"><span class="ico">💳</span><span>Pagamentos</span><span class="mob-bdg" id="mn-bdg-pag"></span></button>
   <button class="mob-nav-btn" onclick="mobIr('rtu')" id="mn-rtu"><span class="ico">🏦</span><span>RTU</span></button>
-  <button class="mob-nav-btn" onclick="window._ativarNotif&&window._ativarNotif()" id="mn-notif" style="display:none"><span class="ico">🔔</span><span>Notifics</span></button>
+  <button class="mob-nav-btn" onclick="window._ativarNotif&&window._ativarNotif()" id="mn-notif"><span class="ico">🔔</span><span>Notifics</span></button>
   <button class="mob-nav-btn" onclick="mobMenu()" id="mn-menu"><span class="ico">☰</span><span>Menu</span></button>
 </nav>
 <script>
