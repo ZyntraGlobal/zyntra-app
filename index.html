@@ -1229,29 +1229,31 @@ checkSessao();
     document.body.appendChild(overlay);
   };
 
-  // Envolve todas as tabelas sem .tw em .mob-table-wrap para scroll horizontal
-  function wrapTables(){
+  // MutationObserver: envolve tabelas em scroll container assim que aparecem no DOM
+  function mobWrapTables(root){
     if(window.innerWidth>768) return;
-    document.querySelectorAll('table').forEach(function(t){
+    (root||document).querySelectorAll('table').forEach(function(t){
       var p=t.parentElement;
-      if(p && !p.classList.contains('tw') && !p.classList.contains('mob-table-wrap')){
-        var w=document.createElement('div');
-        w.className='mob-table-wrap';
-        p.insertBefore(w,t);
-        w.appendChild(t);
-      }
+      if(!p) return;
+      if(p.dataset.mobWrap) return;
+      p.dataset.mobWrap='1';
+      if(p.classList.contains('tw')) return;
+      var w=document.createElement('div');
+      w.style.cssText='display:block;overflow-x:scroll;-webkit-overflow-scrolling:touch;width:100%;max-width:100%;';
+      p.insertBefore(w,t);
+      w.appendChild(t);
     });
   }
-  var _origSetPage=window.setPage;
-  window.setPage=function(h){
-    if(_origSetPage) _origSetPage(h);
-    setTimeout(wrapTables,50);
-  };
+  var _pg=document.getElementById('pg');
+  if(_pg){
+    var _mo=new MutationObserver(function(){ mobWrapTables(_pg); });
+    _mo.observe(_pg,{childList:true,subtree:true});
+  }
 
   window.addEventListener('resize', showNav);
   window.addEventListener('load', function(){
     showNav();
-    setTimeout(wrapTables,200);
+    mobWrapTables();
     // Sincronizar badges do nav com os do sidebar
     setInterval(function(){
       var bEst = document.getElementById('b-alert');
