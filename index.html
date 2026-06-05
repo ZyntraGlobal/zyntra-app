@@ -1156,6 +1156,17 @@ function _calcAlertasG(){
   return alertas;
 }
 
+function _assinarPushG(){
+  if(!('serviceWorker' in navigator)||!('Notification' in window)||Notification.permission!=='granted')return;
+  navigator.serviceWorker.ready.then(function(reg){
+    reg.pushManager.getSubscription().then(function(sub){
+      var salvar=function(s){fetch('https://ntfy.sh/zyntra-sub-gestao-zg2026x',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(s)}).catch(function(){});};
+      if(sub){salvar(sub);return;}
+      reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:_urlB64G('BBhENPjxNvUjD-1ug7UJMdfnWJU3AvpBunQKj8dR_JNlr0J3_RFKCpRVEBbrmKIK6J_E9aCSv4y3thL_R0xMONE')}).then(salvar).catch(function(){});
+    });
+  });
+}
+
 function pNotifG(){
   var tem=('Notification' in window);
   var perm=tem?Notification.permission:'denied';
@@ -1172,7 +1183,9 @@ function pNotifG(){
     } else if(perm==='denied'){
       h+='<div class="sub" style="color:var(--amb);margin-top:8px">Vá em Ajustes → Notificações → Zyntra Gestao → Permitir notificações</div>';
     } else {
-      h+='<div style="margin-top:10px;display:flex;gap:8px"><button class="btn" onclick="notifTestarG()">📤 Enviar teste</button><button class="btn" onclick="notifChecarG()">🔍 Verificar alertas</button></div>';
+      // Já ativado — assina push automaticamente em background
+      _assinarPushG();
+      h+='<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn" onclick="notifTestarG()">📤 Enviar teste</button><button class="btn" onclick="notifChecarG()">🔍 Verificar alertas</button><button class="btn" onclick="_assinarPushG();_notif(\'🔄 Push renovado\',\'Assinatura atualizada no relay\',\'grn\')">🔄 Renovar push</button></div>';
     }
     h+='</div>';
   }
