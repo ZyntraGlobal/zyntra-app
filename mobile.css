@@ -50,10 +50,27 @@
   .ts { max-height: calc(100dvh - 220px); }
 
   /* ── Botões touch-friendly ── */
-  .btn { padding: 9px 13px; font-size: 13px; }
+  .btn { padding: 9px 13px; font-size: 13px; touch-action: manipulation; cursor: pointer; }
   .bsm { padding: 7px 11px; font-size: 12px; }
   .brow { gap: 6px; }
   .brow .btn { flex: 1; justify-content: center; }
+
+  /* ── Filtros e elementos clicáveis ── */
+  .ni, .pill, [onclick], button, select, .sel, .chip {
+    touch-action: manipulation;
+    cursor: pointer;
+    -webkit-tap-highlight-color: rgba(201,168,76,.2);
+  }
+
+  /* ── Garantir que bottom nav não bloqueie conteúdo ── */
+  .mob-nav { pointer-events: auto; }
+  .pg { pointer-events: auto; }
+
+  /* ── Filtros de pesquisa ── */
+  .brow input.inp { flex: 1; min-width: 0; }
+
+  /* ── Rows de ação ── */
+  .brow { flex-wrap: wrap; }
 
   /* ── Inputs: evitar zoom iOS (mín 16px) ── */
   .inp, .sel, input, select, textarea {
