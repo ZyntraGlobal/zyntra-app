@@ -39,6 +39,23 @@
   .g5 { grid-template-columns: 1fr 1fr !important; }
   .row2 { grid-template-columns: 1fr !important; }
 
+  /* ── Grids inline do dashboard (gerados via JS) ── */
+  div[style*="grid-template-columns:1fr 1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+  div[style*="grid-template-columns:1fr 1fr 1fr"][style*="gap:16px"] {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+  /* Valor principal do card do dashboard */
+  div[style*="font-size:32px"] {
+    font-size: 22px !important;
+  }
+  /* Card do dashboard — padding menor */
+  div[style*="padding:24px 28px"] {
+    padding: 16px !important;
+  }
+
   /* ── Cards ── */
   .card .val { font-size: 16px; }
   .card .lbl { font-size: 10px; }
