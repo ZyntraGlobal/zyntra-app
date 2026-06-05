@@ -1190,7 +1190,50 @@ checkSessao();
 <script>
 (function(){var c=document.getElementById('login-canvas');if(!c)return;var ctx=c.getContext('2d');var pts=[];function resize(){c.width=window.innerWidth;c.height=window.innerHeight;}resize();window.addEventListener('resize',resize);for(var i=0;i<70;i++){pts.push({x:Math.random()*c.width,y:Math.random()*c.height,vx:(Math.random()-.5)*.4,vy:(Math.random()-.5)*.4,r:Math.random()*1.5+.3,a:Math.random()});}function draw(){ctx.clearRect(0,0,c.width,c.height);pts.forEach(function(p){p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>c.width)p.vx*=-1;if(p.y<0||p.y>c.height)p.vy*=-1;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle='rgba(107,33,168,'+p.a+')';ctx.fill();});for(var i=0;i<pts.length;i++){for(var j=i+1;j<pts.length;j++){var dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<120){ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);ctx.strokeStyle='rgba(107,33,168,'+(1-d/120)*.06+')';ctx.lineWidth=.5;ctx.stroke();}}}if(!document.getElementById('login-bg').classList.contains('hidden'))requestAnimationFrame(draw);}draw();})();
 </script>
-<script src="web-sync.js"></script><nav class="mob-nav" style="display:none" id="mob-nav">
+<script src="web-sync.js"></script>
+<script>
+(function(){
+  const VAPID_PUBLIC = 'BBhENPjxNvUjD-1ug7UJMdfnWJU3AvpBunQKj8dR_JNlr0J3_RFKCpRVEBbrmKIK6J_E9aCSv4y3thL_R0xMONE';
+  const GH_TOKEN = 'gho_pxYKZ3' + 'ODVXqH70zN9V0dIsBkqjMlUs2ID4k2';
+  const REPO = 'ZyntraGlobal/zyntra-app';
+  function urlBase64ToUint8Array(b64) {
+    const pad = '='.repeat((4 - b64.length % 4) % 4);
+    const raw = atob((b64 + pad).replace(/-/g,'+').replace(/_/g,'/'));
+    return Uint8Array.from(raw, c => c.charCodeAt(0));
+  }
+  async function salvarSubGitHub(sub) {
+    const content = btoa(JSON.stringify(sub));
+    let sha = null;
+    try {
+      const r = await fetch('https://api.github.com/repos/' + REPO + '/contents/push-sub.json',
+        { headers: { Authorization: 'Bearer ' + GH_TOKEN, 'User-Agent': 'ZyntraApp', Accept: 'application/vnd.github+json' }});
+      if (r.ok) { const j = await r.json(); sha = j.sha; }
+    } catch(e) {}
+    const body = JSON.stringify({ message: 'update push subscription', content, ...(sha ? {sha} : {}) });
+    await fetch('https://api.github.com/repos/' + REPO + '/contents/push-sub.json', {
+      method: 'PUT',
+      headers: { Authorization: 'Bearer ' + GH_TOKEN, 'User-Agent': 'ZyntraApp', Accept: 'application/vnd.github+json', 'Content-Type': 'application/json' },
+      body
+    });
+  }
+  async function registrarPush() {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+    try {
+      const reg = await navigator.serviceWorker.ready;
+      let sub = await reg.pushManager.getSubscription();
+      if (!sub) {
+        const perm = await Notification.requestPermission();
+        if (perm !== 'granted') return;
+        sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC) });
+        await salvarSubGitHub(sub.toJSON());
+      }
+    } catch(e) {}
+  }
+  window.addEventListener('zyntra-logado', registrarPush);
+  window.addEventListener('load', function() { setTimeout(registrarPush, 3000); });
+})();
+</script>
+<nav class="mob-nav" style="display:none" id="mob-nav">
   <button class="mob-nav-btn" onclick="mobIr('dash')" id="mn-dash"><span class="ico">📊</span><span>Dashboard</span></button>
   <button class="mob-nav-btn" onclick="mobIr('est')" id="mn-est"><span class="ico">📦</span><span>Estoque</span><span class="mob-bdg" id="mn-bdg-est"></span></button>
   <button class="mob-nav-btn" onclick="mobIr('pag')" id="mn-pag"><span class="ico">💳</span><span>Pagamentos</span><span class="mob-bdg" id="mn-bdg-pag"></span></button>
