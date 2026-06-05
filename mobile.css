@@ -90,8 +90,9 @@
   }
   .login-brand { display: none !important; }
   .login-form-side {
+    width: 100% !important;
     flex: 1;
-    padding: 40px 24px !important;
+    padding: 48px 28px !important;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -100,13 +101,16 @@
     display: flex !important;
     flex-direction: column;
     align-items: center;
-    margin-bottom: 32px;
+    margin-bottom: 36px;
   }
-  .login-logo-mob img { width: 80px; height: 80px; object-fit: contain; margin-bottom: 12px; }
+  .login-logo-mob img { width: 80px; height: 80px; object-fit: contain; margin-bottom: 12px; filter: drop-shadow(0 0 20px rgba(107,33,168,.7)); }
   .login-logo-mob .t1 { font-size: 22px; font-weight: 900; letter-spacing: 3px; color: #fff; text-transform: uppercase; }
   .login-logo-mob .t1 em { color: #c9a84c; font-style: normal; margin: 0 4px; }
-  .login-inp { font-size: 16px !important; padding: 14px !important; }
-  .login-btn { padding: 14px !important; font-size: 15px !important; }
+  /* Classe real do input de login */
+  .login-input { font-size: 16px !important; padding: 15px 16px !important; border-radius: 10px !important; }
+  .login-btn { padding: 16px !important; font-size: 15px !important; letter-spacing: 2px !important; border-radius: 10px !important; }
+  .login-field { margin-bottom: 14px; }
+  .login-label { font-size: 12px !important; }
 
   /* ── Bottom navigation bar ── */
   .mob-nav {
