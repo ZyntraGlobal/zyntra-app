@@ -47,4 +47,9 @@
 
   // Re-sincronizar a cada 2 minutos em background
   setInterval(sincronizar, 120000);
+
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/zyntra-app/sw.js', { scope: '/zyntra-app/' })
+      .catch(function(e) { console.warn('SW:', e); });
+  }
 })();
