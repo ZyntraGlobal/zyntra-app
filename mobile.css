@@ -158,32 +158,34 @@
     flex-direction: column !important;
     justify-content: center !important;
   }
+  .login-form-side { padding: 40px 28px 32px !important; }
   .login-logo-mob {
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
-    margin-bottom: 32px !important;
+    margin-bottom: 28px !important;
   }
   .login-logo-mob img {
-    width: 180px !important;
+    width: 130px !important;
     height: auto !important;
     object-fit: contain !important;
     display: block !important;
-    margin: 0 auto 14px !important;
-    filter: drop-shadow(0 0 24px rgba(107,33,168,.8)) !important;
+    margin: 0 auto 16px !important;
+    filter: drop-shadow(0 0 28px rgba(107,33,168,.9)) drop-shadow(0 0 8px rgba(107,33,168,.5)) !important;
   }
   .login-logo-mob .t1 {
-    font-size: 20px !important;
+    font-size: 18px !important;
     font-weight: 900 !important;
-    letter-spacing: 3px !important;
+    letter-spacing: 4px !important;
     color: #fff !important;
     text-transform: uppercase !important;
     text-align: center !important;
   }
-  .login-logo-mob .t1 em { color: #c9a84c !important; font-style: normal !important; margin: 0 4px !important; }
-  .login-input { font-size: 16px !important; padding: 15px 16px !important; }
-  .login-btn { padding: 16px !important; font-size: 15px !important; }
-  .login-field { margin-bottom: 14px !important; }
+  .login-logo-mob .t1 em { color: #c9a84c !important; font-style: normal !important; margin: 0 6px !important; }
+  .login-input { font-size: 16px !important; padding: 14px 16px !important; border-radius: 10px !important; }
+  .login-btn { padding: 15px !important; font-size: 14px !important; border-radius: 10px !important; margin-top: 6px !important; }
+  .login-field { margin-bottom: 12px !important; }
+  .login-label { font-size: 11px !important; font-weight: 700 !important; letter-spacing: .5px !important; margin-bottom: 6px !important; display: block !important; }
 
   /* ── Notificações acima do bottom nav ── */
   div[style*="z-index:9000"] {
