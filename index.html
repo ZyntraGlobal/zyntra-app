@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Zyntra Gestão</title>
-<link href="./_files/css2" rel="stylesheet">
+<link href="./_files/css2" rel="stylesheet"><link rel="stylesheet" href="mobile.css">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -1151,7 +1151,7 @@ checkSessao();
       <div class="login-tagline">Estoque · Pagamentos · RTU<br><span>Tudo em um só lugar.</span></div>
       <div class="login-dots"><div class="login-dot"></div><div class="login-dot"></div><div class="login-dot"></div></div>
     </div>
-    <div class="login-form-side">
+    <div class="login-form-side"><div class="login-logo-mob" style="display:none"><img src="_files/zyntra-logo.jpg" alt="Zyntra"><div class="t1">ZYNTRA <em>·</em> FC</div></div>
       <div class="login-tag">Acesso Seguro</div>
       <div class="login-title">Bem-vindo<br>de volta</div>
       <div class="login-subtitle">Faça login para acessar o sistema</div>
@@ -1167,4 +1167,54 @@ checkSessao();
 <script>
 (function(){var c=document.getElementById('login-canvas');if(!c)return;var ctx=c.getContext('2d');var pts=[];function resize(){c.width=window.innerWidth;c.height=window.innerHeight;}resize();window.addEventListener('resize',resize);for(var i=0;i<70;i++){pts.push({x:Math.random()*c.width,y:Math.random()*c.height,vx:(Math.random()-.5)*.4,vy:(Math.random()-.5)*.4,r:Math.random()*1.5+.3,a:Math.random()});}function draw(){ctx.clearRect(0,0,c.width,c.height);pts.forEach(function(p){p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>c.width)p.vx*=-1;if(p.y<0||p.y>c.height)p.vy*=-1;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle='rgba(107,33,168,'+p.a+')';ctx.fill();});for(var i=0;i<pts.length;i++){for(var j=i+1;j<pts.length;j++){var dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<120){ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);ctx.strokeStyle='rgba(107,33,168,'+(1-d/120)*.06+')';ctx.lineWidth=.5;ctx.stroke();}}}if(!document.getElementById('login-bg').classList.contains('hidden'))requestAnimationFrame(draw);}draw();})();
 </script>
-<script src="web-sync.js"></script></body></html>
+<script src="web-sync.js"></script><nav class="mob-nav" style="display:none" id="mob-nav">
+  <button class="mob-nav-btn" onclick="mobIr('dash')" id="mn-dash"><span class="ico">📊</span><span>Dashboard</span></button>
+  <button class="mob-nav-btn" onclick="mobIr('est')" id="mn-est"><span class="ico">📦</span><span>Estoque</span><span class="mob-bdg" id="mn-bdg-est"></span></button>
+  <button class="mob-nav-btn" onclick="mobIr('pag')" id="mn-pag"><span class="ico">💳</span><span>Pagamentos</span><span class="mob-bdg" id="mn-bdg-pag"></span></button>
+  <button class="mob-nav-btn" onclick="mobIr('rtu')" id="mn-rtu"><span class="ico">🏦</span><span>RTU</span></button>
+  <button class="mob-nav-btn" onclick="mobMenu()" id="mn-menu"><span class="ico">☰</span><span>Menu</span></button>
+</nav>
+<script>
+(function(){
+  function isMob(){ return window.innerWidth <= 768; }
+  function showNav(){ if(isMob()){ document.getElementById('mob-nav').style.display='flex'; } }
+  
+  window.mobIr = function(sec) {
+    document.querySelectorAll('.mob-nav-btn').forEach(b=>b.classList.remove('on'));
+    if(sec==='dash'){ document.getElementById('mn-dash').classList.add('on'); ir('dash'); }
+    else if(sec==='est'){ document.getElementById('mn-est').classList.add('on'); ir('est_produtos'); }
+    else if(sec==='pag'){
+      document.getElementById('mn-pag').classList.add('on');
+      var mes = new Date().getMonth()+1;
+      // Mostrar seletor de meses
+      var pg = document.querySelector('.pg[data-p="pag_sel"]');
+      if(!pg){ ir('pag',mes); } else { ir('pag',mes); }
+    }
+    else if(sec==='rtu'){ document.getElementById('mn-rtu').classList.add('on'); ir('rtu_lanc'); }
+  };
+
+  window.mobMenu = function() {
+    document.getElementById('mn-menu').classList.add('on');
+    // Mostrar sidebar temporariamente como overlay
+    var sb = document.querySelector('.sb');
+    if(!sb) return;
+    sb.style.cssText = 'display:flex!important;position:fixed;inset:0;z-index:999;width:80%;max-width:280px;';
+    var overlay = document.createElement('div');
+    overlay.id = 'mob-overlay';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:998;';
+    overlay.onclick = function(){ sb.style.cssText='display:none!important;'; this.remove(); document.getElementById('mn-menu').classList.remove('on'); };
+    document.body.appendChild(overlay);
+  };
+
+  window.addEventListener('resize', showNav);
+  window.addEventListener('load', function(){
+    showNav();
+    // Sincronizar badges do nav com os do sidebar
+    setInterval(function(){
+      var bEst = document.getElementById('b-alert');
+      var mnEst = document.getElementById('mn-bdg-est');
+      if(bEst && mnEst && bEst.style.display!=='none'){ mnEst.textContent=bEst.textContent; mnEst.style.display='block'; } else if(mnEst){ mnEst.style.display='none'; }
+    }, 2000);
+  });
+})();
+</script></body></html>
