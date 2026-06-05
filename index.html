@@ -1,198 +1,1170 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Zyntra">
-<link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icon-192.png">
-<title>Zyntra Global</title>
+﻿<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Zyntra Gestão</title>
+<link href="./_files/css2" rel="stylesheet">
 <style>
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d0d0d;color:#e0e0e0;min-height:100vh;padding-bottom:80px}
-.header{background:#111;padding:16px;padding-top:calc(16px + env(safe-area-inset-top));display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;border-bottom:1px solid #222}
-.logo{font-size:18px;font-weight:700;letter-spacing:2px;color:#fff}.logo span{color:#7c3aed}
-.update{font-size:10px;color:#555;text-align:right}
-.tabs{display:flex;background:#111;border-bottom:1px solid #222;position:sticky;top:57px;z-index:99}
-.tab{flex:1;padding:12px 4px;text-align:center;font-size:11px;font-weight:600;color:#555;border-bottom:2px solid transparent;transition:.2s;cursor:pointer}
-.tab.active{color:#7c3aed;border-bottom-color:#7c3aed}
-.page{display:none;padding:16px}.page.active{display:block}
-.card{background:#1a1a1a;border-radius:14px;padding:16px;margin-bottom:12px}
-.card-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#7c3aed;margin-bottom:12px}
-.resumo{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:4px}
-.res-box{background:#111;border-radius:10px;padding:10px 6px;text-align:center}
-.res-val{font-size:12px;font-weight:700;color:#fff;word-break:break-all}
-.res-val.verde{color:#22c55e}.res-val.vermelho{color:#ef4444}.res-val.amarelo{color:#f59e0b}
-.res-lab{font-size:9px;color:#555;margin-top:3px}
-.item{padding:10px 0;border-bottom:1px solid #222}
-.item:last-child{border-bottom:none}
-.item-nome{font-size:13px;color:#e0e0e0;margin-bottom:3px;line-height:1.3}
-.item-info{font-size:11px;color:#666;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
-.badge{font-size:10px;padding:2px 7px;border-radius:4px;font-weight:600;white-space:nowrap}
-.b-pago{background:#14532d;color:#22c55e}.b-pend{background:#450a0a;color:#ef4444}
-.b-alta{background:#451a03;color:#f97316}.b-media{background:#1c1917;color:#a8a29e}
-.alerta .item-nome{color:#fbbf24}
-.empty{color:#444;font-size:12px;text-align:center;padding:16px 0}
-.mes-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-.mes-btn{background:#222;border:none;color:#e0e0e0;width:32px;height:32px;border-radius:8px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
-.mes-nome{font-size:14px;font-weight:600;color:#fff}
-.loading{text-align:center;padding:40px;color:#444;font-size:14px}
-.refresh-btn{background:#7c3aed;border:none;color:#fff;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer}
-.status-bar{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
-.status-chip{font-size:10px;padding:4px 10px;border-radius:20px;font-weight:600;cursor:pointer;border:1px solid transparent}
-.status-chip.all{background:#222;color:#e0e0e0}
-.status-chip.pago{background:#14532d;color:#22c55e}
-.status-chip.pend{background:#450a0a;color:#ef4444}
-.status-chip.active{border-color:#7c3aed}
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#111010;--w:#1a1917;--w2:#222019;--w3:#2c2a25;--s3:#222019;
+  --bdr:#302e28;--bdr2:#4a4840;
+  --t:#f0ede8;--t2:#a09c92;--t3:#6a665e;
+  --gold:#c9a84c;--gd:#b8903e;--gdb:#d4b560;--gl:rgba(201,168,76,.13);--glb:rgba(201,168,76,.38);
+  --grn:#4ade80;--gnbg:rgba(74,222,128,.09);
+  --red:#f87171;--rdbg:rgba(248,113,113,.09);
+  --amb:#fbbf24;--ambg:rgba(251,191,36,.09);
+  --blu:#60a5fa;--blubg:rgba(96,165,250,.09);
+  --pur:#c084fc;--nav:210px
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);font-size:13px;display:flex;height:100vh;overflow:hidden}
+.sb{width:var(--nav);background:var(--w);border-right:1px solid var(--bdr2);display:flex;flex-direction:column;overflow-y:auto;flex-shrink:0}
+.sb-logo{padding:14px;border-bottom:2px solid var(--gold);flex-shrink:0}
+.sb-logo .t1{font-size:15px;font-weight:700;letter-spacing:-.4px;color:var(--t)}
+.sb-logo .t1 span{color:var(--gold)}
+.sb-logo .t2{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+.sb-sec{font-size:9px;color:var(--t3);font-weight:700;text-transform:uppercase;letter-spacing:.8px;padding:9px 14px 3px;border-top:1px solid var(--bdr);margin-top:2px}
+.sb-sec:first-of-type{border-top:none;margin-top:0}
+.ni{display:flex;align-items:center;gap:7px;padding:6px 10px;margin:1px 5px;border-radius:6px;cursor:pointer;font-size:12px;color:var(--t2);transition:all .1s;user-select:none;white-space:nowrap;overflow:hidden}
+.ni:hover{background:var(--w2);color:var(--t)}
+.ni.on{background:var(--gl);color:var(--gold);font-weight:600;border-left:2px solid var(--gold);padding-left:8px}
+.ni .ico{font-size:13px;flex-shrink:0;width:16px;text-align:center}
+.ni .lbl{overflow:hidden;text-overflow:ellipsis}
+.bdg{margin-left:auto;font-size:9px;background:var(--t3);color:var(--bg);border-radius:8px;padding:1px 5px;font-weight:700;flex-shrink:0}
+.ni.on .bdg{background:var(--gold);color:#111}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.topbar{height:48px;background:var(--w);border-bottom:1px solid var(--bdr2);display:flex;align-items:center;padding:0 16px;gap:10px;flex-shrink:0}
+.topbar-title{font-size:13px;font-weight:600;flex:0 0 auto;color:var(--t2)}
+#frase{flex:1;font-size:13px;color:var(--gold);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 16px;opacity:1;transition:opacity .3s}
+.chip{background:var(--gl);color:var(--gold);border:1px solid var(--glb);border-radius:20px;padding:2px 8px;font-size:10px;font-weight:600;white-space:nowrap}
+.pg{overflow-y:auto;flex:1;padding:14px 16px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+.g5{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:12px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.card{background:var(--w);border:1px solid var(--bdr);border-radius:8px;padding:12px 14px}
+.card.hl{border-color:var(--glb);background:linear-gradient(135deg,var(--w),rgba(201,168,76,.06))}
+.card.danger{border-color:rgba(248,113,113,.35);background:rgba(248,113,113,.04)}
+.card.ok{border-color:rgba(74,222,128,.35);background:rgba(74,222,128,.04)}
+.card.warn{border-color:rgba(251,191,36,.35);background:rgba(251,191,36,.04)}
+.card .lbl{font-size:10px;color:var(--t2);font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
+.card .val{font-size:19px;font-weight:700;line-height:1.1}
+.card .sub{font-size:10px;color:var(--t3);margin-top:2px}
+.grn{color:var(--grn)}.red{color:var(--red)}.amb{color:var(--amb)}.blu{color:var(--blu)}.gld{color:var(--gold)}.pur{color:var(--pur)}
+.panel{background:var(--w);border:1px solid var(--bdr);border-radius:8px;overflow:hidden;margin-bottom:12px}
+.ph{padding:9px 13px;border-bottom:1px solid var(--bdr2);background:var(--w2);display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.pt{font-size:10px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.4px}
+.pb{padding:11px 13px}
+.sec{font-size:11px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.5px;margin:14px 0 8px;padding-bottom:6px;border-bottom:2px solid var(--glb)}
+.ts{overflow-y:auto;max-height:460px}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{padding:6px 9px;text-align:left;font-size:10px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.2px;border-bottom:2px solid var(--bdr2);background:var(--w2);white-space:nowrap;position:sticky;top:0;z-index:2}
+td{padding:6px 9px;border-bottom:1px solid var(--bdr);vertical-align:middle;color:var(--t)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(201,168,76,.03)}
+tfoot td{font-weight:700;border-top:2px solid var(--bdr2);border-bottom:none!important;background:var(--w2);color:var(--t)}
+.tr{text-align:right}.tc{text-align:center}.tnw{white-space:nowrap}
+.pill{font-size:10px;padding:2px 7px;border-radius:20px;font-weight:600;white-space:nowrap;display:inline-block}
+.ppago{background:rgba(74,222,128,.14);color:#4ade80;border:1px solid rgba(74,222,128,.28)}
+.ppendente{background:rgba(251,191,36,.14);color:#fbbf24;border:1px solid rgba(251,191,36,.28)}
+.patrasado{background:rgba(248,113,113,.14);color:#f87171;border:1px solid rgba(248,113,113,.28)}
+.pprogramado{background:rgba(96,165,250,.14);color:#60a5fa;border:1px solid rgba(96,165,250,.28)}
+.pok{background:rgba(74,222,128,.14);color:#4ade80;border:1px solid rgba(74,222,128,.28)}
+.palerta{background:rgba(248,113,113,.14);color:#f87171;border:1px solid rgba(248,113,113,.28)}
+.pn{background:rgba(160,156,146,.1);color:#a09c92;border:1px solid rgba(160,156,146,.2)}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;font-size:12px;font-family:'Inter',sans-serif;border-radius:6px;border:1px solid var(--bdr2);background:var(--w2);color:var(--t);cursor:pointer;font-weight:500;transition:all .1s;white-space:nowrap}
+.btn:hover{background:var(--w3);border-color:var(--gold)}
+.btnp{background:var(--gold);color:#111;border-color:var(--gold)}
+.btnp:hover{background:var(--gdb)}
+.btnd{background:rgba(248,113,113,.12);color:var(--red);border-color:rgba(248,113,113,.25)}
+.bsm{padding:3px 7px;font-size:11px}
+.brow{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.inp{padding:6px 9px;font-size:12px;font-family:'Inter',sans-serif;border:1px solid var(--bdr2);border-radius:6px;background:var(--w2);color:var(--t);outline:none}
+.inp:focus{border-color:var(--gold);background:var(--w3)}
+.sel{padding:6px 8px;font-size:12px;font-family:'Inter',sans-serif;border:1px solid var(--bdr2);border-radius:6px;background:var(--w2);color:var(--t);outline:none}
+.sel:focus{border-color:var(--gold)}
+.fg{display:grid;gap:9px}
+.f2{grid-template-columns:1fr 1fr}.f3{grid-template-columns:1fr 1fr 1fr}
+.fg label{font-size:10px;color:var(--t2);font-weight:600;text-transform:uppercase;letter-spacing:.3px;display:block;margin-bottom:2px}
+.fg input,.fg select,.fg textarea{width:100%;padding:6px 9px;font-size:12px;font-family:'Inter',sans-serif;border:1px solid var(--bdr2);border-radius:6px;background:var(--w2);color:var(--t);outline:none}
+.fg input:focus,.fg select:focus{border-color:var(--gold);background:var(--w3)}
+.mbg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:999;align-items:flex-start;justify-content:center;padding:50px 10px 20px;overflow-y:auto;backdrop-filter:blur(2px)}
+.mbg.open{display:flex}
+.modal{background:var(--w);border:1px solid var(--bdr2);border-radius:10px;padding:18px;width:580px;max-width:100%;box-shadow:0 24px 70px rgba(0,0,0,.5);margin:auto}
+.modal.lg{width:780px}
+.modal h3{font-size:13px;font-weight:700;margin-bottom:12px;padding-bottom:9px;border-bottom:2px solid var(--bdr2);color:var(--gold)}
+.macts{display:flex;gap:7px;justify-content:flex-end;margin-top:14px;padding-top:11px;border-top:1px solid var(--bdr)}
+.empty{padding:36px;text-align:center;color:var(--t3)}
+.progress-bar{height:8px;background:var(--w2);border-radius:4px;overflow:hidden;margin-top:4px}
+.progress-fill{height:8px;border-radius:4px;transition:width .3s}
+/* LOGIN */
+.login-bg{position:fixed;inset:0;background:#000;display:flex;align-items:center;justify-content:center;z-index:9999;overflow:hidden}
+.login-bg.hidden{display:none}
+#login-canvas{position:absolute;inset:0;z-index:0;pointer-events:none}
+.login-wrap{position:relative;z-index:1;display:flex;width:860px;max-width:98vw;min-height:520px;border-radius:24px;overflow:hidden;box-shadow:0 0 80px rgba(107,33,168,.25),0 40px 120px rgba(0,0,0,.9);border:1px solid rgba(107,33,168,.2)}
+.login-brand{flex:1;background:linear-gradient(160deg,#080808 0%,#0e0010 60%,#080808 100%);border-right:1px solid rgba(107,33,168,.25);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:52px 40px;position:relative;overflow:hidden}
+.login-brand::before{content:'';position:absolute;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(107,33,168,.18) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);animation:lgPulse 3s ease-in-out infinite}
+.login-logo-wrap{position:relative;margin-bottom:28px;animation:lgEntrada .6s cubic-bezier(.34,1.56,.64,1)}
+.login-logo-img{width:110px;height:110px;object-fit:contain;display:block;filter:drop-shadow(0 0 30px rgba(107,33,168,.7))}
+.login-logo-ring{position:absolute;inset:-12px;border:1px solid rgba(107,33,168,.4);border-radius:50%;animation:lgSpin 8s linear infinite}
+.login-logo-ring2{position:absolute;inset:-20px;border:1px dashed rgba(107,33,168,.2);border-radius:50%;animation:lgSpin 14s linear infinite reverse}
+.login-brand-name{font-size:24px;font-weight:900;letter-spacing:3px;color:#fff;text-transform:uppercase;margin-bottom:6px;text-shadow:0 0 20px rgba(107,33,168,.5)}
+.login-brand-name em{color:#c9a84c;font-style:normal;margin:0 6px}
+.login-brand-sub{font-size:9px;color:rgba(107,33,168,.7);text-transform:uppercase;letter-spacing:3px;margin-bottom:28px}
+.login-tagline{font-size:12px;color:rgba(255,255,255,.15);font-style:italic;text-align:center}
+.login-tagline span{color:rgba(107,33,168,.5);font-weight:700}
+.login-dots{display:flex;gap:6px;margin-top:24px}
+.login-dot{width:6px;height:6px;border-radius:50%;background:rgba(107,33,168,.4);animation:lgDot 1.4s ease-in-out infinite}
+.login-dot:nth-child(2){animation-delay:.2s}
+.login-dot:nth-child(3){animation-delay:.4s}
+.login-form-side{width:380px;background:linear-gradient(160deg,#0a0a0a 0%,#0d0d0d 100%);display:flex;flex-direction:column;justify-content:center;padding:52px 44px;animation:lgSlide .5s cubic-bezier(.34,1.2,.64,1)}
+.login-tag{display:inline-flex;align-items:center;gap:6px;background:rgba(107,33,168,.12);border:1px solid rgba(107,33,168,.3);border-radius:20px;padding:4px 12px;font-size:10px;font-weight:700;color:rgba(107,33,168,.8);letter-spacing:1px;text-transform:uppercase;margin-bottom:20px}
+.login-tag::before{content:'';width:6px;height:6px;border-radius:50%;background:#6b21a8;box-shadow:0 0 6px rgba(107,33,168,1);animation:lgDot 1.4s ease-in-out infinite}
+.login-title{font-size:28px;font-weight:800;color:#fff;margin-bottom:4px;letter-spacing:-.5px;line-height:1.1}
+.login-subtitle{font-size:13px;color:#333;margin-bottom:32px}
+.login-field{margin-bottom:18px}
+.login-label{font-size:10px;font-weight:700;color:#444;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:8px}
+.login-input{width:100%;padding:13px 16px;font-size:14px;font-family:'Inter',sans-serif;border:1px solid #1e1e1e;border-radius:10px;background:#111;color:#fff;outline:none;transition:border .2s,box-shadow .2s;box-sizing:border-box}
+.login-input:focus{border-color:rgba(107,33,168,.6);box-shadow:0 0 0 3px rgba(107,33,168,.12)}
+.login-input::placeholder{color:#2a2a2a}
+.login-btn{width:100%;padding:14px;margin-top:8px;font-size:13px;font-family:'Inter',sans-serif;font-weight:700;background:linear-gradient(135deg,#6b21a8,#7c3aed,#6b21a8);background-size:200% 100%;color:#fff;border:none;border-radius:10px;cursor:pointer;letter-spacing:2px;text-transform:uppercase;transition:all .2s;box-shadow:0 4px 20px rgba(107,33,168,.3)}
+.login-btn:hover{background-position:right;box-shadow:0 8px 32px rgba(107,33,168,.5);transform:translateY(-1px)}
+.login-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.login-err{font-size:12px;color:#f87171;margin-top:10px;min-height:16px;text-align:center}
+.login-lock{font-size:12px;color:#fbbf24;margin-top:10px;min-height:16px;text-align:center}
+.login-footer-txt{font-size:10px;color:#1e1e1e;text-align:center;margin-top:24px;letter-spacing:.5px}
+@keyframes lgPulse{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.15)}}
+@keyframes lgSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes lgEntrada{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:scale(1)}}
+@keyframes lgSlide{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
+@keyframes lgDot{0%,100%{opacity:.3;transform:scale(1)}50%{opacity:1;transform:scale(1.4)}}
+@keyframes lgShake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+@keyframes slideIn{from{transform:translateX(120%);opacity:0}to{transform:translateX(0);opacity:1}}
 </style>
 </head>
 <body>
 
-<div class="header">
-  <div class="logo">ZYNTRA<span> · </span>FC</div>
-  <div style="text-align:right">
-    <div class="update" id="upd">Carregando...</div>
-    <button class="refresh-btn" onclick="carregarDados()">↻ Atualizar</button>
+<nav class="sb">
+  <div class="sb-logo">
+    <div class="t1">ZYNTRA <span>·</span> GESTÃO</div>
+    <div class="t2">Sistema de Gestão 2026</div>
+  </div>
+  <div class="sb-sec">Visão Geral</div>
+  <div class="ni" onclick="ir('dash',this)"><span class="ico">📊</span><span class="lbl">Dashboard</span></div>
+  <div class="sb-sec">Estoque</div>
+  <div class="ni" onclick="ir('est_produtos',this)"><span class="ico">📦</span><span class="lbl">Produtos</span><span class="bdg" id="b-est">0</span></div>
+  <div class="ni" onclick="ir('est_fin',this)"><span class="ico">💰</span><span class="lbl">Financeiro Est.</span></div>
+  <div class="ni" onclick="ir('est_mov',this)"><span class="ico">🔄</span><span class="lbl">Movimentações</span></div>
+  <div class="ni" onclick="ir('est_alertas',this)"><span class="ico">⚠️</span><span class="lbl">Alertas Stock</span><span class="bdg" id="b-alert" style="display:none">0</span></div>
+  <div class="sb-sec">Pagamentos Empresa</div>
+  <div class="ni" onclick="ir('pag',1,this)"><span class="ico">📋</span><span class="lbl">Janeiro</span><span class="bdg" id="p1" style="display:none">0</span></div>
+  <div class="ni" onclick="ir('pag',2,this)"><span class="ico">📋</span><span class="lbl">Fevereiro</span><span class="bdg" id="p2" style="display:none">0</span></div>
+  <div class="ni" onclick="ir('pag',3,this)"><span class="ico">📋</span><span class="lbl">Março</span><span class="bdg" id="p3" style="display:none">0</span></div>
+  <div class="ni" onclick="ir('pag',4,this)"><span class="ico">📋</span><span class="lbl">Abril</span><span class="bdg" id="p4" style="display:none">0</span></div>
+  <div class="ni" onclick="ir('pag',5,this)"><span class="ico">📋</span><span class="lbl">Maio</span><span class="bdg" id="p5" style="display:none">0</span></div>
+  <div class="ni" onclick="ir('pag',6,this)"><span class="ico">📋</span><span class="lbl">Junho</span><span class="bdg" id="p6" style="display:none">0</span></div>
+  <div class="ni" onclick="ir('pag',7,this)"><span class="ico">📋</span><span class="lbl">Julho</span><span class="bdg" id="p7" style="display:none">0</span></div>
+  <div class="ni" onclick="ir('pag',8,this)"><span class="ico">📋</span><span class="lbl">Agosto</span><span class="bdg" id="p8" style="display:none">0</span></div>
+  <div class="ni" onclick="ir('pag',9,this)"><span class="ico">📋</span><span class="lbl">Setembro</span><span class="bdg" id="p9" style="display:none">0</span></div>
+  <div class="ni" onclick="ir('pag',10,this)"><span class="ico">📋</span><span class="lbl">Outubro</span><span class="bdg" id="p10" style="display:none">0</span></div>
+  <div class="ni" onclick="ir('pag',11,this)"><span class="ico">📋</span><span class="lbl">Novembro</span><span class="bdg" id="p11" style="display:none">0</span></div>
+  <div class="ni" onclick="ir('pag',12,this)"><span class="ico">📋</span><span class="lbl">Dezembro</span><span class="bdg" id="p12" style="display:none">0</span></div>
+  <div class="sb-sec">Controle RTU</div>
+  <div class="ni" onclick="ir('rtu_lanc',this)"><span class="ico">🏦</span><span class="lbl">Lançamentos</span><span class="bdg" id="b-rtu">0</span></div>
+  <div class="ni" onclick="ir('rtu_resumo',this)"><span class="ico">📈</span><span class="lbl">Resumo Anual</span></div>
+  <div class="sb-sec">Sistema</div>
+  <div class="ni" onclick="fazerBackupG()" id="ni-backup"><span class="ico">💾</span><span class="lbl">Backup</span></div>
+</nav>
+
+<div class="main">
+  <div class="topbar">
+    <span class="topbar-title" id="ptitle">Dashboard</span>
+    <span id="frase">⚡ Gestão inteligente. Resultado real.</span>
+    <span style="font-size:11px;color:var(--t3);white-space:nowrap;margin-right:8px" id="tdate"></span>
+    <span id="fs-status" style="font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap;background:rgba(160,156,146,.12);color:var(--t3);border:1px solid var(--bdr);margin-right:6px;cursor:pointer">💾 Auto-save</span>
+    <span class="chip">Zyntra 2026</span>
+  </div>
+  <div class="pg" id="pg"><div class="empty">Carregando...</div></div>
+</div>
+
+<!-- MODAL -->
+<div class="mbg" id="mbg">
+  <div class="modal" id="mbox">
+    <h3 id="mtit"></h3>
+    <div id="mbody"></div>
+    <div class="macts" id="macts">
+      <button class="btn" onclick="fecharM()">Cancelar</button>
+      <button class="btn btnp" onclick="confirmarM()">Salvar</button>
+    </div>
   </div>
 </div>
 
-<div class="tabs">
-  <div class="tab active" onclick="mudarAba('pagamentos')">💳 Pagamentos</div>
-  <div class="tab" onclick="mudarAba('rtu')">📦 RTU</div>
-  <div class="tab" onclick="mudarAba('estoque')">🏪 Estoque</div>
-</div>
-
-<div id="pagamentos" class="page active"><div class="loading">Carregando...</div></div>
-<div id="rtu" class="page"><div class="loading">Carregando...</div></div>
-<div id="estoque" class="page"><div class="loading">Carregando...</div></div>
-
 <script>
-const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-let DB = null, mesSel = new Date().getMonth(), filtro = 'all';
+// ── DADOS INICIAIS ─────────────────────────────────────
+var PRODUTOS_BASE=[
+  {id:1, nome:"MOUSE REDRAGON STORM M808W RGB BRANCO",                      cod:1, ncm:"8471.60.53",cat:"Mouse",        qty:0,min:2, cmv:0,preco:0,vendas30:0,fornecedor:'Redragon',  leadTime:7},
+  {id:2, nome:"MOUSE REDRAGON GRIFFIN M607 RGB PRETO",                      cod:2, ncm:"8471.60.53",cat:"Mouse",        qty:0,min:2, cmv:0,preco:0,vendas30:0,fornecedor:'Redragon',  leadTime:7},
+  {id:3, nome:"SUPORTE HEADSET REDRAGON H300 PRO RGB PRETO",                cod:3, ncm:"3926.90.90",cat:"Acessório",    qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'Redragon',  leadTime:7},
+  {id:4, nome:"CAIXA DE SOM REDRAGON ANVIL RGB BRANCO GS520W",              cod:4, ncm:"8518.50.00",cat:"Som",          qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'Redragon',  leadTime:7},
+  {id:5, nome:"MOUSE GAMER REDRAGON M612-RGB PREDATOR USB PRETO",           cod:5, ncm:"8471.60.53",cat:"Mouse",        qty:0,min:2, cmv:0,preco:0,vendas30:0,fornecedor:'Redragon',  leadTime:7},
+  {id:6, nome:"MOUSE GAMER REDRAGON GRIFFIN M607W RGB BRANCO",              cod:6, ncm:"8471.60.53",cat:"Mouse",        qty:0,min:2, cmv:0,preco:0,vendas30:0,fornecedor:'Redragon',  leadTime:7},
+  {id:7, nome:"CAIXA DE SOM GAMER REDRAGON ANVIL RGB PRETO GS520",          cod:7, ncm:"8518.29.90",cat:"Som",          qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'Redragon',  leadTime:7},
+  {id:8, nome:"MOUSE GAMER REDRAGON M913 IMPACT ELITE WIRELESS PRETO",      cod:8, ncm:"8471.60.53",cat:"Mouse",        qty:0,min:2, cmv:157.92,preco:0,vendas30:0,fornecedor:'Redragon',  leadTime:7},
+  {id:9, nome:"MOUSE GAMER HYPERX PULSEFIRE HX-MC002B PRETO",               cod:9, ncm:"8471.60.53",cat:"Mouse",        qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'HyperX',    leadTime:10},
+  {id:10,nome:"MOUSEPAD GAMER REDRAGON SUZAKU P003",                        cod:10,ncm:"4016.10.90",cat:"Mousepad",     qty:0,min:2, cmv:0,preco:0,vendas30:0,fornecedor:'Redragon',  leadTime:7},
+  {id:11,nome:"MOUSE GAMER HYPERX PULSEFIRE FPS PRO",                       cod:11,ncm:"8471.60.53",cat:"Mouse",        qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'HyperX',    leadTime:10},
+  {id:12,nome:"MOUSE GAMER REDRAGON M991 RGB PRETO",                        cod:12,ncm:"8471.60.53",cat:"Mouse",        qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'Redragon',  leadTime:7},
+  {id:13,nome:"TECLADO MECÂNICO REDRAGON K585 DITI",                        cod:13,ncm:"8471.60.52",cat:"Teclado",      qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'Redragon',  leadTime:7},
+  {id:14,nome:"MOUSE GAMER REDRAGON INVADER M719 RGB",                      cod:14,ncm:"8471.60.53",cat:"Mouse",        qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'Redragon',  leadTime:7},
+  {id:15,nome:"CAIXA DE SOM GAMER REDRAGON ADIEMUS RGB BRANCO GS560W",      cod:15,ncm:"8518.50.00",cat:"Som",          qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'Redragon',  leadTime:7},
+  {id:16,nome:"TECLADO MECÂNICO REDRAGON K512 SHIVA PRETO",                 cod:16,ncm:"8471.60.52",cat:"Teclado",      qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'Redragon',  leadTime:7},
+  {id:17,nome:"MOUSE GAMER HYPERX PULSEFIRE RAID HX-MC005B PRETO",          cod:17,ncm:"8471.60.53",cat:"Mouse",        qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'HyperX',    leadTime:10},
+  {id:18,nome:"CAIXA DE SOM REDRAGON GS510 RGB PRETO",                      cod:18,ncm:"8518.29.90",cat:"Som",          qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'Redragon',  leadTime:7},
+  {id:19,nome:"MOUSE GAMER REDRAGON M811 PRO RGB PRETO",                    cod:19,ncm:"8471.60.53",cat:"Mouse",        qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'Redragon',  leadTime:7},
+  {id:20,nome:"MEMÓRIA RAM KINGSTON FURY BEAST DDR4 8GB",                   cod:20,ncm:"8473.30.42",cat:"Memória",      qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'Kingston',   leadTime:14},
+  {id:21,nome:"MOUSEPAD GAMER REDRAGON XEON",                               cod:21,ncm:"4016.10.90",cat:"Mousepad",     qty:0,min:2, cmv:0,preco:0,vendas30:0,fornecedor:'Redragon',  leadTime:7},
+  {id:22,nome:"MOUSE GAMER REDRAGON SNIPER PRO M801P",                      cod:22,ncm:"8471.60.53",cat:"Mouse",        qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'Redragon',  leadTime:7},
+  {id:23,nome:"MOUSE GAMER REDRAGON M908 IMPACT RGB PRETO",                 cod:23,ncm:"8471.60.53",cat:"Mouse",        qty:0,min:2, cmv:108.75,preco:0,vendas30:0,fornecedor:'Redragon',  leadTime:7},
+  {id:24,nome:"CONTROLE GAMER REDRAGON SATURN G807 PRETO",                  cod:24,ncm:"8471.60.59",cat:"Controle",     qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'Redragon',  leadTime:7},
+  {id:25,nome:"MOUSE GAMER REDRAGON VAMPIRE M686 RGB PRETO",                cod:25,ncm:"8471.60.53",cat:"Mouse",        qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'Redragon',  leadTime:7},
+  {id:26,nome:"HEADSET REDRAGON ARES H120",                                 cod:26,ncm:"8518.30.00",cat:"Headset",      qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'Redragon',  leadTime:7},
+  {id:27,nome:"CAIXA DE SOM REDRAGON ORPHEUS GS550 2.0 PRETO",             cod:27,ncm:"8518.50.00",cat:"Som",          qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'Redragon',  leadTime:7},
+  {id:28,nome:"CAIXA DE SOM REDRAGON ADIEMUS GS560 PRETO",                 cod:28,ncm:"8518.50.00",cat:"Som",          qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'Redragon',  leadTime:7},
+  {id:29,nome:"MEMÓRIA RAM KEEPDATA DDR4 2400MHZ 8GB",                     cod:29,ncm:"8473.30.42",cat:"Memória",      qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'',          leadTime:14},
+  {id:30,nome:"MOUSEPAD KINGSTON HYPERX FURY S PRO 30X36",                  cod:30,ncm:"4016.10.90",cat:"Mousepad",     qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'HyperX',    leadTime:10},
+  {id:31,nome:"FONE HYPERX CLOUD STINGER CORE BRANCO",                      cod:31,ncm:"8518.30.00",cat:"Headset",      qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'HyperX',    leadTime:10},
+  {id:32,nome:"CONTROLE GAMESIR T4 PRO SEM FIO PRETO",                      cod:32,ncm:"9504.50.00",cat:"Controle",     qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'GameSir',   leadTime:14},
+  {id:33,nome:"CONTROLE GAMER GAMESIR X2S BLUETOOTH PRETO",                 cod:33,ncm:"9504.50.00",cat:"Controle",     qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'GameSir',   leadTime:14},
+  {id:34,nome:"CONTROLE GAMESIR KALEID WIRED PRETO",                        cod:34,ncm:"9504.50.00",cat:"Controle",     qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'GameSir',   leadTime:14},
+  {id:35,nome:"TECLADO MECÂNICO HYPERX ALLOY ORIGINS RGB",                  cod:35,ncm:"8471.60.52",cat:"Teclado",      qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'HyperX',    leadTime:10},
+  {id:36,nome:"CONTROLE GAMESIR CYCLONE 2 SEM FIO PRETO",                   cod:36,ncm:"9504.50.00",cat:"Controle",     qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'GameSir',   leadTime:14},
+  {id:37,nome:"CONTROLE GAMESIR G8 GALILEO USB-C CINZA",                    cod:37,ncm:"9504.50.00",cat:"Controle",     qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'GameSir',   leadTime:14},
+  {id:38,nome:"CONTROLE GAMESIR G7 HE WIRED PRETO",                         cod:38,ncm:"9504.50.00",cat:"Controle",     qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'GameSir',   leadTime:14},
+  {id:39,nome:"FONE GAMER CORSAIR VOID ELITE RGB WIRELESS PRETO",           cod:39,ncm:"8518.30.00",cat:"Headset",      qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'Corsair',   leadTime:14},
+  {id:40,nome:"MOUSE GAMER CORSAIR SCIMITAR ELITE USB RGB PRETO",           cod:40,ncm:"8471.60.53",cat:"Mouse",        qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'Corsair',   leadTime:14},
+  {id:41,nome:"FONE GAMER CORSAIR VOID ELITE RGB WIRELESS BRANCO",          cod:41,ncm:"8518.30.00",cat:"Headset",      qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'Corsair',   leadTime:14},
+  {id:42,nome:"MOUSEPAD CORSAIR MM200 30X36 PRETO",                         cod:42,ncm:"4016.10.90",cat:"Mousepad",     qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'Corsair',   leadTime:14},
+  {id:43,nome:"MOUSE REDRAGON STORM M808 RGB PRETO",                        cod:43,ncm:"8471.60.53",cat:"Mouse",        qty:0,min:2, cmv:0,preco:0,vendas30:0,fornecedor:'Redragon',  leadTime:7},
+  {id:44,nome:"KIT FITAS ILUMINAÇÃO CORSAIR ICUE LS100",                    cod:44,ncm:"9405.42.00",cat:"Iluminação",   qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'Corsair',   leadTime:14},
+  {id:45,nome:"MOUSE GAMER REDRAGON M656 GAINER WIRELESS PRETO",            cod:45,ncm:"8471.60.53",cat:"Mouse",        qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'Redragon',  leadTime:7},
+  {id:46,nome:"MOUSE CORSAIR HARPOON PRO ÓPTICO RGB PRETO",                 cod:46,ncm:"8471.60.53",cat:"Mouse",        qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'Corsair',   leadTime:14},
+  {id:47,nome:"MEMÓRIA RAM CORSAIR VENGEANCE RS RGB 16GB DDR4",             cod:47,ncm:"8473.30.42",cat:"Memória",      qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'Corsair',   leadTime:14},
+  {id:48,nome:"HEADSET GAMER REDRAGON ZEUS PRO H510W WIRELESS BRANCO",      cod:48,ncm:"8518.30.00",cat:"Headset",      qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'Redragon',  leadTime:7},
+  {id:49,nome:"MOUSE GAMER REDRAGON KING PRO M916AK BRANCO ANIME",          cod:49,ncm:"8471.60.53",cat:"Mouse",        qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'Redragon',  leadTime:7},
+  {id:50,nome:"HEADSET GAMER REDRAGON PANDORA H350W-RGB USB BRANCO",        cod:50,ncm:"8518.30.00",cat:"Headset",      qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'Redragon',  leadTime:7},
+  {id:51,nome:"MOUSE GAMER HYPERX PULSEFIRE CORE USB RGB PRETO",            cod:51,ncm:"8471.60.53",cat:"Mouse",        qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'HyperX',    leadTime:10},
+  {id:52,nome:"HEADSET REDRAGON AURORA H376BR USB PRETO",                   cod:52,ncm:"8518.30.00",cat:"Headset",      qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'Redragon',  leadTime:7},
+  {id:53,nome:"MOUSE GAMER REDRAGON KING PRO ROSA M916",                    cod:53,ncm:"8471.60.53",cat:"Mouse",        qty:0,min:2, cmv:0,preco:0,vendas30:0,fornecedor:'Redragon',  leadTime:7},
+  {id:54,nome:"HEADSET GAMER LOGITECH SEM FIO G435 PRETO",                  cod:54,ncm:"8518.30.00",cat:"Headset",      qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'Logitech',  leadTime:14},
+  {id:55,nome:"MOUSEPAD HYPERX FURY PRO HX-MPFS-S-SM SPEED 24X29",         cod:55,ncm:"4016.10.90",cat:"Mousepad",     qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'HyperX',    leadTime:10},
+  {id:56,nome:"TECLADO GAMER MECÂNICO HYPERX ALLOY ELITE RGB",              cod:56,ncm:"8471.60.52",cat:"Teclado",      qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'HyperX',    leadTime:10},
+  {id:57,nome:"MOUSE GAMER CORSAIR M75 AIR PRETO",                          cod:57,ncm:"8471.60.53",cat:"Mouse",        qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'Corsair',   leadTime:14},
+  {id:58,nome:"MEMÓRIA RAM CORSAIR VENGEANCE RGB RS DDR4 16GB 3200MHZ",     cod:58,ncm:"8473.30.42",cat:"Memória",      qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'Corsair',   leadTime:14},
+  {id:59,nome:"HEADSET GAMER KINGSTON HYPERX CLOUD REVOLVER S 7.1",         cod:59,ncm:"8518.30.00",cat:"Headset",      qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'HyperX',    leadTime:10},
+  {id:60,nome:"MOUSE GAMER CORSAIR SCIMITAR ELITE SE MMO WIRELESS",         cod:60,ncm:"8471.60.53",cat:"Mouse",        qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'Corsair',   leadTime:14},
+  {id:61,nome:"MEMÓRIA RAM CORSAIR VENGEANCE LPX DDR4 16GB 2666MHZ",       cod:61,ncm:"8473.30.42",cat:"Memória",      qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'Corsair',   leadTime:14},
+  {id:62,nome:"CONTROLE GAMER REDRAGON RIFT G710 PC E PS3",                 cod:62,ncm:"9504.50.00",cat:"Controle",     qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'Redragon',  leadTime:7},
+  {id:63,nome:"CORSAIR VENGEANCE RGB PRO SL DDR4 32GB 3200MHZ",             cod:63,ncm:"8473.30.42",cat:"Memória",      qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'Corsair',   leadTime:14},
+  {id:64,nome:"SSD EXTERNO CORSAIR EX400U SURVIVOR 1TB USB-C",              cod:64,ncm:"8471.70.40",cat:"Armazenamento",qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'Corsair',   leadTime:14},
+  {id:65,nome:"CAIXA DE SOM GAMER REDRAGON ANVIL RGB ROSA GS520P",          cod:65,ncm:"8518.50.00",cat:"Som",          qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'Redragon',  leadTime:7},
+  {id:66,nome:"MOUSE REDRAGON KING M724P 12400 DPI USB-C ROSA",             cod:66,ncm:"8471.60.53",cat:"Mouse",        qty:0,min:2, cmv:65.99,preco:0,vendas30:0,fornecedor:'Redragon',  leadTime:7},
+  {id:67,nome:"MEMÓRIA RAM CORSAIR VENGEANCE RGB PRO 8GB 3600MHZ",          cod:67,ncm:"8473.30.42",cat:"Memória",      qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'Corsair',   leadTime:14},
+  {id:68,nome:"MEMÓRIA RAM CORSAIR VENGEANCE RGB PRO/SL 32GB DDR4 3600MHZ", cod:68,ncm:"8473.30.42",cat:"Memória",      qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'Corsair',   leadTime:14},
+  {id:69,nome:"TECLADO GAMER MECÂNICO AJAZZ AK820 PRO WIRELESS PRETO",     cod:69,ncm:"8471.60.52",cat:"Teclado",      qty:0,min:1, cmv:0,preco:0,vendas30:0,fornecedor:'Ajazz',     leadTime:14},
+  {id:70,nome:"MOUSE ATTACK SHARK X6 1K 49G/PAW3395 C/BASE BLACK",              cod:70,ncm:"8471.60.53",cat:"Mouse",        qty:0,min:2,cmv:0,   preco:0,vendas30:0,fornecedor:'',         leadTime:14},
+  {id:71,nome:"TECLADO GAMER MECÂNICO AJAZZ AK820 PRO NACODEXX WIRELESS",      cod:71,ncm:"8471.60.52",cat:"Teclado",      qty:0,min:1,cmv:0,   preco:0,vendas30:0,fornecedor:'Ajazz',    leadTime:14},
+  {id:72,nome:"MOUSE GAMER REDRAGON M724P - ROSA",                              cod:72,ncm:"8471.60.53",cat:"Mouse",        qty:1,min:2,cmv:65.99,preco:0,vendas30:0,fornecedor:'Redragon',leadTime:7},
+  {id:73,nome:"MOUSE GAMER REDRAGON M724P - PRETO",                             cod:73,ncm:"8471.60.53",cat:"Mouse",        qty:1,min:2,cmv:65.99,preco:0,vendas30:0,fornecedor:'Redragon',leadTime:7},
+  {id:74,nome:"TECLADO MECÂNICO GAMER REDRAGON ALIEN - PRETO",                  cod:74,ncm:"8471.60.52",cat:"Teclado",      qty:1,min:1,cmv:441.91,preco:0,vendas30:0,fornecedor:'Redragon',leadTime:7},
+  {id:75,nome:"MOUSE GAMER LAMZU MAYA X AIKLABS - AZUL",                        cod:75,ncm:"8471.60.53",cat:"Mouse",        qty:1,min:1,cmv:598.35,preco:0,vendas30:0,fornecedor:'',        leadTime:14},
+  {id:76,nome:"SUPORTE PARA HEADSET REDRAGON SCEPTER ELITE RGB - PRETO HA311",  cod:76,ncm:"8473.30.90",cat:"Acessório",    qty:1,min:1,cmv:77.41,preco:0,vendas30:0,fornecedor:'Redragon',leadTime:7},
+  {id:77,nome:"HEADSET GAMER REDRAGON PANDORA 2 H350RGB-1 USB - PRETO",         cod:77,ncm:"8518.30.00",cat:"Headset",      qty:2,min:1,cmv:130,  preco:0,vendas30:0,fornecedor:'Redragon',leadTime:7},
+  {id:78,nome:"MOUSE GAMER REDRAGON KING PRO M916P-PRO 26000 DPI USB-C ROSA",   cod:78,ncm:"8471.60.53",cat:"Mouse",        qty:1,min:2,cmv:202.02,preco:0,vendas30:0,fornecedor:'Redragon',leadTime:7}
+];
 
-function fmt(v){ return 'R$ ' + (v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+var RTU_BASE=[
+  {id:1,data:"27/05/2026",produto:"MOUSE GAMER REDRAGON M908",cat:"Eletronicos",valor:108.75,impFed:27.19,impEst:13.05,totalImp:40.24,totalPagar:148.99,mes:5,ano:2026,obs:""},
+  {id:2,data:"27/05/2026",produto:"MOUSE GAMER REDRAGON M913",cat:"Eletronicos",valor:157.92,impFed:39.48,impEst:18.95,totalImp:58.43,totalPagar:216.35,mes:5,ano:2026,obs:""},
+  {id:3,data:"27/05/2026",produto:"MOUSE GAMER REDRAGON M724P",cat:"Eletronicos",valor:65.99,impFed:16.50,impEst:7.92,totalImp:24.42,totalPagar:90.41,mes:5,ano:2026,obs:""}
+];
 
-async function carregarDados(){
-  document.getElementById('upd').textContent = 'Atualizando...';
-  try {
-    const r = await fetch('data.json?t=' + Date.now());
-    DB = await r.json();
-    const agora = new Date();
-    document.getElementById('upd').textContent = 'Atualizado ' + agora.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-    renderAll();
-  } catch(e) {
-    document.getElementById('upd').textContent = 'Erro ao carregar';
+var RTU_CONFIG={limiteAnual:110000,limiteMes1a3:18000,limiteMes4plus:37000,aliqFed:0.25,aliqEst:0.12,mesInicio:5,anoRef:2026};
+
+var MFULL=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+var PAG_STATUS=['Pago','Pendente','Atrasado','Programado'];
+var PAG_TIPO=['Conta Fixa','Conta Variável','Fornecedor','Imposto','Assinatura','Folha/Pró-labore','Marketplace','Parcelamento','Outros'];
+var PAG_FORMA=['Pix','Cartão de Crédito','Cartão de Débito','Boleto','Dinheiro','Transferência','Débito Automático'];
+var PAG_PRIOR=['Alta','Média','Baixa'];
+var PAG_CAT=['Fornecedor','Aluguel','Energia','Água','Internet/Telefone','Impostos','Funcionários/Pró-labore','Marketing','Sistema/Software','Logística/Frete','Embalagens','Marketplace','Cartão/Taxas','Serviços Terceiros','Outros'];
+var PAG_REC=['Mensal','Única','Parcelada','Anual','Semanal'];
+var EST_CATS=['Mouse','Teclado','Headset','Mousepad','Controle','Som','Memória','Armazenamento','Acessório','Iluminação','Outros'];
+
+// ── BANCO DE DADOS ────────────────────────────────────
+function _normProd(p){
+  return {
+    id:p.id,nome:p.nome||'',cod:p.cod||p.id,ncm:p.ncm||'',cat:p.cat||'Outros',
+    qty:Number(p.qty)||0, min:Number(p.min)||1, cmv:Number(p.cmv)||0,
+    preco:Number(p.preco)||0, vendas30:Number(p.vendas30)||0,
+    fornecedor:p.fornecedor||'', leadTime:Number(p.leadTime)||7
+  };
+}
+function loadDB(){
+  try{var s=localStorage.getItem('zyntra_gestao_v1');if(s){var d=JSON.parse(s);d.produtos=d.produtos.map(_normProd);return d;}}catch(e){}
+  return{
+    produtos:JSON.parse(JSON.stringify(PRODUTOS_BASE)).map(_normProd),
+    mov:[],
+    pag:[[],[],[],[],[],[],[],[],[],[],[],[]],
+    rtu:JSON.parse(JSON.stringify(RTU_BASE)),
+    nRtu:10,nPag:100,nMov:100
+  };
+}
+var DB=loadDB();
+
+// ── ABC CLASSIFICATION ────────────────────────────────
+var _abcMap={};
+function _calcABC(){
+  _abcMap={};
+  var arr=DB.produtos.map(function(p){
+    var impacto=(p.vendas30*(p.cmv||p.preco||1))||(p.qty*(p.cmv||p.preco||1))||p.vendas30||p.qty||1;
+    return {id:p.id,v:impacto};
+  }).sort(function(a,b){return b.v-a.v;});
+  var total=arr.reduce(function(a,x){return a+x.v;},0)||1;
+  var acc=0;
+  arr.forEach(function(x){
+    acc+=x.v;
+    var pct=acc/total;
+    _abcMap[x.id]=pct<=0.80?'A':pct<=0.95?'B':'C';
+  });
+}
+_calcABC();
+function getABC(p){return _abcMap[p.id]||'C';}
+
+// ── COBERTURA (dias) ──────────────────────────────────
+function _cobertura(p){
+  var d=p.vendas30/30;
+  if(d<=0)return Infinity;
+  return p.qty/d;
+}
+function _cobTxt(p){var c=_cobertura(p);return c===Infinity?'∞':Math.round(c)+' dias';}
+function _cobCor(p){
+  var c=_cobertura(p);
+  if(c===Infinity)return 'var(--t3)';
+  if(c<7)return 'var(--red)';
+  if(c<=30)return 'var(--amb)';
+  return 'var(--grn)';
+}
+function _pontoRep(p){return Math.ceil((p.vendas30/30)*(p.leadTime||7));}
+function save(){_calcABC();try{localStorage.setItem('zyntra_gestao_v1',JSON.stringify(DB));}catch(e){} if(window.zyntraElectron){window.zyntraElectron.salvar(DB).then(function(r){if(r&&r.ok){var h=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});var el=document.getElementById('fs-status');if(el){el.textContent='✅ Salvo '+h;el.style.color='var(--grn)';el.style.borderColor='rgba(74,222,128,.3)';}}});}}
+
+// ── HELPERS ──────────────────────────────────────────
+function R(v){return 'R$ '+Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function N(v){return Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function hoje(){var d=new Date();return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear();}
+function setPage(h){document.getElementById('pg').innerHTML=h;document.querySelector('.pg').scrollTop=0;}
+function pillStatus(s){var m={'Pago':'ppago','Pendente':'ppendente','Atrasado':'patrasado','Programado':'pprogramado','OK':'pok','ALERTA':'palerta'};return '<span class="pill '+(m[s]||'pn')+'">'+s+'</span>';}
+function diasAte(dataStr){if(!dataStr)return null;var p=dataStr.split('/');var d=new Date(p[2],p[1]-1,p[0]);var hoje=new Date();hoje.setHours(0,0,0,0);return Math.ceil((d-hoje)/(1000*60*60*24));}
+
+var _mfn=null;
+function abrirM(t,b,fn,lg){document.getElementById('mtit').textContent=t;document.getElementById('mbody').innerHTML=b;_mfn=fn||null;document.getElementById('macts').style.display=fn?'flex':'none';document.getElementById('mbox').className='modal'+(lg?' lg':'');document.getElementById('mbg').classList.add('open');}
+function fecharM(){document.getElementById('mbg').classList.remove('open');}
+function confirmarM(){if(_mfn)_mfn();}
+document.getElementById('mbg').addEventListener('click',function(e){if(e.target.id==='mbg')fecharM();});
+
+// ── BADGES ───────────────────────────────────────────
+function badges(){
+  // Estoque: mostra produtos disponíveis (qty > 0)
+  var disponiveis=DB.produtos.filter(function(p){return p.qty>0;}).length;
+  document.getElementById('b-est').textContent=disponiveis;
+  var alertas=DB.produtos.filter(function(p){return p.qty>0&&p.qty<=p.min;}).length;
+  var ba=document.getElementById('b-alert');
+  if(ba){ba.textContent=alertas;ba.style.display=alertas>0?'inline':'none';}
+  // Pagamentos
+  for(var m=1;m<=12;m++){
+    var arr=(DB.pag[m-1]||[]);
+    var el=document.getElementById('p'+m);
+    if(el){el.textContent=arr.length;el.style.display=arr.length>0?'inline':'none';}
+  }
+  // RTU
+  document.getElementById('b-rtu').textContent=DB.rtu.filter(function(r){return r.valor;}).length;
+}
+
+// ── NAVEGAÇÃO ─────────────────────────────────────────
+var _curPage='dash',_curMes=0;
+function ir(tipo,arg,el){
+  if(typeof arg==='object'&&!el){el=arg;arg=0;}
+  document.querySelectorAll('.ni').forEach(function(x){x.classList.remove('on');});
+  if(el)el.classList.add('on');
+  _curPage=tipo;_curMes=arg||0;
+  var titulos={dash:'Dashboard',est_produtos:'Estoque — Produtos',est_fin:'Estoque — Financeiro',est_mov:'Estoque — Movimentações',est_alertas:'Estoque — Alertas',rtu_lanc:'Controle RTU — Lançamentos',rtu_resumo:'Controle RTU — Resumo Anual'};
+  document.getElementById('ptitle').textContent=titulos[tipo]||(tipo==='pag'?'Pagamentos — '+MFULL[(arg||1)-1]+' 2026':tipo);
+  if(tipo==='dash')pDash();
+  else if(tipo==='est_produtos')pEstProdutos();
+  else if(tipo==='est_fin')pEstFinanceiro();
+  else if(tipo==='est_mov')pEstMov();
+  else if(tipo==='est_alertas')pEstAlertas();
+  else if(tipo==='pag')pPag(arg);
+  else if(tipo==='rtu_lanc')pRtuLanc();
+  else if(tipo==='rtu_resumo')pRtuResumo();
+}
+
+// ── DASHBOARD ─────────────────────────────────────────
+function pDash(){
+  var mes=new Date().getMonth()+1;
+  var nm=MFULL[mes-1];
+
+  // ── ESTOQUE ──
+  var totalProd=DB.produtos.length;
+  var totalDisp=DB.produtos.filter(function(p){return p.qty>0;}).length;
+  var totalQty=DB.produtos.reduce(function(a,p){return a+p.qty;},0);
+  var totalVal=DB.produtos.reduce(function(a,p){return a+(p.qty*(p.cmv||p.preco||0));},0);
+  var semEst=DB.produtos.filter(function(p){return p.qty===0;}).length;
+  var baixo=DB.produtos.filter(function(p){return p.qty>0&&p.qty<=p.min;}).length;
+  var estStatus=semEst>0?'red':baixo>0?'amb':'grn';
+  var estLabel=semEst>0?semEst+' sem estoque':baixo>0?baixo+' abaixo do mínimo':'Tudo em ordem';
+
+  // ── PAGAMENTOS ──
+  var pagMes=DB.pag[mes-1]||[];
+  var totalPag=pagMes.reduce(function(a,p){return a+(p.valor||0);},0);
+  var pago=pagMes.filter(function(p){return p.status==='Pago';}).reduce(function(a,p){return a+(p.valor||0);},0);
+  var atrasado=pagMes.filter(function(p){return p.status==='Atrasado';}).length;
+  var pendente=pagMes.filter(function(p){return p.status==='Pendente';}).length;
+  var pagStatus=atrasado>0?'red':pendente>0?'amb':'grn';
+  var pagLabel=atrasado>0?atrasado+' atrasado'+(atrasado>1?'s':''):pendente>0?pendente+' pendente'+(pendente>1?'s':''):pagMes.length===0?'Nenhum lançamento':'Tudo em dia';
+
+  // ── RTU ──
+  var totalRtu=DB.rtu.reduce(function(a,r){return a+(r.valor||0);},0);
+  var saldoRtu=RTU_CONFIG.limiteAnual-totalRtu;
+  var pctRtu=totalRtu>0?totalRtu/RTU_CONFIG.limiteAnual*100:0;
+  var rtuStatus=pctRtu>80?'red':pctRtu>60?'amb':'grn';
+  var rtuLabel=pctRtu>80?'⚠ Próximo do limite':pctRtu>0?pctRtu.toFixed(1)+'% do limite usado':'Sem compras registradas';
+
+  function modCard(ico,titulo,valPrincipal,valCor,sub,statusCor,statusLabel,onclick,detalhes){
+    var borda=statusCor==='red'?'rgba(248,113,113,.3)':statusCor==='amb'?'rgba(251,191,36,.3)':'rgba(74,222,128,.25)';
+    var bg=statusCor==='red'?'rgba(248,113,113,.03)':statusCor==='amb'?'rgba(251,191,36,.02)':'rgba(74,222,128,.02)';
+    var dotCor=statusCor==='red'?'var(--red)':statusCor==='amb'?'var(--amb)':'var(--grn)';
+    var h='<div style="background:var(--w);border:1px solid '+borda+';border-radius:12px;padding:24px 28px;background:'+bg+';cursor:pointer;transition:transform .15s" onclick="'+onclick+'" onmouseover="this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.transform=\'translateY(0)\'">';
+    h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">';
+    h+='<div style="display:flex;align-items:center;gap:10px"><span style="font-size:22px">'+ico+'</span><span style="font-size:12px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.6px">'+titulo+'</span></div>';
+    h+='<div style="display:flex;align-items:center;gap:6px;background:var(--w2);border:1px solid var(--bdr2);border-radius:20px;padding:4px 10px"><span style="width:7px;height:7px;border-radius:50%;background:'+dotCor+';display:inline-block"></span><span style="font-size:10px;font-weight:600;color:'+dotCor+'">'+statusLabel+'</span></div>';
+    h+='</div>';
+    h+='<div style="font-size:32px;font-weight:800;color:var(--'+valCor+');letter-spacing:-.5px;margin-bottom:4px">'+valPrincipal+'</div>';
+    h+='<div style="font-size:12px;color:var(--t3);margin-bottom:20px">'+sub+'</div>';
+    h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding-top:16px;border-top:1px solid var(--bdr)">';
+    detalhes.forEach(function(d){h+='<div><div style="font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">'+d[0]+'</div><div style="font-size:14px;font-weight:700;color:'+d[2]+'">'+d[1]+'</div></div>';});
+    h+='</div></div>';
+    return h;
+  }
+
+  var h='<div style="margin-bottom:8px"><span style="font-size:11px;color:var(--t3)">'+new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'})+'</span></div>';
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:0">';
+
+  // Card Estoque
+  h+=modCard('📦','Estoque',R(totalVal),'gold',totalQty+' un · '+totalDisp+' disponíveis · '+totalProd+' SKUs',estStatus,estLabel,"ir('est_produtos')",[
+    ['Valor parado',R(totalVal),'var(--gold)'],
+    ['Unidades',totalQty+' un','var(--grn)'],
+    ['Sem estoque',semEst,semEst>0?'var(--red)':'var(--t3)']
+  ]);
+
+  // Card Pagamentos
+  h+=modCard('💳','Pagamentos '+nm,R(totalPag),'gold',pagMes.length+' conta'+(pagMes.length!==1?'s':'')+' este mês',pagStatus,pagLabel,"ir('pag',"+mes+")",[
+    ['Pago',R(pago),'var(--grn)'],
+    ['Pendentes',pendente,pendente>0?'var(--amb)':'var(--t3)'],
+    ['Atrasados',atrasado,atrasado>0?'var(--red)':'var(--t3)']
+  ]);
+
+  // Card RTU
+  h+=modCard('🏦','Controle RTU',R(totalRtu),'gold','Compras no regime RTU 2026',rtuStatus,rtuLabel,"ir('rtu_lanc')",[
+    ['Limite anual',R(RTU_CONFIG.limiteAnual),'var(--t3)'],
+    ['Saldo',R(saldoRtu),rtuStatus==='red'?'var(--red)':rtuStatus==='amb'?'var(--amb)':'var(--grn)'],
+    ['Lançamentos',DB.rtu.filter(function(r){return r.valor;}).length,'var(--t)']
+  ]);
+
+  h+='</div>';
+  h+='<div style="margin-top:16px;padding:12px 16px;background:var(--w);border:1px solid var(--bdr);border-radius:8px;display:flex;align-items:center;gap:8px;font-size:11px;color:var(--t3)">💡 Clique em qualquer módulo acima para abrir e gerenciar.</div>';
+  setPage(h);
+}
+
+// ── ESTOQUE PRODUTOS ──────────────────────────────────
+function pEstProdutos(busca,filtCat,filtSt){
+  busca=busca||'';filtCat=filtCat||'';filtSt=filtSt||'';
+  var lista=DB.produtos.slice();
+  if(busca)lista=lista.filter(function(p){return p.nome.toLowerCase().indexOf(busca.toLowerCase())>=0||String(p.cod).indexOf(busca)>=0||p.ncm.indexOf(busca)>=0;});
+  if(filtCat)lista=lista.filter(function(p){return p.cat===filtCat;});
+  if(filtSt==='ok')lista=lista.filter(function(p){return p.qty>p.min;});
+  else if(filtSt==='baixo')lista=lista.filter(function(p){return p.qty>0&&p.qty<=p.min;});
+  else if(filtSt==='zero')lista=lista.filter(function(p){return p.qty===0;});
+
+  var totalQty=DB.produtos.reduce(function(a,p){return a+p.qty;},0);
+  var totalCusto=DB.produtos.reduce(function(a,p){return a+(p.qty*p.cmv);},0);
+  var totalVenda=DB.produtos.reduce(function(a,p){return a+(p.qty*(p.preco||p.cmv));},0);
+  var semEst=DB.produtos.filter(function(p){return p.qty===0;}).length;
+  var baixo=DB.produtos.filter(function(p){return p.qty>0&&p.qty<=p.min;}).length;
+
+  var h='<div class="g5">';
+  h+='<div class="card"><div class="lbl">Total de SKUs</div><div class="val gld">'+DB.produtos.length+'</div><div class="sub">'+totalQty+' unidades</div></div>';
+  h+='<div class="card"><div class="lbl">Capital Parado (custo)</div><div class="val gld">'+R(totalCusto)+'</div><div class="sub">a preço de custo</div></div>';
+  h+='<div class="card"><div class="lbl">Capital Parado (venda)</div><div class="val pur">'+R(totalVenda)+'</div><div class="sub">a preço de venda</div></div>';
+  h+='<div class="card '+(baixo>0?'warn':'')+'"><div class="lbl">Estoque Baixo</div><div class="val amb">'+baixo+'</div><div class="sub">abaixo do mínimo</div></div>';
+  h+='<div class="card '+(semEst>0?'danger':'ok')+'"><div class="lbl">Sem Estoque</div><div class="val '+(semEst>0?'red':'grn')+'">'+semEst+'</div><div class="sub">zerados</div></div>';
+  h+='</div>';
+
+  h+='<div class="brow">';
+  h+='<input class="inp" id="est-s" style="width:200px" placeholder="Buscar produto, NCM..." value="'+busca+'" oninput="_refEst()">';
+  h+='<select class="sel" id="est-cat" onchange="_refEst()"><option value="">Todas as categorias</option>';
+  EST_CATS.forEach(function(c){h+='<option value="'+c+'"'+(filtCat===c?' selected':'')+'>'+c+'</option>';});
+  h+='</select>';
+  h+='<select class="sel" id="est-st" onchange="_refEst()"><option value="">Todos os status</option><option value="ok"'+(filtSt==='ok'?' selected':'')+'>OK</option><option value="baixo"'+(filtSt==='baixo'?' selected':'')+'>Baixo</option><option value="zero"'+(filtSt==='zero'?' selected':'')+'>Sem estoque</option></select>';
+  if(busca||filtCat||filtSt)h+='<button class="btn bsm" onclick="pEstProdutos()">✕ Limpar</button>';
+  h+='<button class="btn btnp" style="margin-left:auto" onclick="modalAddProduto()">+ Produto</button>';
+  h+='<button class="btn" onclick="modalMovimento()">📦 Entrada/Saída</button>';
+  h+='</div>';
+
+  h+='<div class="panel"><div class="ph"><div class="pt">Catálogo de Produtos</div><span style="font-size:10px;color:var(--t3)">'+lista.length+' de '+DB.produtos.length+' produtos</span></div>';
+  h+='<div class="ts tw"><table><thead><tr><th>CÓD.</th><th>PRODUTO</th><th>CAT.</th><th>NCM</th><th class="tc">ESTOQUE</th><th class="tc">MÍN.</th><th class="tc">VEND. 30D</th><th class="tc">ABC</th><th>COBERTURA</th><th class="tr">CMV</th><th class="tr">PREÇO</th><th class="tr">PARADO (R$)</th><th>FORNECEDOR</th><th>STATUS</th><th></th></tr></thead><tbody>';
+  if(lista.length===0){h+='<tr><td colspan="15" class="empty">Nenhum produto encontrado.</td></tr>';}
+  else lista.forEach(function(p){
+    var st=p.qty===0?'<span class="pill patrasado">Sem estoque</span>':p.qty<=p.min?'<span class="pill ppendente">Baixo</span>':'<span class="pill ppago">OK</span>';
+    var qCor=p.qty===0?'red':p.qty<=p.min?'amb':'grn';
+    var abc=getABC(p);
+    var abcCor=abc==='A'?'var(--gold)':abc==='B'?'var(--amb)':'var(--t3)';
+    var parado=p.qty*(p.preco>0?p.preco:p.cmv);
+    var cobTxt=_cobTxt(p);
+    var cobCor=_cobCor(p);
+    h+='<tr>';
+    h+='<td class="mono" style="font-size:11px">'+p.cod+'</td>';
+    h+='<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500" title="'+p.nome+'">'+p.nome+'</td>';
+    h+='<td><span class="pill pn" style="font-size:10px">'+p.cat+'</span></td>';
+    h+='<td class="mono" style="font-size:10px;color:var(--t3)">'+p.ncm+'</td>';
+    h+='<td class="tc" style="font-weight:700;color:var(--'+qCor+')">'+p.qty+'</td>';
+    h+='<td class="tc" style="color:var(--t3)">'+p.min+'</td>';
+    h+='<td class="tc" style="color:var(--blu)">'+(p.vendas30>0?p.vendas30:'—')+'</td>';
+    h+='<td class="tc" style="font-weight:800;color:'+abcCor+'">'+abc+'</td>';
+    h+='<td style="font-weight:600;color:'+cobCor+'">'+cobTxt+'</td>';
+    h+='<td class="tr" style="font-size:11px">'+(p.cmv>0?R(p.cmv):'—')+'</td>';
+    h+='<td class="tr" style="font-size:11px">'+(p.preco>0?R(p.preco):'—')+'</td>';
+    h+='<td class="tr" style="font-weight:600;color:var(--gold)">'+(parado>0?R(parado):'—')+'</td>';
+    h+='<td style="font-size:11px;color:var(--t2)">'+(p.fornecedor||'—')+'</td>';
+    h+='<td>'+st+'</td>';
+    h+='<td class="tnw"><button class="btn bsm" onclick="editProduto('+p.id+')" title="Editar">✏</button> <button class="btn bsm" onclick="modalMovimentoProduto('+p.id+')" title="Entrada/Saída">📦</button></td>';
+    h+='</tr>';
+  });
+  h+='</tbody></table></div></div>';
+  setPage(h);
+}
+function _refEst(){
+  var b=document.getElementById('est-s'),c=document.getElementById('est-cat'),s=document.getElementById('est-st');
+  pEstProdutos(b?b.value:'',c?c.value:'',s?s.value:'');
+}
+
+function modalAddProduto(){
+  var maxCod=DB.produtos.reduce(function(a,p){return Math.max(a,p.cod);},0);
+  abrirM('Novo Produto',
+    '<div class="fg f3">'+
+    '<div style="grid-column:1/-1"><label>Nome do Produto *</label><input id="np-nome"></div>'+
+    '<div><label>Código</label><input id="np-cod" type="number" value="'+(maxCod+1)+'"></div>'+
+    '<div><label>NCM</label><input id="np-ncm" placeholder="0000.00.00"></div>'+
+    '<div><label>Categoria</label><select id="np-cat">'+EST_CATS.map(function(c){return '<option>'+c+'</option>';}).join('')+'</select></div>'+
+    '<div><label>Qtd. Inicial</label><input id="np-qty" type="number" value="0" min="0"></div>'+
+    '<div><label>Estoque Mínimo</label><input id="np-min" type="number" value="1" min="0"></div>'+
+    '<div><label>CMV / Custo (R$)</label><input id="np-cmv" type="number" step="0.01" value="0"></div>'+
+    '<div><label>Preço de Venda (R$)</label><input id="np-preco" type="number" step="0.01" value="0"></div>'+
+    '<div><label>Vendas 30 dias</label><input id="np-v30" type="number" value="0" min="0"></div>'+
+    '<div><label>Fornecedor</label><input id="np-forn" placeholder="Ex: Redragon"></div>'+
+    '<div><label>Lead Time (dias)</label><input id="np-lead" type="number" value="7" min="1"></div>'+
+    '</div>',
+    function(){
+      var nome=document.getElementById('np-nome').value.trim();
+      if(!nome){alert('Informe o nome.');return;}
+      var maxId=DB.produtos.reduce(function(a,p){return Math.max(a,p.id);},0);
+      var maxC=DB.produtos.reduce(function(a,p){return Math.max(a,p.cod);},0);
+      DB.produtos.push(_normProd({id:maxId+1,nome:nome.toUpperCase(),
+        cod:parseInt(document.getElementById('np-cod').value)||maxC+1,
+        ncm:document.getElementById('np-ncm').value||'',
+        cat:document.getElementById('np-cat').value,
+        qty:parseInt(document.getElementById('np-qty').value)||0,
+        min:parseInt(document.getElementById('np-min').value)||1,
+        cmv:parseFloat(document.getElementById('np-cmv').value)||0,
+        preco:parseFloat(document.getElementById('np-preco').value)||0,
+        vendas30:parseInt(document.getElementById('np-v30').value)||0,
+        fornecedor:document.getElementById('np-forn').value.trim(),
+        leadTime:parseInt(document.getElementById('np-lead').value)||7
+      }));
+      save();badges();fecharM();pEstProdutos();
+    });
+}
+
+function editProduto(id){
+  var p=DB.produtos.find(function(x){return x.id===id;});if(!p)return;
+  abrirM('Editar Produto — '+p.nome.substring(0,35)+'…',
+    '<div class="fg f3">'+
+    '<div style="grid-column:1/-1"><label>Nome</label><input id="ep-nome" value="'+p.nome+'"></div>'+
+    '<div><label>Código</label><input id="ep-cod" type="number" value="'+p.cod+'"></div>'+
+    '<div><label>NCM</label><input id="ep-ncm" value="'+p.ncm+'"></div>'+
+    '<div><label>Categoria</label><select id="ep-cat">'+EST_CATS.map(function(c){return '<option'+(c===p.cat?' selected':'')+'>'+c+'</option>';}).join('')+'</select></div>'+
+    '<div><label>Estoque Atual</label><input id="ep-qty" type="number" value="'+p.qty+'" min="0"></div>'+
+    '<div><label>Estoque Mínimo</label><input id="ep-min" type="number" value="'+p.min+'" min="0"></div>'+
+    '<div><label>CMV / Custo (R$)</label><input id="ep-cmv" type="number" step="0.01" value="'+p.cmv+'"></div>'+
+    '<div><label>Preço de Venda (R$)</label><input id="ep-preco" type="number" step="0.01" value="'+(p.preco||0)+'"></div>'+
+    '<div><label>Vendas 30 dias</label><input id="ep-v30" type="number" value="'+(p.vendas30||0)+'" min="0"></div>'+
+    '<div><label>Fornecedor</label><input id="ep-forn" value="'+(p.fornecedor||'')+'"></div>'+
+    '<div><label>Lead Time (dias)</label><input id="ep-lead" type="number" value="'+(p.leadTime||7)+'" min="1"></div>'+
+    '</div>',
+    function(){
+      p.nome=document.getElementById('ep-nome').value.trim().toUpperCase();
+      p.cod=parseInt(document.getElementById('ep-cod').value)||p.cod;
+      p.ncm=document.getElementById('ep-ncm').value;
+      p.cat=document.getElementById('ep-cat').value;
+      p.qty=parseInt(document.getElementById('ep-qty').value)||0;
+      p.min=parseInt(document.getElementById('ep-min').value)||1;
+      p.cmv=parseFloat(document.getElementById('ep-cmv').value)||0;
+      p.preco=parseFloat(document.getElementById('ep-preco').value)||0;
+      p.vendas30=parseInt(document.getElementById('ep-v30').value)||0;
+      p.fornecedor=document.getElementById('ep-forn').value.trim();
+      p.leadTime=parseInt(document.getElementById('ep-lead').value)||7;
+      save();badges();fecharM();pEstProdutos();
+    },true);
+}
+
+// ── ESTOQUE FINANCEIRO ────────────────────────────────
+function pEstFinanceiro(){
+  var lista=DB.produtos.slice().sort(function(a,b){
+    return (b.qty*(b.preco>0?b.preco:b.cmv))-(a.qty*(a.preco>0?a.preco:a.cmv));
+  });
+  var totCusto=lista.reduce(function(a,p){return a+(p.qty*p.cmv);},0);
+  var totVenda=lista.reduce(function(a,p){return a+(p.qty*(p.preco>0?p.preco:p.cmv));},0);
+  var semPreco=lista.filter(function(p){return p.preco<=0;}).length;
+  var semCMV=lista.filter(function(p){return p.cmv<=0;}).length;
+  var margem=totCusto>0?(totVenda-totCusto)/totCusto*100:0;
+
+  // por categoria
+  var cats={};
+  lista.forEach(function(p){
+    if(!cats[p.cat])cats[p.cat]={custo:0,venda:0,qty:0,n:0};
+    cats[p.cat].custo+=p.qty*p.cmv;
+    cats[p.cat].venda+=p.qty*(p.preco>0?p.preco:p.cmv);
+    cats[p.cat].qty+=p.qty;
+    cats[p.cat].n++;
+  });
+  var catArr=Object.entries(cats).sort(function(a,b){return b[1].venda-a[1].venda;});
+  var maxV=catArr.length?catArr[0][1].venda||1:1;
+
+  var h='<div class="g4">';
+  h+='<div class="card hl"><div class="lbl">Capital Parado (custo)</div><div class="val gld">'+R(totCusto)+'</div><div class="sub">'+lista.length+' SKUs em estoque</div></div>';
+  h+='<div class="card"><div class="lbl">Capital Parado (venda)</div><div class="val pur">'+R(totVenda)+'</div><div class="sub">potencial de receita</div></div>';
+  h+='<div class="card '+(margem>0?'ok':'')+'"><div class="lbl">Margem Potencial</div><div class="val grn">'+margem.toFixed(1)+'%</div><div class="sub">'+R(totVenda-totCusto)+' de lucro bruto</div></div>';
+  h+='<div class="card '+(semPreco>0?'warn':'')+'"><div class="lbl">Sem Preço Cadastrado</div><div class="val amb">'+semPreco+'</div><div class="sub">produtos sem preço de venda</div></div>';
+  h+='</div>';
+
+  // barras por categoria
+  h+='<div class="row2">';
+  h+='<div class="panel"><div class="ph"><div class="pt">Capital por categoria (valor venda)</div></div><div class="pb">';
+  catArr.forEach(function(e){
+    var pct=Math.round(e[1].venda/maxV*100);
+    h+='<div style="margin-bottom:10px">';
+    h+='<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px"><span style="font-weight:600">'+e[0]+'</span><span style="color:var(--t3)">'+e[1].n+' SKUs · '+e[1].qty+' un.</span></div>';
+    h+='<div style="display:flex;align-items:center;gap:8px">';
+    h+='<div style="flex:1;height:10px;background:var(--w2);border-radius:5px;overflow:hidden"><div style="width:'+pct+'%;height:10px;border-radius:5px;background:var(--gold)"></div></div>';
+    h+='<span style="font-size:12px;font-weight:700;min-width:80px;text-align:right;color:var(--gold)">'+R(e[1].venda)+'</span></div>';
+    h+='</div>';
+  });
+  h+='</div></div>';
+
+  h+='<div class="panel"><div class="ph"><div class="pt">Resumo por categoria</div></div>';
+  h+='<div class="tw"><table><thead><tr><th>CATEGORIA</th><th class="tc">SKUs</th><th class="tc">UNID.</th><th class="tr">CUSTO PARADO</th><th class="tr">VENDA PARADO</th><th class="tr">MARGEM</th></tr></thead><tbody>';
+  catArr.forEach(function(e){
+    var mg=e[1].custo>0?(e[1].venda-e[1].custo)/e[1].custo*100:0;
+    var mgCor=mg>30?'var(--grn)':mg>10?'var(--amb)':'var(--t3)';
+    h+='<tr><td style="font-weight:600">'+e[0]+'</td><td class="tc">'+e[1].n+'</td><td class="tc">'+e[1].qty+'</td>';
+    h+='<td class="tr">'+(e[1].custo>0?R(e[1].custo):'—')+'</td>';
+    h+='<td class="tr" style="font-weight:700;color:var(--gold)">'+(e[1].venda>0?R(e[1].venda):'—')+'</td>';
+    h+='<td class="tr" style="font-weight:700;color:'+mgCor+'">'+(e[1].custo>0?mg.toFixed(1)+'%':'—')+'</td>';
+    h+='</tr>';
+  });
+  h+='<tfoot><tr><td style="font-weight:700">TOTAL</td><td class="tc">'+lista.length+'</td><td class="tc">'+lista.reduce(function(a,p){return a+p.qty;},0)+'</td><td class="tr" style="font-weight:700">'+R(totCusto)+'</td><td class="tr" style="font-weight:700;color:var(--gold)">'+R(totVenda)+'</td><td class="tr" style="font-weight:700;color:var(--grn)">'+margem.toFixed(1)+'%</td></tr></tfoot>';
+  h+='</tbody></table></div></div>';
+  h+='</div>';
+
+  h+='<div class="sec">📦 Produtos — Capital Parado (maior para menor)</div>';
+  h+='<div class="panel"><div class="ph"><div class="pt">Valor parado por SKU</div>';
+  h+='<button class="btn bsm" onclick="pEstProdutos()" style="font-size:11px">Ver catálogo completo →</button></div>';
+  h+='<div class="ts tw"><table><thead><tr><th>CÓD.</th><th>PRODUTO</th><th>CAT.</th><th class="tc">ESTOQUE</th><th class="tr">CMV</th><th class="tr">PREÇO VENDA</th><th class="tr">CUSTO PARADO</th><th class="tr">VENDA PARADO</th><th class="tr">MARGEM</th><th>ABC</th></tr></thead><tbody>';
+  lista.forEach(function(p){
+    var pv=p.preco>0?p.preco:p.cmv;
+    var custoPar=p.qty*p.cmv;
+    var vendaPar=p.qty*pv;
+    var mg=p.cmv>0?(pv-p.cmv)/p.cmv*100:0;
+    var mgCor=mg>30?'var(--grn)':mg>10?'var(--amb)':mg>0?'var(--t3)':'var(--red)';
+    var abc=getABC(p);
+    var abcCor=abc==='A'?'var(--gold)':abc==='B'?'var(--amb)':'var(--t3)';
+    h+='<tr>';
+    h+='<td class="mono" style="font-size:11px">'+p.cod+'</td>';
+    h+='<td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500" title="'+p.nome+'">'+p.nome+'</td>';
+    h+='<td><span class="pill pn" style="font-size:10px">'+p.cat+'</span></td>';
+    h+='<td class="tc" style="font-weight:700">'+p.qty+'</td>';
+    h+='<td class="tr" style="font-size:11px">'+(p.cmv>0?R(p.cmv):'<span style="color:var(--red)">—</span>')+'</td>';
+    h+='<td class="tr" style="font-size:11px">'+(p.preco>0?R(p.preco):'<span style="color:var(--amb)">—</span>')+'</td>';
+    h+='<td class="tr">'+(custoPar>0?R(custoPar):'—')+'</td>';
+    h+='<td class="tr" style="font-weight:700;color:var(--gold)">'+(vendaPar>0?R(vendaPar):'—')+'</td>';
+    h+='<td class="tr" style="font-weight:700;color:'+mgCor+'">'+(p.cmv>0?mg.toFixed(1)+'%':'—')+'</td>';
+    h+='<td style="font-weight:800;color:'+abcCor+'">'+abc+'</td>';
+    h+='</tr>';
+  });
+  h+='</tbody></table></div></div>';
+  setPage(h);
+}
+
+function modalMovimento(prodId){
+  var opts=DB.produtos.map(function(p){return '<option value="'+p.id+'"'+(p.id===prodId?' selected':'')+'>'+p.cod+' — '+p.nome.substring(0,40)+'</option>';}).join('');
+  abrirM('Registrar Movimentação',
+    '<div class="fg f3">'+
+    '<div style="grid-column:1/-1"><label>Produto *</label><select id="mv-prod">'+opts+'</select></div>'+
+    '<div><label>Tipo *</label><select id="mv-tipo"><option>Entrada</option><option>Saída</option></select></div>'+
+    '<div><label>Quantidade *</label><input id="mv-qty" type="number" min="1" value="1"></div>'+
+    '<div><label>Data</label><input id="mv-data" value="'+hoje()+'"></div>'+
+    '<div style="grid-column:1/-1"><label>Observação</label><input id="mv-obs" placeholder="Opcional"></div>'+
+    '</div>',
+    function(){
+      var pid=parseInt(document.getElementById('mv-prod').value);
+      var p=DB.produtos.find(function(x){return x.id===pid;});
+      if(!p)return;
+      var tipo=document.getElementById('mv-tipo').value;
+      var qty=parseInt(document.getElementById('mv-qty').value)||0;
+      if(tipo==='Saída'&&qty>p.qty){alert('Estoque insuficiente. Disponível: '+p.qty);return;}
+      p.qty+=tipo==='Entrada'?qty:-qty;
+      DB.mov.push({id:DB.nMov++,prodId:pid,prodNome:p.nome,tipo:tipo,qty:qty,data:document.getElementById('mv-data').value,obs:document.getElementById('mv-obs').value});
+      save();badges();fecharM();pEstProdutos();
+    });
+}
+function modalMovimentoProduto(id){modalMovimento(id);}
+
+// ── ESTOQUE MOVIMENTAÇÕES ─────────────────────────────
+function pEstMov(){
+  var lista=DB.mov.slice().reverse();
+  var h='<div class="brow"><button class="btn btnp" onclick="modalMovimento()">📦 Nova Movimentação</button></div>';
+  h+='<div class="panel"><div class="ph"><div class="pt">Histórico de Movimentações</div><span style="font-size:10px;color:var(--t3)">'+lista.length+' registros</span></div>';
+  h+='<div class="ts tw"><table><thead><tr><th>DATA</th><th>TIPO</th><th>PRODUTO</th><th class="tc">QTD</th><th>OBS.</th><th></th></tr></thead><tbody>';
+  if(lista.length===0){h+='<tr><td colspan="6" class="empty">Nenhuma movimentação registrada.</td></tr>';}
+  else lista.forEach(function(m){
+    h+='<tr><td class="tnw mono" style="font-size:11px">'+m.data+'</td>';
+    h+='<td>'+(m.tipo==='Entrada'?'<span class="pill ppago">Entrada</span>':'<span class="pill patrasado">Saída</span>')+'</td>';
+    h+='<td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+m.prodNome+'</td>';
+    h+='<td class="tc" style="font-weight:700;color:'+(m.tipo==='Entrada'?'var(--grn)':'var(--red)')+'">'+m.qty+'</td>';
+    h+='<td style="font-size:11px;color:var(--t2)">'+(m.obs||'')+'</td>';
+    h+='<td><button class="btn bsm btnd" onclick="delMov('+m.id+')">✕</button></td></tr>';
+  });
+  h+='</tbody></table></div></div>';
+  setPage(h);
+}
+function delMov(id){if(!confirm('Remover movimentação?'))return;DB.mov=DB.mov.filter(function(m){return m.id!==id;});save();pEstMov();}
+
+// ── ESTOQUE ALERTAS ───────────────────────────────────
+function pEstAlertas(){
+  var semEst=DB.produtos.filter(function(p){return p.qty===0;});
+  var baixo=DB.produtos.filter(function(p){return p.qty>0&&p.qty<=p.min;});
+  var comRuptura=DB.produtos.filter(function(p){return p.vendas30>0&&p.qty>0;})
+    .map(function(p){return {p:p,cob:_cobertura(p)};})
+    .filter(function(x){return x.cob<30;})
+    .sort(function(a,b){return a.cob-b.cob;});
+
+  var h='<div class="g3">';
+  h+='<div class="card '+(semEst.length>0?'danger':'ok')+'"><div class="lbl">Sem Estoque</div><div class="val '+(semEst.length>0?'red':'grn')+'">'+semEst.length+'</div><div class="sub">reposição urgente</div></div>';
+  h+='<div class="card '+(baixo.length>0?'warn':'ok')+'"><div class="lbl">Estoque Baixo</div><div class="val amb">'+baixo.length+'</div><div class="sub">abaixo do mínimo</div></div>';
+  h+='<div class="card '+(comRuptura.length>0?'warn':'ok')+'"><div class="lbl">Risco de Ruptura</div><div class="val amb">'+comRuptura.length+'</div><div class="sub">cobertura &lt; 30 dias</div></div>';
+  h+='</div>';
+
+  if(semEst.length===0&&baixo.length===0&&comRuptura.length===0){
+    h+='<div class="empty" style="margin-top:60px">✅ Todos os produtos estão com estoque adequado e cobertura suficiente!</div>';
+    setPage(h);return;
+  }
+
+  if(semEst.length>0){
+    h+='<div class="sec">❌ Sem Estoque — Reposição Urgente</div>';
+    h+='<div class="panel"><div class="ph"><div class="pt">Produtos zerados</div><span style="font-size:10px;color:var(--t3)">'+semEst.length+' produtos</span></div>';
+    h+='<div class="ts tw"><table><thead><tr><th>CÓD.</th><th>PRODUTO</th><th>CAT.</th><th>NCM</th><th class="tc">MÍN.</th><th class="tr">CMV</th><th>FORNECEDOR</th><th></th></tr></thead><tbody>';
+    semEst.forEach(function(p){
+      h+='<tr style="background:var(--rdbg)">';
+      h+='<td class="mono">'+p.cod+'</td>';
+      h+='<td style="font-weight:600;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+p.nome+'</td>';
+      h+='<td><span class="pill pn" style="font-size:10px">'+p.cat+'</span></td>';
+      h+='<td class="mono" style="font-size:10px;color:var(--t3)">'+p.ncm+'</td>';
+      h+='<td class="tc">'+p.min+'</td>';
+      h+='<td class="tr">'+(p.cmv>0?R(p.cmv):'—')+'</td>';
+      h+='<td style="font-size:11px;color:var(--t2)">'+(p.fornecedor||'—')+'</td>';
+      h+='<td><button class="btn bsm btnp" onclick="modalMovimentoProduto('+p.id+')">+ Entrada</button></td>';
+      h+='</tr>';
+    });
+    h+='</tbody></table></div></div>';
+  }
+
+  if(baixo.length>0){
+    h+='<div class="sec">⚠ Estoque Baixo — Abaixo do Mínimo</div>';
+    h+='<div class="panel"><div class="ph"><div class="pt">Abaixo do mínimo</div><span style="font-size:10px;color:var(--t3)">'+baixo.length+' produtos</span></div>';
+    h+='<div class="ts tw"><table><thead><tr><th>CÓD.</th><th>PRODUTO</th><th>CAT.</th><th class="tc">ATUAL</th><th class="tc">MÍN.</th><th class="tc">DÉFICIT</th><th>COBERTURA</th><th>FORNECEDOR</th><th></th></tr></thead><tbody>';
+    baixo.forEach(function(p){
+      var def=p.min-p.qty;
+      h+='<tr style="background:var(--ambg)">';
+      h+='<td class="mono">'+p.cod+'</td>';
+      h+='<td style="font-weight:500;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+p.nome+'</td>';
+      h+='<td><span class="pill pn" style="font-size:10px">'+p.cat+'</span></td>';
+      h+='<td class="tc" style="font-weight:700;color:var(--amb)">'+p.qty+'</td>';
+      h+='<td class="tc" style="color:var(--t3)">'+p.min+'</td>';
+      h+='<td class="tc" style="color:var(--red);font-weight:700">'+def+'</td>';
+      h+='<td style="font-weight:600;color:'+_cobCor(p)+'">'+_cobTxt(p)+'</td>';
+      h+='<td style="font-size:11px;color:var(--t2)">'+(p.fornecedor||'—')+'</td>';
+      h+='<td><button class="btn bsm btnp" onclick="modalMovimentoProduto('+p.id+')">+ Entrada</button></td>';
+      h+='</tr>';
+    });
+    h+='</tbody></table></div></div>';
+  }
+
+  if(comRuptura.length>0){
+    h+='<div class="sec">📉 Previsão de Ruptura — Cobertura &lt; 30 dias</div>';
+    h+='<div class="panel"><div class="ph"><div class="pt">Estimativa por velocidade de venda</div><span style="font-size:10px;color:var(--t3)">'+comRuptura.length+' produtos em risco</span></div>';
+    h+='<div class="ts tw"><table><thead><tr><th>PRODUTO</th><th>CAT.</th><th class="tc">ESTOQUE</th><th class="tc">VEND./DIA</th><th>COBERTURA</th><th>RUPTURA PREVISTA</th><th class="tc">URGÊNCIA</th><th></th></tr></thead><tbody>';
+    comRuptura.forEach(function(x){
+      var p=x.p;var cob=x.cob;
+      var diaria=(p.vendas30/30).toFixed(1);
+      var dias=Math.round(cob);
+      var dataRup=new Date();dataRup.setDate(dataRup.getDate()+dias);
+      var dataTxt=dataRup.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});
+      var urg,urgPill;
+      if(cob<7){urg='Crítica';urgPill='patrasado';}
+      else if(cob<=14){urg='Alta';urgPill='ppendente';}
+      else{urg='Atenção';urgPill='pprogramado';}
+      h+='<tr>';
+      h+='<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500">'+p.nome+'</td>';
+      h+='<td><span class="pill pn" style="font-size:10px">'+p.cat+'</span></td>';
+      h+='<td class="tc" style="font-weight:700">'+p.qty+'</td>';
+      h+='<td class="tc" style="color:var(--blu)">'+diaria+'</td>';
+      h+='<td style="font-weight:700;color:'+_cobCor(p)+'">'+dias+' dias</td>';
+      h+='<td style="font-size:11px;color:var(--t2)">'+dataTxt+'</td>';
+      h+='<td class="tc"><span class="pill '+urgPill+'">'+urg+'</span></td>';
+      h+='<td><button class="btn bsm btnp" onclick="modalMovimentoProduto('+p.id+')">+ Entrada</button></td>';
+      h+='</tr>';
+    });
+    h+='</tbody></table></div></div>';
+  }
+
+  // Tabela sugestão de reposição
+  var repor=[...semEst,...baixo].sort(function(a,b){return a.qty-b.qty;});
+  if(repor.length>0){
+    h+='<div class="sec">🔄 Sugestão de Reposição</div>';
+    h+='<div class="panel"><div class="ph"><div class="pt">Quantidades sugeridas de compra</div></div>';
+    h+='<div class="ts tw"><table><thead><tr><th>PRODUTO</th><th>CAT.</th><th>NCM</th><th class="tc">ESTOQUE</th><th class="tc">MÍN.</th><th class="tc">DÉFICIT</th><th class="tc">PONTO REP.</th><th class="tc">SUGESTÃO COMPRA</th><th class="tr">CUSTO EST. (R$)</th></tr></thead><tbody>';
+    repor.forEach(function(p){
+      var def=Math.max(0,p.min-p.qty);
+      var sug=Math.max(def,p.min*2);
+      var pr=_pontoRep(p);
+      var custEst=sug*p.cmv;
+      h+='<tr>';
+      h+='<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500">'+p.nome+'</td>';
+      h+='<td><span class="pill pn" style="font-size:10px">'+p.cat+'</span></td>';
+      h+='<td class="mono" style="font-size:10px;color:var(--t3)">'+p.ncm+'</td>';
+      h+='<td class="tc" style="font-weight:700;color:'+(p.qty===0?'var(--red)':'var(--amb)')+'">'+p.qty+'</td>';
+      h+='<td class="tc" style="color:var(--t3)">'+p.min+'</td>';
+      h+='<td class="tc" style="color:var(--red);font-weight:700">'+def+'</td>';
+      h+='<td class="tc" style="color:var(--t2)">'+pr+' un.</td>';
+      h+='<td class="tc" style="font-weight:700;color:var(--grn)">'+sug+' un.</td>';
+      h+='<td class="tr">'+(custEst>0?R(custEst):'—')+'</td>';
+      h+='</tr>';
+    });
+    h+='</tbody></table></div></div>';
+  }
+  setPage(h);
+}
+
+// ── PAGAMENTOS ────────────────────────────────────────
+function pPag(mes){
+  var lista=DB.pag[mes-1]||[];
+  var total=lista.reduce(function(a,p){return a+p.valor;},0);
+  var pago=lista.filter(function(p){return p.status==='Pago';}).reduce(function(a,p){return a+p.valor;},0);
+  var aPagar=lista.filter(function(p){return p.status==='Pendente'||p.status==='Programado';}).reduce(function(a,p){return a+p.valor;},0);
+  var atrasado=lista.filter(function(p){return p.status==='Atrasado';}).reduce(function(a,p){return a+p.valor;},0);
+  var pctPago=total>0?pago/total*100:0;
+  var h='<div class="g5"><div class="card hl"><div class="lbl">Total do Mês</div><div class="val gld">'+R(total)+'</div><div class="sub">'+lista.length+' contas</div></div>';
+  h+='<div class="card ok"><div class="lbl">Pago</div><div class="val grn">'+R(pago)+'</div><div class="sub">'+pctPago.toFixed(0)+'% do total</div></div>';
+  h+='<div class="card"><div class="lbl">A Pagar</div><div class="val amb">'+R(aPagar)+'</div></div>';
+  h+='<div class="card '+(atrasado>0?'danger':'')+'"><div class="lbl">Atrasado</div><div class="val '+(atrasado>0?'red':'grn')+'">'+(atrasado>0?R(atrasado):'R$ 0,00')+'</div></div>';
+  h+='<div class="card"><div class="lbl">% Pago</div><div class="val grn">'+pctPago.toFixed(0)+'%</div><div class="progress-bar"><div class="progress-fill" style="width:'+pctPago+'%;background:var(--grn)"></div></div></div></div>';
+  h+='<div class="brow"><button class="btn btnp" onclick="modalAddPag('+mes+')">+ Novo Pagamento</button></div>';
+  h+='<div class="panel"><div class="ph"><div class="pt">Pagamentos — '+MFULL[mes-1].toUpperCase()+' 2026</div></div>';
+  h+='<div class="ts tw"><table><thead><tr><th>DESCRIÇÃO</th><th>CATEGORIA</th><th>TIPO</th><th class="tr">VALOR (R$)</th><th>FORMA</th><th>VENCIMENTO</th><th>STATUS</th><th>PAGAMENTO</th><th>PRIOR.</th><th>RESP.</th><th></th></tr></thead><tbody>';
+  if(lista.length===0){h+='<tr><td colspan="11"><div style="padding:48px;text-align:center"><div style="font-size:32px;margin-bottom:12px">💳</div><div style="font-size:15px;font-weight:600;color:var(--t);margin-bottom:6px">Nenhum pagamento em '+MFULL[mes-1]+'</div><div style="font-size:12px;color:var(--t3);margin-bottom:20px">Registre contas a pagar, assinaturas, impostos e muito mais.</div><button class="btn btnp" onclick="modalAddPag('+mes+')">+ Adicionar Primeiro Pagamento</button></div></td></tr>';}
+  else lista.forEach(function(p,i){
+    var dias=diasAte(p.datavenc);
+    var rowBg=p.status==='Atrasado'?'background:var(--rdbg)':p.status==='Pago'?'':'';
+    h+='<tr style="'+rowBg+'"><td style="font-weight:500;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+p.desc+'">'+p.desc+'</td>';
+    h+='<td style="font-size:11px">'+p.cat+'</td><td style="font-size:11px">'+p.tipo+'</td>';
+    h+='<td class="tr" style="font-weight:700;color:var(--gold)">'+R(p.valor)+'</td>';
+    h+='<td style="font-size:11px">'+p.forma+'</td>';
+    h+='<td class="tnw" style="font-size:11px;color:'+(dias!==null&&dias<0?'var(--red)':dias!==null&&dias<=3?'var(--amb)':'var(--t2)')+'">'+p.datavenc+(dias!==null?' <small>('+dias+'d)</small>':'')+'</td>';
+    h+='<td>'+pillStatus(p.status)+'</td>';
+    h+='<td class="tnw" style="font-size:11px;color:var(--t3)">'+(p.datapag||'—')+'</td>';
+    h+='<td style="font-size:11px;color:'+(p.prior==='Alta'?'var(--red)':p.prior==='Média'?'var(--amb)':'var(--t3)')+'">'+p.prior+'</td>';
+    h+='<td style="font-size:11px;color:var(--t2)">'+(p.resp||'')+'</td>';
+    h+='<td class="tnw"><button class="btn bsm" onclick="editPag('+mes+','+i+')">✏</button> <button class="btn bsm btnd" onclick="delPag('+mes+','+i+')">✕</button></td></tr>';
+  });
+  h+='</tbody></table></div></div>';
+  setPage(h);
+}
+
+function _formPag(vals){
+  vals=vals||{};
+  return '<div class="fg f3">'+
+    '<div style="grid-column:1/-1"><label>Descrição *</label><input id="pp-desc" value="'+(vals.desc||'')+'"></div>'+
+    '<div><label>Categoria</label><select id="pp-cat">'+PAG_CAT.map(function(c){return '<option'+(c===(vals.cat||'')?' selected':'')+'>'+c+'</option>';}).join('')+'</select></div>'+
+    '<div><label>Tipo de Conta</label><select id="pp-tipo">'+PAG_TIPO.map(function(t){return '<option'+(t===(vals.tipo||'')?' selected':'')+'>'+t+'</option>';}).join('')+'</select></div>'+
+    '<div><label>Valor (R$) *</label><input id="pp-val" type="number" step="0.01" value="'+(vals.valor||'')+'"></div>'+
+    '<div><label>Forma de Pagamento</label><select id="pp-forma">'+PAG_FORMA.map(function(f){return '<option'+(f===(vals.forma||'')?' selected':'')+'>'+f+'</option>';}).join('')+'</select></div>'+
+    '<div><label>Data Vencimento</label><input id="pp-dvenc" value="'+(vals.datavenc||hoje())+'"></div>'+
+    '<div><label>Status</label><select id="pp-status">'+PAG_STATUS.map(function(s){return '<option'+(s===(vals.status||'Pendente')?' selected':'')+'>'+s+'</option>';}).join('')+'</select></div>'+
+    '<div><label>Data de Pagamento</label><input id="pp-dpag" value="'+(vals.datapag||'')+'"></div>'+
+    '<div><label>Prioridade</label><select id="pp-prior">'+PAG_PRIOR.map(function(p){return '<option'+(p===(vals.prior||'Média')?' selected':'')+'>'+p+'</option>';}).join('')+'</select></div>'+
+    '<div><label>Responsável</label><input id="pp-resp" value="'+(vals.resp||'')+'"></div>'+
+    '<div><label>Recorrência</label><select id="pp-rec">'+PAG_REC.map(function(r){return '<option'+(r===(vals.rec||'Única')?' selected':'')+'>'+r+'</option>';}).join('')+'</select></div>'+
+    '<div><label>Observações</label><input id="pp-obs" value="'+(vals.obs||'')+'"></div>'+
+    '</div>';
+}
+
+function _lerFormPag(){
+  return {desc:document.getElementById('pp-desc').value.trim(),cat:document.getElementById('pp-cat').value,tipo:document.getElementById('pp-tipo').value,valor:parseFloat(document.getElementById('pp-val').value)||0,forma:document.getElementById('pp-forma').value,datavenc:document.getElementById('pp-dvenc').value,status:document.getElementById('pp-status').value,datapag:document.getElementById('pp-dpag').value,prior:document.getElementById('pp-prior').value,resp:document.getElementById('pp-resp').value,rec:document.getElementById('pp-rec').value,obs:document.getElementById('pp-obs').value};
+}
+
+function modalAddPag(mes){
+  abrirM('Novo Pagamento — '+MFULL[mes-1],_formPag(),function(){
+    var d=_lerFormPag();if(!d.desc||!d.valor){document.getElementById('pp-desc').focus();return;}
+    if(!DB.pag[mes-1])DB.pag[mes-1]=[];
+    DB.pag[mes-1].push(d);save();badges();fecharM();pPag(mes);
+  },true);
+}
+
+function editPag(mes,idx){
+  var p=DB.pag[mes-1][idx];if(!p)return;
+  abrirM('Editar Pagamento',_formPag(p),function(){
+    var d=_lerFormPag();if(!d.desc)return;
+    DB.pag[mes-1][idx]=d;save();badges();fecharM();pPag(mes);
+  },true);
+}
+function delPag(mes,idx){if(!confirm('Excluir este pagamento?'))return;DB.pag[mes-1].splice(idx,1);save();badges();pPag(mes);}
+
+// ── RTU ───────────────────────────────────────────────
+function pRtuLanc(busca,filtMes){
+  busca=busca||'';filtMes=filtMes||0;
+  var lista=DB.rtu.filter(function(r){return r.valor;});
+  if(busca)lista=lista.filter(function(r){return r.produto.toLowerCase().indexOf(busca.toLowerCase())>=0;});
+  if(filtMes)lista=lista.filter(function(r){return r.mes===filtMes;});
+  var totalVal=lista.reduce(function(a,r){return a+r.valor;},0);
+  var totalImp=lista.reduce(function(a,r){return a+r.totalImp;},0);
+  var totalPag=lista.reduce(function(a,r){return a+r.totalPagar;},0);
+  var pct=totalVal/RTU_CONFIG.limiteAnual*100;
+  var saldo=RTU_CONFIG.limiteAnual-DB.rtu.reduce(function(a,r){return a+(r.valor||0);},0);
+
+  var h='<div class="g4"><div class="card hl"><div class="lbl">Total Compras (Ano)</div><div class="val gld">'+R(DB.rtu.reduce(function(a,r){return a+(r.valor||0);},0))+'</div><div class="sub">Conta no limite RTU</div></div>';
+  h+='<div class="card"><div class="lbl">Total Impostos (Ano)</div><div class="val pur">'+R(DB.rtu.reduce(function(a,r){return a+(r.totalImp||0);},0))+'</div><div class="sub">Fed 25% + ICMS 12%</div></div>';
+  h+='<div class="card '+(saldo<10000?'danger':saldo<30000?'warn':'ok')+'"><div class="lbl">Saldo Anual Disponível</div><div class="val '+(saldo<10000?'red':saldo<30000?'amb':'grn')+'">'+R(saldo)+'</div><div class="sub">Limite: '+R(RTU_CONFIG.limiteAnual)+'</div><div class="progress-bar"><div class="progress-fill" style="width:'+Math.min(pct,100)+'%;background:'+(pct>80?'var(--red)':pct>60?'var(--amb)':'var(--grn)')+'"></div></div></div>';
+  h+='<div class="card"><div class="lbl">Lançamentos</div><div class="val">'+DB.rtu.filter(function(r){return r.valor;}).length+'</div><div class="sub">'+pct.toFixed(2)+'% do limite usado</div></div></div>';
+
+  h+='<div class="brow">';
+  h+='<input class="inp" id="rtu-s" style="width:220px" placeholder="Buscar produto..." value="'+busca+'" oninput="_refRtu()">';
+  h+='<select class="sel" id="rtu-m" onchange="_refRtu()"><option value="0">Todos os meses</option>';
+  MFULL.forEach(function(m,i){h+='<option value="'+(i+1)+'"'+(filtMes===(i+1)?' selected':'')+'>'+m+'</option>';});
+  h+='</select>';
+  if(busca||filtMes)h+='<button class="btn bsm" onclick="pRtuLanc()">✕ Limpar</button>';
+  h+='<button class="btn btnp" style="margin-left:auto" onclick="modalAddRtu()">+ Novo Lançamento</button></div>';
+
+  h+='<div class="panel"><div class="ph"><div class="pt">Lançamentos RTU 2026</div></div>';
+  h+='<div class="ts tw"><table><thead><tr><th>DATA</th><th>PRODUTO / DESCRIÇÃO</th><th>CATEGORIA</th><th class="tr">VALOR COMPRA</th><th class="tr">IMP. FED 25%</th><th class="tr">ICMS 12%</th><th class="tr">TOTAL IMPOSTOS</th><th class="tr">TOTAL A PAGAR</th><th>STATUS</th><th></th></tr></thead><tbody>';
+  if(lista.length===0){h+='<tr><td colspan="10" class="empty">Nenhum lançamento. Clique em + Novo Lançamento.</td></tr>';}
+  else lista.forEach(function(r){
+    var pct2=DB.rtu.reduce(function(a,x){return a+(x.valor||0);},0)/RTU_CONFIG.limiteAnual*100;
+    h+='<tr><td class="tnw mono" style="font-size:11px">'+r.data+'</td>';
+    h+='<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500" title="'+r.produto+'">'+r.produto+'</td>';
+    h+='<td style="font-size:11px">'+r.cat+'</td>';
+    h+='<td class="tr gld" style="font-weight:600">'+R(r.valor)+'</td>';
+    h+='<td class="tr pur">'+R(r.impFed)+'</td>';
+    h+='<td class="tr pur">'+R(r.impEst)+'</td>';
+    h+='<td class="tr pur" style="font-weight:700">'+R(r.totalImp)+'</td>';
+    h+='<td class="tr" style="font-weight:700;color:var(--t)">'+R(r.totalPagar)+'</td>';
+    h+='<td><span class="pill pok">OK</span></td>';
+    h+='<td class="tnw"><button class="btn bsm" onclick="editRtu('+r.id+')">✏</button> <button class="btn bsm btnd" onclick="delRtu('+r.id+')">✕</button></td></tr>';
+  });
+  h+='<tfoot><tr><td colspan="3">TOTAL ('+lista.length+' lançamentos)</td><td class="tr gld">'+R(totalVal)+'</td><td class="tr pur">'+R(lista.reduce(function(a,r){return a+r.impFed;},0))+'</td><td class="tr pur">'+R(lista.reduce(function(a,r){return a+r.impEst;},0))+'</td><td class="tr pur" style="font-weight:700">'+R(totalImp)+'</td><td class="tr" style="font-weight:700">'+R(totalPag)+'</td><td colspan="2"></td></tr></tfoot>';
+  h+='</tbody></table></div></div>';
+  setPage(h);
+}
+function _refRtu(){var b=document.getElementById('rtu-s'),m=document.getElementById('rtu-m');pRtuLanc(b?b.value:'',m?parseInt(m.value)||0:0);}
+
+function _calcRtu(){
+  try{
+    var v=parseFloat(document.getElementById('nr-val').value)||0;
+    var fed=Math.round(v*RTU_CONFIG.aliqFed*100)/100;
+    var est=Math.round(v*RTU_CONFIG.aliqEst*100)/100;
+    var tot=Math.round((fed+est)*100)/100;
+    var totPag=Math.round((v+tot)*100)/100;
+    document.getElementById('nr-fed').value=fed.toFixed(2);
+    document.getElementById('nr-est').value=est.toFixed(2);
+    document.getElementById('nr-imp').value=tot.toFixed(2);
+    document.getElementById('nr-totpag').value=totPag.toFixed(2);
+  }catch(e){}
+}
+
+function _formRtu(vals){
+  vals=vals||{};
+  return '<div class="fg f3">'+
+    '<div style="grid-column:1/-1"><label>Produto / Descrição *</label><input id="nr-prod" value="'+(vals.produto||'')+'"></div>'+
+    '<div><label>Data da Compra</label><input id="nr-data" value="'+(vals.data||hoje())+'"></div>'+
+    '<div><label>Categoria</label><input id="nr-cat" value="'+(vals.cat||'Eletronicos')+'"></div>'+
+    '<div><label>Valor da Compra (R$) *</label><input id="nr-val" type="number" step="0.01" value="'+(vals.valor||'')+'" oninput="_calcRtu()"></div>'+
+    '<div><label>Imp. Federal 25% (R$)</label><input id="nr-fed" readonly value="'+(vals.impFed||'')+'"></div>'+
+    '<div><label>ICMS Estadual 12% (R$)</label><input id="nr-est" readonly value="'+(vals.impEst||'')+'"></div>'+
+    '<div><label>Total Impostos (R$)</label><input id="nr-imp" readonly value="'+(vals.totalImp||'')+'"></div>'+
+    '<div><label>Total a Pagar (R$)</label><input id="nr-totpag" readonly value="'+(vals.totalPagar||'')+'"></div>'+
+    '<div><label>Observação</label><input id="nr-obs" value="'+(vals.obs||'')+'"></div>'+
+    '</div>'+
+    '<div style="background:var(--w2);border:1px solid var(--bdr2);border-radius:6px;padding:10px 12px;margin-top:8px;font-size:11px;color:var(--t2)">'+
+    '⚠ Impostos calculados automaticamente: <strong>Federal 25%</strong> + <strong>ICMS Estadual 12%</strong> sobre o Valor da Compra. Apenas o Valor da Compra conta para o limite anual de <strong>R$110.000</strong>.</div>';
+}
+
+function modalAddRtu(){
+  var saldo=RTU_CONFIG.limiteAnual-DB.rtu.reduce(function(a,r){return a+(r.valor||0);},0);
+  if(saldo<=0){alert('Limite anual RTU atingido (R$110.000)!');return;}
+  abrirM('Novo Lançamento RTU',_formRtu(),function(){
+    var prod=document.getElementById('nr-prod').value.trim();
+    var val=parseFloat(document.getElementById('nr-val').value)||0;
+    if(!prod||!val){alert('Preencha produto e valor.');return;}
+    var fed=Math.round(val*RTU_CONFIG.aliqFed*100)/100;
+    var est=Math.round(val*RTU_CONFIG.aliqEst*100)/100;
+    var tot=Math.round((fed+est)*100)/100;
+    var d=document.getElementById('nr-data').value;
+    var parts=d.split('/');
+    var mes=parts.length===3?parseInt(parts[1]):new Date().getMonth()+1;
+    DB.rtu.push({id:DB.nRtu++,data:d,produto:prod.toUpperCase(),cat:document.getElementById('nr-cat').value||'Eletronicos',valor:val,impFed:fed,impEst:est,totalImp:tot,totalPagar:Math.round((val+tot)*100)/100,mes:mes,ano:2026,obs:document.getElementById('nr-obs').value});
+    save();badges();fecharM();pRtuLanc();
+  },true);
+}
+
+function editRtu(id){
+  var r=DB.rtu.find(function(x){return x.id===id;});if(!r)return;
+  abrirM('Editar Lançamento RTU',_formRtu(r),function(){
+    r.produto=document.getElementById('nr-prod').value.trim().toUpperCase();
+    r.data=document.getElementById('nr-data').value;
+    r.cat=document.getElementById('nr-cat').value;
+    r.valor=parseFloat(document.getElementById('nr-val').value)||0;
+    r.impFed=Math.round(r.valor*RTU_CONFIG.aliqFed*100)/100;
+    r.impEst=Math.round(r.valor*RTU_CONFIG.aliqEst*100)/100;
+    r.totalImp=Math.round((r.impFed+r.impEst)*100)/100;
+    r.totalPagar=Math.round((r.valor+r.totalImp)*100)/100;
+    r.obs=document.getElementById('nr-obs').value;
+    save();fecharM();pRtuLanc();
+  },true);
+}
+function delRtu(id){if(!confirm('Excluir lançamento?'))return;DB.rtu=DB.rtu.filter(function(x){return x.id!==id;});save();badges();pRtuLanc();}
+
+// ── RTU RESUMO ────────────────────────────────────────
+function pRtuResumo(){
+  var totalAno=DB.rtu.reduce(function(a,r){return a+(r.valor||0);},0);
+  var totalImpAno=DB.rtu.reduce(function(a,r){return a+(r.totalImp||0);},0);
+  var saldo=RTU_CONFIG.limiteAnual-totalAno;
+  var pct=totalAno/RTU_CONFIG.limiteAnual*100;
+  var h='<div class="g4">';
+  h+='<div class="card hl"><div class="lbl">Total Compras (Ano)</div><div class="val gld">'+R(totalAno)+'</div><div class="sub">'+DB.rtu.filter(function(r){return r.valor;}).length+' lançamentos</div></div>';
+  h+='<div class="card"><div class="lbl">Total Impostos</div><div class="val pur">'+R(totalImpAno)+'</div><div class="sub">Federal + ICMS</div></div>';
+  h+='<div class="card"><div class="lbl">Total Pago</div><div class="val">'+R(totalAno+totalImpAno)+'</div></div>';
+  h+='<div class="card '+(saldo<10000?'danger':saldo<30000?'warn':'ok')+'"><div class="lbl">Saldo Disponível</div><div class="val '+(saldo<10000?'red':saldo<30000?'amb':'grn')+'">'+R(saldo)+'</div><div class="sub">'+pct.toFixed(2)+'% usado</div></div></div>';
+
+  // Limite mensal
+  h+='<div class="sec">📅 Controle por Mês</div>';
+  h+='<div class="panel"><div class="ph"><div class="pt">Compras por Mês</div></div><div class="tw"><table><thead><tr><th>MÊS</th><th class="tr">COMPRAS</th><th class="tr">IMPOSTOS</th><th class="tr">TOTAL PAGO</th><th class="tr">LIMITE MÊS</th><th class="tr">USADO %</th><th>STATUS</th></tr></thead><tbody>';
+  var meses_rtu=[5,6,7,8,9,10,11,12];
+  meses_rtu.forEach(function(m,i){
+    var arr=DB.rtu.filter(function(r){return r.mes===m&&r.valor;});
+    var comp=arr.reduce(function(a,r){return a+(r.valor||0);},0);
+    var imp=arr.reduce(function(a,r){return a+(r.totalImp||0);},0);
+    var lim=i<3?RTU_CONFIG.limiteMes1a3:RTU_CONFIG.limiteMes4plus;
+    var pctM=comp/lim*100;
+    var st=arr.length===0?'<span class="pill pn">Sem dados</span>':pctM>100?'<span class="pill patrasado">Excedido</span>':pctM>80?'<span class="pill ppendente">Atenção</span>':'<span class="pill ppago">OK</span>';
+    h+='<tr'+(arr.length===0?' style="opacity:.4"':'')+'><td>'+MFULL[m-1]+'</td><td class="tr gld">'+(comp>0?R(comp):'—')+'</td><td class="tr pur">'+(imp>0?R(imp):'—')+'</td><td class="tr">'+(comp>0?R(comp+imp):'—')+'</td><td class="tr" style="color:var(--t2)">'+R(lim)+'</td><td class="tr">'+(comp>0?pctM.toFixed(1)+'%':'—')+'</td><td>'+st+'</td></tr>';
+  });
+  h+='</tbody></table></div></div>';
+
+  // Resumo por categoria
+  var cats={};DB.rtu.filter(function(r){return r.valor;}).forEach(function(r){if(!cats[r.cat])cats[r.cat]={val:0,imp:0,n:0};cats[r.cat].val+=r.valor;cats[r.cat].imp+=r.totalImp;cats[r.cat].n++;});
+  h+='<div class="sec">📦 Por Categoria</div><div class="panel"><div class="ph"><div class="pt">Totais por Categoria</div></div><table><thead><tr><th>CATEGORIA</th><th class="tr">Nº</th><th class="tr">COMPRAS</th><th class="tr">IMPOSTOS</th><th class="tr">TOTAL PAGO</th></tr></thead><tbody>';
+  Object.entries(cats).forEach(function(e){h+='<tr><td>'+e[0]+'</td><td class="tr">'+e[1].n+'</td><td class="tr gld">'+R(e[1].val)+'</td><td class="tr pur">'+R(e[1].imp)+'</td><td class="tr" style="font-weight:700">'+R(e[1].val+e[1].imp)+'</td></tr>';});
+  h+='</tbody></table></div>';
+  setPage(h);
+}
+
+// ── BACKUP ────────────────────────────────────────────
+async function fazerBackupG(){
+  var btn=document.getElementById('ni-backup');
+  if(btn){btn.querySelector('.lbl').textContent='Fazendo backup...';btn.style.opacity='.6';}
+  if(window.zyntraElectron&&window.zyntraElectron.backupCompleto){
+    var r=await window.zyntraElectron.backupCompleto();
+    if(btn){btn.querySelector('.lbl').textContent='Backup';btn.style.opacity='';}
+    if(r.ok)_notif('✅ Backup criado!','Salvo em Zyntra Global → Backups','grn');
+    else _notif('❌ Erro no backup',r.error||'','red');
+  } else {
+    var blob=new Blob([JSON.stringify(DB,null,2)],{type:'application/json'});
+    var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='ZyntraGestao_'+new Date().toISOString().split('T')[0]+'.json';a.click();
+    if(btn){btn.querySelector('.lbl').textContent='Backup';btn.style.opacity='';}
+    _notif('✅ Dados exportados!','Arquivo JSON salvo','grn');
   }
 }
+function _notif(t,m,tipo){var n=document.createElement('div');var c=tipo==='grn'?'var(--grn)':'var(--red)';n.style.cssText='position:fixed;bottom:20px;right:20px;background:#1a1917;border:1px solid #302e28;border-left:4px solid '+c+';border-radius:10px;padding:14px 18px;max-width:300px;box-shadow:0 8px 32px rgba(0,0,0,.6);z-index:9000;animation:slideIn .3s ease';n.innerHTML='<div style="font-size:13px;font-weight:700;color:#f0ede8;margin-bottom:3px">'+t+'</div><div style="font-size:11px;color:#a09c92">'+m+'</div>';document.body.appendChild(n);setTimeout(function(){n.style.opacity='0';n.style.transition='opacity .3s';setTimeout(function(){n.remove();},300);},4000);}
 
-function mudarAba(id){
-  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',['pagamentos','rtu','estoque'][i]===id));
-  document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===id));
-}
+// ── FRASES ────────────────────────────────────────────
+var FRASES=["⚡ Gestão inteligente. Resultado real.","📦 Estoque sob controle é lucro garantido.","🏦 RTU no limite? Você sabe antes de comprar.","💳 Contas em dia, empresa saudável.","📊 Dado bom é dado atualizado.","🎯 Organize hoje, lucre amanhã."];
+var _fi=0;
+function initFrases(){setInterval(function(){_fi=(_fi+1)%FRASES.length;var el=document.getElementById('frase');if(el){el.style.opacity='0';setTimeout(function(){el.textContent=FRASES[_fi];el.style.opacity='1';},300);}},8000);}
 
-function renderAll(){ renderPag(); renderRtu(); renderEstoque(); }
+// ── LOGIN SEGURO ─────────────────────────────────────
+var _SALT='zyntra_gestao_2026';
+var _USERS={'felipe':'2d71431802e57e1ccb68e23240fa3e71f25b0c18283705eaf58ea27c9bcc102e','admin':'44120a7bf21b16c748cee8641e0751506bc25b9831db407504552b932a685283'};
+var _MAX_TENT=3,_LOCK_MS=5*60*1000;
+async function sha256h(s){var b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,'0');}).join('');}
+function _lgShake(){var b=document.querySelector('.login-form-side');if(b){b.style.animation='none';b.offsetHeight;b.style.animation='lgShake .35s ease';}}
+function _lgLock(){var ld=JSON.parse(localStorage.getItem('zg_lock')||'{}');if(ld.until&&Date.now()<ld.until){var r=Math.ceil((ld.until-Date.now())/1000);document.getElementById('li-lock').style.display='block';document.getElementById('li-lock').textContent='🔒 Aguarde '+Math.floor(r/60)+'m '+r%60+'s';document.getElementById('li-btn').disabled=true;setTimeout(_lgLock,1000);return true;}document.getElementById('li-lock').style.display='none';document.getElementById('li-btn').disabled=false;return false;}
+async function doLogin(){if(_lgLock())return;var user=document.getElementById('li-user').value.trim().toLowerCase(),pass=document.getElementById('li-pass').value,err=document.getElementById('li-err');err.textContent='';if(!user||!pass){err.textContent='Preencha usuário e senha.';return;}var btn=document.getElementById('li-btn');btn.disabled=true;btn.textContent='Verificando...';var hash=await sha256h(user+':'+pass+':'+_SALT);btn.disabled=false;btn.textContent='ENTRAR NO SISTEMA';if(_USERS[user]&&_USERS[user]===hash){localStorage.removeItem('zg_lock');localStorage.setItem('zg_sess',JSON.stringify({user:user,until:Date.now()+4*60*60*1000}));document.getElementById('login-bg').classList.add('hidden');badges();pDash();_iniciarWatch();}else{document.getElementById('li-pass').value='';_lgShake();var lk=JSON.parse(localStorage.getItem('zg_lock')||'{"t":0}');lk.t=(lk.t||0)+1;if(lk.t>=_MAX_TENT){lk.until=Date.now()+_LOCK_MS;lk.t=0;localStorage.setItem('zg_lock',JSON.stringify(lk));err.textContent='';_lgLock();}else{localStorage.setItem('zg_lock',JSON.stringify(lk));var rem=_MAX_TENT-lk.t;err.textContent='Incorreto. '+rem+' tentativa'+(rem>1?'s':'')+' restante'+(rem>1?'s':'')+'.';}}}
+function _expirar(){localStorage.removeItem('zg_sess');document.getElementById('login-bg').classList.remove('hidden');document.getElementById('li-pass').value='';var e=document.createElement('div');e.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#1a1917;border:1px solid var(--glb);color:var(--gold);padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;z-index:10000;box-shadow:0 8px 32px rgba(0,0,0,.5)';e.textContent='🔒 Sessão expirada. Faça login novamente.';document.body.appendChild(e);setTimeout(function(){e.remove();},4000);setTimeout(function(){var u=document.getElementById('li-user');if(u)u.focus();},200);}
+var _wt=null;function _iniciarWatch(){if(_wt)clearInterval(_wt);_wt=setInterval(function(){var raw=localStorage.getItem('zg_sess');if(!raw){_expirar();clearInterval(_wt);return;}try{var s=JSON.parse(raw);if(!s.until||Date.now()>=s.until){_expirar();clearInterval(_wt);}}catch(e){_expirar();clearInterval(_wt);}},60000);}
+function checkSessao(){localStorage.removeItem('zg_sess');document.getElementById('login-bg').classList.remove('hidden');setTimeout(function(){var u=document.getElementById('li-user');if(u)u.focus();_lgLock();},150);return false;}
 
-function renderPag(){
-  const pag = (DB.pag && DB.pag[mesSel]) ? DB.pag[mesSel] : [];
-  const total = pag.reduce((s,p)=>s+(p.valor||0),0);
-  const pago  = pag.filter(p=>p.status==='Pago').reduce((s,p)=>s+(p.valor||0),0);
-  const pend  = pag.filter(p=>p.status!=='Pago').reduce((s,p)=>s+(p.valor||0),0);
-  const lista = filtro==='all' ? pag : filtro==='pago' ? pag.filter(p=>p.status==='Pago') : pag.filter(p=>p.status!=='Pago');
-
-  document.getElementById('pagamentos').innerHTML = `
-    <div class="card">
-      <div class="mes-nav">
-        <button class="mes-btn" onclick="mudarMes(-1)">‹</button>
-        <span class="mes-nome">${MESES[mesSel]}</span>
-        <button class="mes-btn" onclick="mudarMes(1)">›</button>
-      </div>
-      <div class="resumo">
-        <div class="res-box"><div class="res-val">${fmt(total)}</div><div class="res-lab">Total</div></div>
-        <div class="res-box"><div class="res-val verde">${fmt(pago)}</div><div class="res-lab">Pago</div></div>
-        <div class="res-box"><div class="res-val vermelho">${fmt(pend)}</div><div class="res-lab">Pendente</div></div>
-      </div>
-    </div>
-    <div class="status-bar">
-      <div class="status-chip all ${filtro==='all'?'active':''}" onclick="setFiltro('all')">Todas (${pag.length})</div>
-      <div class="status-chip pago ${filtro==='pago'?'active':''}" onclick="setFiltro('pago')">✅ Pagas</div>
-      <div class="status-chip pend ${filtro==='pend'?'active':''}" onclick="setFiltro('pend')">⏳ Pendentes</div>
-    </div>
-    <div class="card">
-      ${lista.length ? lista.map(p=>`
-        <div class="item">
-          <div class="item-nome">${p.desc}</div>
-          <div class="item-info">
-            <span class="badge ${p.status==='Pago'?'b-pago':'b-pend'}">${p.status}</span>
-            <span>${fmt(p.valor)}</span>
-            <span>venc ${p.datavenc}</span>
-            ${p.prior==='Alta'?'<span class="badge b-alta">Alta</span>':''}
-          </div>
-        </div>`).join('') : '<div class="empty">Nenhuma conta neste mês</div>'}
-    </div>`;
-}
-
-function mudarMes(d){ mesSel = Math.max(0,Math.min(11,mesSel+d)); renderPag(); }
-function setFiltro(f){ filtro=f; renderPag(); }
-
-function renderRtu(){
-  const rtu = (DB.rtu||[]).slice().reverse().slice(0,20);
-  const totalRtu = (DB.rtu||[]).reduce((s,r)=>s+(r.totalPagar||0),0);
-  document.getElementById('rtu').innerHTML = `
-    <div class="card">
-      <div class="resumo">
-        <div class="res-box"><div class="res-val">${(DB.rtu||[]).length}</div><div class="res-lab">Lançamentos</div></div>
-        <div class="res-box" style="grid-column:span 2"><div class="res-val amarelo">${fmt(totalRtu)}</div><div class="res-lab">Total Compras</div></div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-title">Últimas Compras</div>
-      ${rtu.length ? rtu.map(r=>`
-        <div class="item">
-          <div class="item-nome">${r.produto}</div>
-          <div class="item-info">
-            <span>${fmt(r.totalPagar)}</span>
-            <span>${r.data}</span>
-            <span>${r.cat||''}</span>
-          </div>
-        </div>`).join('') : '<div class="empty">Nenhum lançamento</div>'}
-    </div>`;
-}
-
-function renderEstoque(){
-  const prods = DB.produtos||[];
-  const alertas = prods.filter(p=>p.qty<=p.min&&p.min>0);
-  const cats = [...new Set(prods.map(p=>p.cat))].filter(Boolean);
-  document.getElementById('estoque').innerHTML = `
-    <div class="card">
-      <div class="resumo">
-        <div class="res-box"><div class="res-val">${prods.length}</div><div class="res-lab">Produtos</div></div>
-        <div class="res-box"><div class="res-val vermelho">${alertas.length}</div><div class="res-lab">Alertas</div></div>
-        <div class="res-box"><div class="res-val">${cats.length}</div><div class="res-lab">Categorias</div></div>
-      </div>
-    </div>
-    ${alertas.length ? `<div class="card">
-      <div class="card-title">⚠ Abaixo do Mínimo</div>
-      ${alertas.map(p=>`
-        <div class="item alerta">
-          <div class="item-nome">${p.nome}</div>
-          <div class="item-info"><span>Estoque: <b>${p.qty}</b></span><span>Mínimo: ${p.min}</span><span>${p.cat}</span></div>
-        </div>`).join('')}
-    </div>` : '<div class="card"><div class="empty">✅ Estoque dentro do esperado</div></div>'}
-    <div class="card">
-      <div class="card-title">Todos os Produtos</div>
-      ${prods.map(p=>`
-        <div class="item ${p.qty<=p.min&&p.min>0?'alerta':''}">
-          <div class="item-nome">${p.nome}</div>
-          <div class="item-info"><span>${p.cat}</span><span>Qtd: ${p.qty}</span><span>Mín: ${p.min}</span></div>
-        </div>`).join('')}
-    </div>`;
-}
-
-if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
-carregarDados();
-setInterval(carregarDados, 60000);
+// ── INIT ──────────────────────────────────────────────
+document.getElementById('tdate').textContent=new Date().toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});
+initFrases();
+checkSessao();
 </script>
-</body>
-</html>
+
+<!-- LOGIN -->
+<div class="login-bg" id="login-bg">
+  <canvas id="login-canvas"></canvas>
+  <div class="login-wrap">
+    <div class="login-brand">
+      <div class="login-logo-wrap">
+        <img class="login-logo-img" src="_files/zyntra-logo.jpg" onerror="this.src='icon-192.png'" alt="Zyntra">
+        <div class="login-logo-ring"></div>
+        <div class="login-logo-ring2"></div>
+      </div>
+      <div class="login-brand-name">ZYNTRA<em>·</em>GESTÃO</div>
+      <div class="login-brand-sub">Sistema de Gestão 2026</div>
+      <div class="login-tagline">Estoque · Pagamentos · RTU<br><span>Tudo em um só lugar.</span></div>
+      <div class="login-dots"><div class="login-dot"></div><div class="login-dot"></div><div class="login-dot"></div></div>
+    </div>
+    <div class="login-form-side">
+      <div class="login-tag">Acesso Seguro</div>
+      <div class="login-title">Bem-vindo<br>de volta</div>
+      <div class="login-subtitle">Faça login para acessar o sistema</div>
+      <div class="login-field"><label class="login-label">Usuário</label><input class="login-input" id="li-user" type="text" placeholder="Digite seu usuário" autocomplete="username" onkeydown="if(event.key==='Enter')document.getElementById('li-pass').focus()"></div>
+      <div class="login-field"><label class="login-label">Senha</label><input class="login-input" id="li-pass" type="password" placeholder="Digite sua senha" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <button class="login-btn" id="li-btn" onclick="doLogin()">ENTRAR NO SISTEMA</button>
+      <div class="login-err" id="li-err"></div>
+      <div class="login-lock" id="li-lock" style="display:none"></div>
+      <div class="login-footer-txt">🔒 SESSÃO DE 4H · DADOS PROTEGIDOS</div>
+    </div>
+  </div>
+</div>
+<script>
+(function(){var c=document.getElementById('login-canvas');if(!c)return;var ctx=c.getContext('2d');var pts=[];function resize(){c.width=window.innerWidth;c.height=window.innerHeight;}resize();window.addEventListener('resize',resize);for(var i=0;i<70;i++){pts.push({x:Math.random()*c.width,y:Math.random()*c.height,vx:(Math.random()-.5)*.4,vy:(Math.random()-.5)*.4,r:Math.random()*1.5+.3,a:Math.random()});}function draw(){ctx.clearRect(0,0,c.width,c.height);pts.forEach(function(p){p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>c.width)p.vx*=-1;if(p.y<0||p.y>c.height)p.vy*=-1;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle='rgba(107,33,168,'+p.a+')';ctx.fill();});for(var i=0;i<pts.length;i++){for(var j=i+1;j<pts.length;j++){var dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<120){ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);ctx.strokeStyle='rgba(107,33,168,'+(1-d/120)*.06+')';ctx.lineWidth=.5;ctx.stroke();}}}if(!document.getElementById('login-bg').classList.contains('hidden'))requestAnimationFrame(draw);}draw();})();
+</script>
+<script src="web-sync.js"></script></body></html>
