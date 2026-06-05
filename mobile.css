@@ -162,21 +162,23 @@
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
-    margin-bottom: 36px !important;
+    margin-bottom: 32px !important;
   }
   .login-logo-mob img {
-    width: 80px !important;
-    height: 80px !important;
+    width: 180px !important;
+    height: auto !important;
     object-fit: contain !important;
-    margin-bottom: 12px !important;
-    filter: drop-shadow(0 0 20px rgba(107,33,168,.7)) !important;
+    display: block !important;
+    margin: 0 auto 14px !important;
+    filter: drop-shadow(0 0 24px rgba(107,33,168,.8)) !important;
   }
   .login-logo-mob .t1 {
-    font-size: 22px !important;
+    font-size: 20px !important;
     font-weight: 900 !important;
     letter-spacing: 3px !important;
     color: #fff !important;
     text-transform: uppercase !important;
+    text-align: center !important;
   }
   .login-logo-mob .t1 em { color: #c9a84c !important; font-style: normal !important; margin: 0 4px !important; }
   .login-input { font-size: 16px !important; padding: 15px 16px !important; }
