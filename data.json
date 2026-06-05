@@ -1000,7 +1000,7 @@
       "cod": 72,
       "ncm": "8471.60.53",
       "cat": "Mouse",
-      "qty": 1,
+      "qty": 0,
       "min": 10,
       "cmv": 65.99,
       "preco": 0,
@@ -1120,6 +1120,15 @@
       "qty": 1,
       "data": "02/06/2026",
       "obs": "Venda"
+    },
+    {
+      "id": 14,
+      "prodId": 72,
+      "prodNome": "MOUSE GAMER REDRAGON M724P - ROSA",
+      "tipo": "Saída",
+      "qty": 1,
+      "data": "05/06/2026",
+      "obs": ""
     }
   ],
   "pag": [
@@ -1619,5 +1628,5 @@
   ],
   "nRtu": 13,
   "nPag": 100,
-  "nMov": 14
+  "nMov": 15
 }
