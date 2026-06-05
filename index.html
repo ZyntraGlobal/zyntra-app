@@ -1201,22 +1201,16 @@ checkSessao();
     const raw = atob((b64 + pad).replace(/-/g,'+').replace(/_/g,'/'));
     return Uint8Array.from(raw, c => c.charCodeAt(0));
   }
-  async function salvarSubGitHub(sub) {
+  async function salvarSub(sub) {
+    // Salva via ntfy.sh (CORS aberto) — GitHub API bloqueia escrita do browser iOS
     try {
-      // btoa pode falhar com chars especiais — usar encodeURIComponent como fallback
-      const json = JSON.stringify(sub);
-      const content = btoa(unescape(encodeURIComponent(json)));
-      let sha = null;
-      const rGet = await fetch('https://api.github.com/repos/' + REPO + '/contents/push-sub.json',
-        { headers: { Authorization: 'Bearer ' + GH_TOKEN, 'User-Agent': 'ZyntraApp', Accept: 'application/vnd.github+json' }});
-      if (rGet.ok) { const j = await rGet.json(); sha = j.sha; }
-      const body = JSON.stringify({ message: 'update push subscription', content, ...(sha ? {sha} : {}) });
-      const rPut = await fetch('https://api.github.com/repos/' + REPO + '/contents/push-sub.json', {
-        method: 'PUT',
-        headers: { Authorization: 'Bearer ' + GH_TOKEN, 'User-Agent': 'ZyntraApp', Accept: 'application/vnd.github+json', 'Content-Type': 'application/json' },
-        body
+      const json = JSON.stringify(sub.toJSON ? sub.toJSON() : sub);
+      const r = await fetch('https://ntfy.sh/zyntra-sub-gestao-zg2026x', {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain', 'Title': 'push-sub' },
+        body: json
       });
-      if (!rPut.ok) { const err = await rPut.json(); throw new Error(JSON.stringify(err)); }
+      if (!r.ok) throw new Error('ntfy status ' + r.status);
       return true;
     } catch(e) {
       alert('Erro ao salvar subscription:\n' + e.message);
@@ -1241,7 +1235,7 @@ checkSessao();
         sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC) });
       }
       // Sempre salva no GitHub (mesmo que subscription já exista)
-      const ok = await salvarSubGitHub(sub.toJSON());
+      const ok = await salvarSub(sub);
       esconderBannerNotif();
       return ok;
     } catch(e) {
