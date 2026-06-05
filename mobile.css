@@ -1,220 +1,219 @@
 @media (max-width: 768px) {
 
-  /* ── Layout base ── */
+  /* ── BASE: liberar scroll vertical e horizontal ── */
+  html, body {
+    height: 100% !important;
+    min-height: 100dvh;
+    overflow: visible !important;
+    -webkit-overflow-scrolling: touch;
+  }
   body {
-    flex-direction: column;
-    height: 100dvh;
-    overflow: hidden;
-    font-size: 14px;
+    flex-direction: column !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
   }
 
-  /* ── Sidebar → escondida no mobile ── */
+  /* ── Sidebar → escondida ── */
   .sb { display: none !important; }
 
-  /* ── Main ocupa tudo ── */
-  .main { width: 100%; height: 100dvh; display: flex; flex-direction: column; }
-
-  /* ── Topbar mobile ── */
-  .topbar {
-    height: 52px;
-    padding: 0 12px;
-    padding-top: env(safe-area-inset-top);
+  /* ── Main ── */
+  .main {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 100dvh;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: visible !important;
   }
-  .topbar-title { font-size: 14px; }
-  #frase { font-size: 12px; }
+
+  /* ── Topbar ── */
+  .topbar {
+    height: auto !important;
+    min-height: 48px;
+    padding: 10px 12px !important;
+    padding-top: calc(10px + env(safe-area-inset-top)) !important;
+    flex-wrap: wrap;
+    gap: 6px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .topbar-title { font-size: 13px; }
+  #frase { font-size: 11px; display: none; }
   .chip { display: none; }
   #fs-status { font-size: 10px; }
 
-  /* ── Página com scroll e espaço p/ bottom nav ── */
+  /* ── PÁGINA: scroll vertical livre até o fim ── */
   .pg {
-    padding: 12px;
-    padding-bottom: calc(70px + env(safe-area-inset-bottom));
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
+    flex: 1 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding: 12px !important;
+    padding-bottom: calc(80px + env(safe-area-inset-bottom)) !important;
   }
 
-  /* ── Grids → coluna única ── */
-  .g2, .g3, .g4, .g5 { grid-template-columns: 1fr 1fr !important; gap: 8px; }
-  .g4 { grid-template-columns: 1fr 1fr !important; }
-  .g5 { grid-template-columns: 1fr 1fr !important; }
+  /* ── TABELAS: scroll horizontal ── */
+  table {
+    display: block !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    white-space: nowrap !important;
+    font-size: 12px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  thead, tbody, tfoot {
+    display: table !important;
+    width: 100% !important;
+  }
+  th, td { padding: 7px 8px !important; white-space: nowrap !important; }
+
+  /* ── Containers de tabela ── */
+  .tw, .ts, .pb, .panel, .card { overflow: visible !important; }
+  .ts { max-height: none !important; overflow: visible !important; }
+
+  /* ── Grids → responsivos ── */
+  .g2 { grid-template-columns: 1fr 1fr !important; }
+  .g3, .g4, .g5 { grid-template-columns: 1fr 1fr !important; }
   .row2 { grid-template-columns: 1fr !important; }
 
-  /* ── Grids inline do dashboard (gerados via JS) ── */
+  /* ── Grids inline do dashboard ── */
   div[style*="grid-template-columns:1fr 1fr 1fr"] {
     grid-template-columns: 1fr !important;
   }
-  div[style*="grid-template-columns:1fr 1fr 1fr"][style*="gap:16px"] {
-    grid-template-columns: 1fr !important;
-    gap: 12px !important;
-  }
-  /* Valor principal do card do dashboard */
-  div[style*="font-size:32px"] {
-    font-size: 22px !important;
-  }
-  /* Card do dashboard — padding menor */
-  div[style*="padding:24px 28px"] {
-    padding: 16px !important;
-  }
+  div[style*="font-size:32px"] { font-size: 20px !important; }
+  div[style*="padding:24px 28px"] { padding: 14px !important; }
 
   /* ── Cards ── */
-  .card .val { font-size: 16px; }
-  .card .lbl { font-size: 10px; }
+  .card .val { font-size: 16px !important; }
+  .card .lbl { font-size: 10px !important; }
 
-  /* ── Tabelas: scroll horizontal ── */
-  .tw { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  table { font-size: 12px; min-width: 500px; }
-  th, td { padding: 7px 8px; white-space: nowrap; }
-  .ts { max-height: calc(100dvh - 220px); }
+  /* ── Botões ── */
+  .btn {
+    padding: 9px 12px !important;
+    font-size: 13px !important;
+    touch-action: manipulation !important;
+    cursor: pointer !important;
+    min-height: 38px;
+  }
+  .bsm { padding: 7px 10px !important; font-size: 12px !important; }
+  .brow { gap: 6px !important; flex-wrap: wrap !important; }
 
-  /* ── Botões touch-friendly ── */
-  .btn { padding: 9px 13px; font-size: 13px; touch-action: manipulation; cursor: pointer; }
-  .bsm { padding: 7px 11px; font-size: 12px; }
-  .brow { gap: 6px; }
-  .brow .btn { flex: 1; justify-content: center; }
-
-  /* ── Filtros e elementos clicáveis ── */
-  .ni, .pill, [onclick], button, select, .sel, .chip {
-    touch-action: manipulation;
-    cursor: pointer;
-    -webkit-tap-highlight-color: rgba(201,168,76,.2);
+  /* ── Todos os elementos clicáveis ── */
+  .ni, .pill, [onclick], button, select, .sel, .btn {
+    touch-action: manipulation !important;
+    cursor: pointer !important;
+    -webkit-tap-highlight-color: rgba(201,168,76,.15);
   }
 
-  /* ── Garantir que bottom nav não bloqueie conteúdo ── */
-  .mob-nav { pointer-events: auto; }
-  .pg { pointer-events: auto; }
-
-  /* ── Filtros de pesquisa ── */
-  .brow input.inp { flex: 1; min-width: 0; }
-
-  /* ── Rows de ação ── */
-  .brow { flex-wrap: wrap; }
-
-  /* ── Inputs: evitar zoom iOS (mín 16px) ── */
-  .inp, .sel, input, select, textarea {
+  /* ── Inputs: sem zoom iOS ── */
+  input, select, textarea, .inp, .sel,
+  .fg input, .fg select, .fg textarea {
     font-size: 16px !important;
-    padding: 10px 10px !important;
+    padding: 10px !important;
   }
-  .fg input, .fg select, .fg textarea { font-size: 16px !important; }
 
   /* ── Formulários ── */
   .f2, .f3 { grid-template-columns: 1fr !important; }
-  .fg { gap: 12px; }
+  .fg { gap: 12px !important; }
 
-  /* ── Modal ── */
-  .mbg { padding: 8px; align-items: flex-end; }
+  /* ── Modal: abre de baixo ── */
+  .mbg {
+    padding: 0 !important;
+    align-items: flex-end !important;
+  }
   .modal {
     width: 100% !important;
-    max-height: 90dvh;
-    overflow-y: auto;
-    border-radius: 16px 16px 0 0;
-    padding: 16px;
-    padding-bottom: calc(16px + env(safe-area-inset-bottom));
+    max-height: 92dvh !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    border-radius: 18px 18px 0 0 !important;
+    padding: 18px !important;
+    padding-bottom: calc(18px + env(safe-area-inset-bottom)) !important;
+    margin: 0 !important;
   }
   .modal.lg { width: 100% !important; }
-  .macts { gap: 8px; }
-  .macts .btn { flex: 1; justify-content: center; }
+  .macts { gap: 8px !important; flex-wrap: wrap !important; }
+  .macts .btn { flex: 1 !important; justify-content: center !important; min-width: 120px; }
 
-  /* ── Login mobile ── */
+  /* ── LOGIN MOBILE ── */
   .login-wrap {
-    flex-direction: column;
+    flex-direction: column !important;
     width: 100% !important;
-    min-height: 100dvh;
-    border-radius: 0;
-    border: none;
+    min-height: 100dvh !important;
+    border-radius: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
   }
   .login-brand { display: none !important; }
   .login-form-side {
     width: 100% !important;
-    flex: 1;
+    flex: 1 !important;
     padding: 48px 28px !important;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
   }
   .login-logo-mob {
     display: flex !important;
-    flex-direction: column;
-    align-items: center;
-    margin-bottom: 36px;
+    flex-direction: column !important;
+    align-items: center !important;
+    margin-bottom: 36px !important;
   }
-  .login-logo-mob img { width: 80px; height: 80px; object-fit: contain; margin-bottom: 12px; filter: drop-shadow(0 0 20px rgba(107,33,168,.7)); }
-  .login-logo-mob .t1 { font-size: 22px; font-weight: 900; letter-spacing: 3px; color: #fff; text-transform: uppercase; }
-  .login-logo-mob .t1 em { color: #c9a84c; font-style: normal; margin: 0 4px; }
-  /* Classe real do input de login */
-  .login-input { font-size: 16px !important; padding: 15px 16px !important; border-radius: 10px !important; }
-  .login-btn { padding: 16px !important; font-size: 15px !important; letter-spacing: 2px !important; border-radius: 10px !important; }
-  .login-field { margin-bottom: 14px; }
-  .login-label { font-size: 12px !important; }
+  .login-logo-mob img {
+    width: 80px !important;
+    height: 80px !important;
+    object-fit: contain !important;
+    margin-bottom: 12px !important;
+    filter: drop-shadow(0 0 20px rgba(107,33,168,.7)) !important;
+  }
+  .login-logo-mob .t1 {
+    font-size: 22px !important;
+    font-weight: 900 !important;
+    letter-spacing: 3px !important;
+    color: #fff !important;
+    text-transform: uppercase !important;
+  }
+  .login-logo-mob .t1 em { color: #c9a84c !important; font-style: normal !important; margin: 0 4px !important; }
+  .login-input { font-size: 16px !important; padding: 15px 16px !important; }
+  .login-btn { padding: 16px !important; font-size: 15px !important; }
+  .login-field { margin-bottom: 14px !important; }
 
-  /* ── Bottom navigation bar ── */
+  /* ── BOTTOM NAV ── */
   .mob-nav {
     display: flex !important;
-    position: fixed;
-    bottom: 0;
-    left: 0; right: 0;
-    height: calc(60px + env(safe-area-inset-bottom));
-    padding-bottom: env(safe-area-inset-bottom);
-    background: var(--w);
-    border-top: 1px solid var(--bdr2);
-    z-index: 500;
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: calc(58px + env(safe-area-inset-bottom)) !important;
+    padding-bottom: env(safe-area-inset-bottom) !important;
+    background: var(--w) !important;
+    border-top: 1px solid var(--bdr2) !important;
+    z-index: 1000 !important;
   }
   .mob-nav-btn {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 3px;
-    cursor: pointer;
-    color: var(--t3);
-    font-size: 10px;
-    font-weight: 600;
-    padding: 6px 2px;
-    border: none;
-    background: none;
-    -webkit-tap-highlight-color: transparent;
-    position: relative;
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 2px !important;
+    cursor: pointer !important;
+    color: var(--t3) !important;
+    font-size: 9px !important;
+    font-weight: 600 !important;
+    padding: 6px 2px !important;
+    border: none !important;
+    background: none !important;
+    touch-action: manipulation !important;
+    -webkit-tap-highlight-color: transparent !important;
   }
-  .mob-nav-btn .ico { font-size: 20px; line-height: 1; }
-  .mob-nav-btn.on { color: var(--gold); }
-  .mob-nav-btn .mob-bdg {
-    position: absolute;
-    top: 4px;
-    right: calc(50% - 14px);
-    background: var(--red);
-    color: #fff;
-    font-size: 9px;
-    font-weight: 700;
-    padding: 1px 4px;
-    border-radius: 8px;
-    min-width: 14px;
-    text-align: center;
-    display: none;
-  }
-
-  /* ── Painel de meses (pagamentos) ── */
-  .mob-mes-scroll {
-    display: flex;
-    overflow-x: auto;
-    gap: 6px;
-    padding: 8px 0;
-    margin-bottom: 10px;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-  }
-  .mob-mes-scroll::-webkit-scrollbar { display: none; }
-  .mob-mes-btn {
-    flex-shrink: 0;
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 600;
-    cursor: pointer;
-    border: 1px solid var(--bdr2);
-    background: var(--w2);
-    color: var(--t2);
-    white-space: nowrap;
-  }
-  .mob-mes-btn.on { background: var(--gl); color: var(--gold); border-color: var(--glb); }
+  .mob-nav-btn .ico { font-size: 19px !important; line-height: 1 !important; }
+  .mob-nav-btn.on { color: var(--gold) !important; }
 
 }
