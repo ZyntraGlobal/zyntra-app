@@ -57,24 +57,28 @@
   }
 
   /* ── TABELAS: scroll horizontal ── */
-  table {
-    display: block !important;
+  .tw {
     overflow-x: auto !important;
+    overflow-y: visible !important;
     -webkit-overflow-scrolling: touch !important;
+    display: block !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+  }
+  table {
+    display: table !important;
     white-space: nowrap !important;
     font-size: 12px !important;
-    width: 100% !important;
-    max-width: 100% !important;
+    min-width: 100% !important;
   }
-  thead, tbody, tfoot {
-    display: table !important;
-    width: 100% !important;
-  }
+  thead, tbody, tfoot { display: table-header-group !important; width: 100% !important; }
+  tbody { display: table-row-group !important; }
+  tfoot { display: table-footer-group !important; }
   th, td { padding: 7px 8px !important; white-space: nowrap !important; }
 
   /* ── Containers de tabela ── */
-  .tw, .ts, .pb, .panel, .card { overflow: visible !important; }
   .ts { max-height: none !important; overflow: visible !important; }
+  .pb, .panel, .card { overflow: visible !important; }
 
   /* ── Grids → responsivos ── */
   .g2 { grid-template-columns: 1fr 1fr !important; }
