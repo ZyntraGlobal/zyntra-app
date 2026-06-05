@@ -185,6 +185,14 @@
   .login-btn { padding: 16px !important; font-size: 15px !important; }
   .login-field { margin-bottom: 14px !important; }
 
+  /* ── Notificações acima do bottom nav ── */
+  div[style*="z-index:9000"] {
+    bottom: calc(72px + env(safe-area-inset-bottom)) !important;
+    right: 12px !important;
+    left: 12px !important;
+    max-width: none !important;
+  }
+
   /* ── BOTTOM NAV ── */
   .mob-nav {
     display: flex !important;
