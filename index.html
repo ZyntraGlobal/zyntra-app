@@ -141,7 +141,30 @@ tfoot td{font-weight:700;border-top:2px solid var(--bdr2);border-bottom:none!imp
 @keyframes lgShake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
 @keyframes slideIn{from{transform:translateX(120%);opacity:0}to{transform:translateX(0);opacity:1}}
 </style>
-</head>
+<script>
+// Pré-carrega dados do GitHub ANTES do app inicializar (síncrono)
+(function(){
+  if(typeof process!=='undefined'&&process.versions&&process.versions.electron)return;
+  try{
+    var base=location.href.replace(/\/[^/]*$/,'/');
+    var xhr=new XMLHttpRequest();
+    xhr.open('GET',base+'data.json?t='+Date.now(),false);
+    xhr.send();
+    if(xhr.status===200){
+      var remoto=JSON.parse(xhr.responseText);
+      if(remoto&&remoto.produtos&&remoto.produtos.length>0){
+        var local=null;
+        try{local=JSON.parse(localStorage.getItem('zyntra_gestao_v1'));}catch(e){}
+        var nLocal=(local&&local.produtos)?local.produtos.length:0;
+        if(remoto.produtos.length>=nLocal){
+          localStorage.setItem('zyntra_gestao_v1',JSON.stringify(remoto));
+          localStorage.removeItem('zg_lock');
+        }
+      }
+    }
+  }catch(e){}
+})();
+</script></head>
 <body>
 
 <nav class="sb">
