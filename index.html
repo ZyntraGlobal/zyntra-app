@@ -1254,13 +1254,27 @@ checkSessao();
     await registrarPush();
   };
 
+  function atualizarBotaoNotif() {
+    const btn = document.getElementById('mn-notif');
+    if (!btn) return;
+    if (!('Notification' in window) || Notification.permission === 'denied') { btn.style.display='none'; return; }
+    if (Notification.permission === 'granted') { btn.style.display='none'; return; }
+    btn.style.display='flex';
+  }
+
   window.addEventListener('load', function() {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(regs) {
+        regs.forEach(function(r) { r.update(); });
+      });
+    }
     setTimeout(function() {
       if (!('Notification' in window)) return;
-      if (Notification.permission === 'granted') return;
+      if (Notification.permission === 'granted') { esconderBannerNotif(); return; }
       if (Notification.permission === 'denied') return;
-      if (window.innerWidth <= 768) mostrarBannerNotif();
-    }, 2000);
+      atualizarBotaoNotif();
+      mostrarBannerNotif();
+    }, 1500);
   });
 })();
 </script>
@@ -1269,6 +1283,7 @@ checkSessao();
   <button class="mob-nav-btn" onclick="mobIr('est')" id="mn-est"><span class="ico">📦</span><span>Estoque</span><span class="mob-bdg" id="mn-bdg-est"></span></button>
   <button class="mob-nav-btn" onclick="mobIr('pag')" id="mn-pag"><span class="ico">💳</span><span>Pagamentos</span><span class="mob-bdg" id="mn-bdg-pag"></span></button>
   <button class="mob-nav-btn" onclick="mobIr('rtu')" id="mn-rtu"><span class="ico">🏦</span><span>RTU</span></button>
+  <button class="mob-nav-btn" onclick="window._ativarNotif&&window._ativarNotif()" id="mn-notif" style="display:none"><span class="ico">🔔</span><span>Notifics</span></button>
   <button class="mob-nav-btn" onclick="mobMenu()" id="mn-menu"><span class="ico">☰</span><span>Menu</span></button>
 </nav>
 <script>
