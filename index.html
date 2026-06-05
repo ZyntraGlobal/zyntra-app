@@ -1235,11 +1235,17 @@ checkSessao();
     (root||document).querySelectorAll('table').forEach(function(t){
       var p=t.parentElement;
       if(!p) return;
-      if(p.dataset.mobWrap) return;
-      p.dataset.mobWrap='1';
-      if(p.classList.contains('tw')) return;
+      if(p.hasAttribute('data-mob-wrap-div')) return;
+      if(p.classList.contains('tw')) {
+        if(p.classList.contains('ts')){
+          p.style.overflowX='auto';
+          p.style.webkitOverflowScrolling='touch';
+        }
+        return;
+      }
       var w=document.createElement('div');
-      w.style.cssText='display:block;overflow-x:scroll;-webkit-overflow-scrolling:touch;width:100%;max-width:100%;';
+      w.setAttribute('data-mob-wrap-div','1');
+      w.style.cssText='display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;max-width:100%;';
       p.insertBefore(w,t);
       w.appendChild(t);
     });

@@ -1,36 +1,31 @@
-/* ============================================================
-   ZYNTRA GESTÃO — MOBILE CSS
-   Mesma lógica do FC: body faz scroll vertical, .pg transparente
-   ============================================================ */
-
 @media (max-width: 768px) {
 
   body {
-    display: block !important;
-    height: auto !important;
-    min-height: 100dvh;
-    overflow-x: hidden !important;
-    overflow-y: auto !important;
+    flex-direction: column !important;
+    height: 100dvh !important;
+    overflow: hidden !important;
     -webkit-overflow-scrolling: touch;
-    padding-bottom: calc(62px + env(safe-area-inset-bottom)) !important;
+  }
+  body.login-open {
+    overflow: hidden !important;
+    height: 100dvh !important;
   }
 
   .sb { display: none !important; }
 
   .main {
-    display: block !important;
-    width: 100% !important;
-    height: auto !important;
-    overflow: visible !important;
+    flex: 1 !important;
     min-height: 0 !important;
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
   }
 
   .topbar {
-    position: sticky !important;
-    top: 0 !important;
-    z-index: 100 !important;
+    flex-shrink: 0 !important;
     height: auto !important;
-    min-height: 46px;
+    min-height: 46px !important;
     padding: 8px 12px !important;
     padding-top: calc(8px + env(safe-area-inset-top)) !important;
     flex-wrap: wrap !important;
@@ -41,18 +36,18 @@
   .chip         { display: none !important; }
   #fs-status    { font-size: 10px !important; }
 
-  /* PG transparente — sem overflow, sem height fixo */
   .pg {
-    overflow: visible !important;
-    height: auto !important;
-    max-height: none !important;
+    flex: 1 !important;
     min-height: 0 !important;
+    max-height: none !important;
+    overflow-y: scroll !important;
+    -webkit-overflow-scrolling: touch !important;
     padding: 12px !important;
-    padding-bottom: 20px !important;
-    flex: none !important;
+    padding-bottom: calc(80px + env(safe-area-inset-bottom)) !important;
+    height: auto !important;
   }
 
-  /* Tabelas: scroll horizontal livre */
+  /* Tabelas — fix do conflito .ts.tw */
   .tw {
     display: block !important;
     overflow-x: auto !important;
@@ -60,18 +55,32 @@
     width: 100% !important;
     max-width: 100% !important;
   }
+  .ts {
+    max-height: none !important;
+    overflow-y: visible !important;
+  }
+  .ts.tw {
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  [data-mob-wrap-div] {
+    display: block !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    width: 100% !important;
+  }
   table {
     display: table !important;
     white-space: nowrap !important;
     font-size: 12px !important;
     border-collapse: collapse !important;
   }
-  thead  { display: table-header-group !important; }
-  tbody  { display: table-row-group !important; }
-  tfoot  { display: table-footer-group !important; }
+  thead { display: table-header-group !important; }
+  tbody { display: table-row-group !important; }
+  tfoot { display: table-footer-group !important; }
   th, td { padding: 7px 8px !important; white-space: nowrap !important; }
-  .ts    { max-height: none !important; overflow: visible !important; }
-  .pb, .panel, .card { overflow: visible !important; }
+  .panel, .pb, .card, .ph { overflow: visible !important; }
 
   /* Grids */
   .g2, .cockpit           { grid-template-columns: 1fr 1fr !important; }
@@ -84,12 +93,7 @@
   .card .lbl { font-size: 10px !important; }
 
   /* Botões */
-  .btn {
-    padding: 9px 12px !important;
-    font-size: 13px !important;
-    touch-action: manipulation !important;
-    min-height: 38px;
-  }
+  .btn { padding: 9px 12px !important; font-size: 13px !important; touch-action: manipulation !important; min-height: 38px; }
   .bsm  { padding: 7px 10px !important; font-size: 12px !important; }
   .brow { gap: 6px !important; flex-wrap: wrap !important; }
 
@@ -108,7 +112,11 @@
   .fg      { gap: 12px !important; }
 
   /* Modal */
-  .mbg { padding: 0 !important; align-items: flex-end !important; }
+  .mbg {
+    padding: 0 !important;
+    align-items: flex-end !important;
+    z-index: 1500 !important;
+  }
   .modal {
     width: 100% !important;
     max-height: 92dvh !important;
@@ -131,8 +139,7 @@
   }
   .login-brand { display: none !important; }
   .login-form-side {
-    width: 100% !important; flex: 1 !important;
-    padding: 40px 28px 32px !important;
+    width: 100% !important; flex: 1 !important; padding: 40px 28px 32px !important;
     display: flex !important; flex-direction: column !important; justify-content: center !important;
   }
   .login-logo-mob {
@@ -140,14 +147,12 @@
     align-items: center !important; margin-bottom: 28px !important;
   }
   .login-logo-mob img {
-    width: 120px !important; height: auto !important;
-    display: block !important; margin: 0 auto 16px !important;
-    filter: drop-shadow(0 0 28px rgba(107,33,168,.9)) !important;
+    width: 120px !important; height: auto !important; display: block !important;
+    margin: 0 auto 16px !important; filter: drop-shadow(0 0 28px rgba(107,33,168,.9)) !important;
   }
   .login-logo-mob .t1 {
-    font-size: 18px !important; font-weight: 900 !important;
-    letter-spacing: 4px !important; color: #fff !important;
-    text-transform: uppercase !important; text-align: center !important;
+    font-size: 18px !important; font-weight: 900 !important; letter-spacing: 4px !important;
+    color: #fff !important; text-transform: uppercase !important; text-align: center !important;
   }
   .login-logo-mob .t1 em { color: #c9a84c !important; font-style: normal !important; }
   .login-input  { font-size: 16px !important; padding: 14px 16px !important; border-radius: 10px !important; }
@@ -163,23 +168,20 @@
 
   /* Bottom nav */
   .mob-nav {
-    display: flex !important;
-    position: fixed !important;
+    display: flex !important; position: fixed !important;
     bottom: 0 !important; left: 0 !important; right: 0 !important;
     height: calc(58px + env(safe-area-inset-bottom)) !important;
     padding-bottom: env(safe-area-inset-bottom) !important;
-    background: var(--w) !important;
-    border-top: 1px solid var(--bdr2) !important;
+    background: var(--w) !important; border-top: 1px solid var(--bdr2) !important;
     z-index: 1000 !important;
   }
   .mob-nav-btn {
-    flex: 1 !important; display: flex !important;
-    flex-direction: column !important; align-items: center !important; justify-content: center !important;
-    gap: 2px !important; color: var(--t3) !important;
-    font-size: 9px !important; font-weight: 600 !important;
-    padding: 6px 2px !important; border: none !important; background: none !important;
-    touch-action: manipulation !important; -webkit-tap-highlight-color: transparent !important;
-    cursor: pointer !important;
+    flex: 1 !important; display: flex !important; flex-direction: column !important;
+    align-items: center !important; justify-content: center !important; gap: 2px !important;
+    cursor: pointer !important; color: var(--t3) !important; font-size: 9px !important;
+    font-weight: 600 !important; padding: 6px 2px !important; border: none !important;
+    background: none !important; touch-action: manipulation !important;
+    -webkit-tap-highlight-color: transparent !important;
   }
   .mob-nav-btn .ico { font-size: 19px !important; line-height: 1 !important; }
   .mob-nav-btn.on   { color: var(--gold) !important; }
