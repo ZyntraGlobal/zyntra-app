@@ -4,15 +4,17 @@
   const CHAVE = 'zyntra_gestao_v1';
   const base = location.href.replace(/\/[^/]*$/, '/');
   const DATA_URL = base + 'data.json';
+  const R = v => 'R$ ' + Number(v || 0).toFixed(2).replace('.', ',');
+  const MESES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 
-  // Mostra notificação via Service Worker com o que mudou
-  async function _notifSync(titulo, corpo) {
+  async function _notifSync(titulo, linhas) {
     if (!('Notification' in window) || Notification.permission !== 'granted') return;
     if (!('serviceWorker' in navigator)) return;
     try {
       const reg = await navigator.serviceWorker.ready;
+      const body = linhas.slice(0, 5).join('\n') + (linhas.length > 5 ? '\n…+' + (linhas.length - 5) + ' mais' : '');
       await reg.showNotification(titulo, {
-        body: corpo,
+        body: body,
         icon: '/zyntra-app/icon-192.png',
         badge: '/zyntra-app/icon-192.png',
         tag: 'zyntra-app-sync',
@@ -21,60 +23,102 @@
     } catch(e) {}
   }
 
-  // Compara DB antigo vs novo e retorna texto descrevendo as mudanças
   function _diffGestao(antigo, novo) {
-    if (!antigo) return null; // primeira sync — não notifica
-    const partes = [];
+    if (!antigo) return null;
+    const linhas = [];
 
-    // Novos lançamentos RTU
-    const idsAntRTU = new Set((antigo.rtu || []).map(r => r.id));
-    const novosRTU  = (novo.rtu || []).filter(r => !idsAntRTU.has(r.id));
-    if (novosRTU.length > 0) {
-      const nomes = novosRTU.slice(0, 2).map(r => (r.produto || r.cat || '?') + ' R$' + (r.valor || 0).toFixed(0)).join(', ');
-      partes.push(novosRTU.length + ' RTU: ' + nomes + (novosRTU.length > 2 ? '...' : ''));
-    }
+    // ── RTU ──
+    const mapAntR = {};
+    (antigo.rtu || []).forEach(r => mapAntR[r.id] = r);
+    const idsNovR = new Set((novo.rtu || []).map(r => r.id));
 
-    // Pagamentos com status alterado
-    const MESES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-    const pagAlt = [];
+    (novo.rtu || []).forEach(r => {
+      const a = mapAntR[r.id];
+      if (!a) {
+        linhas.push('➕ RTU: ' + r.produto + ' · ' + R(r.valor) + ' · Imp: ' + R(r.totalImp) + ' · Total: ' + R((r.valor||0)+(r.totalImp||0)));
+      } else {
+        const d = [];
+        if (a.valor    !== r.valor)    d.push(R(a.valor) + ' → ' + R(r.valor));
+        if (a.produto  !== r.produto)  d.push('produto: ' + r.produto);
+        if (a.cat      !== r.cat)      d.push('cat: ' + r.cat);
+        if (d.length) linhas.push('✏️ RTU ' + r.produto + ': ' + d.join(', '));
+      }
+    });
+    (antigo.rtu || []).forEach(r => {
+      if (!idsNovR.has(r.id)) linhas.push('🗑️ RTU removido: ' + r.produto + ' · ' + R(r.valor));
+    });
+
+    // ── Pagamentos (todos os meses) ──
     for (let m = 0; m < 12; m++) {
       const ant = (antigo.pag && antigo.pag[m]) ? antigo.pag[m] : [];
-      const nov = (novo.pag && novo.pag[m]) ? novo.pag[m] : [];
-      nov.forEach((p, i) => {
-        const a = ant[i];
-        if (a && a.status !== p.status && p.status === 'Pago') {
-          pagAlt.push((p.desc || '?') + ' (' + MESES[m] + ')');
+      const nov = (novo.pag   && novo.pag[m])   ? novo.pag[m]   : [];
+      const mes = MESES[m];
+
+      // Novos pagamentos no mês
+      for (let i = ant.length; i < nov.length; i++) {
+        const p = nov[i];
+        linhas.push('➕ Pgto ' + mes + ': ' + p.desc + ' · ' + R(p.valor) + ' [' + p.status + ']');
+      }
+
+      // Alterações em pagamentos existentes
+      for (let i = 0; i < Math.min(ant.length, nov.length); i++) {
+        const a = ant[i], p = nov[i];
+        if (!a || !p) continue;
+        const d = [];
+        if (a.status !== p.status) d.push(a.status + ' → ' + p.status);
+        if (a.valor  !== p.valor)  d.push(R(a.valor) + ' → ' + R(p.valor));
+        if (a.desc   !== p.desc)   d.push('desc: ' + p.desc);
+        if (d.length) {
+          const ico = p.status === 'Pago' ? '💳' : p.status === 'Atrasado' ? '🔴' : '✏️';
+          linhas.push(ico + ' ' + (p.desc || a.desc) + ' (' + mes + '): ' + d.join(', '));
         }
-      });
-    }
-    if (pagAlt.length > 0) {
-      partes.push(pagAlt.length + ' pago(s): ' + pagAlt.slice(0, 2).join(', ') + (pagAlt.length > 2 ? '...' : ''));
+      }
+
+      // Pagamentos removidos
+      for (let i = nov.length; i < ant.length; i++) {
+        const a = ant[i];
+        if (a) linhas.push('🗑️ Pgto removido ' + mes + ': ' + a.desc);
+      }
     }
 
-    // Produtos com estoque alterado
-    const mapAnt = {};
-    (antigo.produtos || []).forEach(p => { mapAnt[p.id] = p; });
-    const prodAlt = (novo.produtos || []).filter(p => {
-      const a = mapAnt[p.id];
-      return a && a.qty !== p.qty;
+    // ── Produtos / Estoque ──
+    const mapAntP = {};
+    (antigo.produtos || []).forEach(p => mapAntP[p.id] = p);
+    const idsNovP = new Set((novo.produtos || []).map(p => p.id));
+
+    (novo.produtos || []).forEach(p => {
+      const a = mapAntP[p.id];
+      if (!a) {
+        linhas.push('➕ Produto: ' + p.nome + ' (cod: ' + p.cod + ', mín: ' + p.min + ')');
+      } else {
+        const d = [];
+        if (a.qty  !== p.qty)  {
+          const delta = (p.qty - a.qty);
+          const sinal = delta > 0 ? '+' : '';
+          const aviso = p.qty <= p.min ? ' ⚠️ ABAIXO DO MÍN' : '';
+          d.push('estoque: ' + a.qty + ' → ' + p.qty + ' (' + sinal + delta + ')' + aviso);
+        }
+        if (a.cmv  !== p.cmv)  d.push('CMV: ' + R(a.cmv) + ' → ' + R(p.cmv));
+        if (a.min  !== p.min)  d.push('mín: ' + a.min + ' → ' + p.min);
+        if (a.nome !== p.nome) d.push('nome: ' + p.nome);
+        if (a.cat  !== p.cat)  d.push('cat: ' + p.cat);
+        if (d.length) linhas.push('📦 ' + p.nome + ': ' + d.join(', '));
+      }
     });
-    if (prodAlt.length > 0) {
-      const nomes = prodAlt.slice(0, 2).map(p => {
-        const a = mapAnt[p.id];
-        const delta = p.qty - a.qty;
-        return p.nome + ' (' + (delta > 0 ? '+' : '') + delta + ')';
-      }).join(', ');
-      partes.push('Estoque: ' + nomes + (prodAlt.length > 2 ? '...' : ''));
-    }
+    (antigo.produtos || []).forEach(p => {
+      if (!idsNovP.has(p.id)) linhas.push('🗑️ Produto removido: ' + p.nome);
+    });
 
-    // Novos produtos
-    const idsAntProd = new Set((antigo.produtos || []).map(p => p.id));
-    const novosProd  = (novo.produtos || []).filter(p => !idsAntProd.has(p.id));
-    if (novosProd.length > 0) {
-      partes.push(novosProd.length + ' produto(s) novo(s): ' + novosProd.slice(0, 2).map(p => p.nome).join(', '));
-    }
+    // ── Movimentações de estoque ──
+    const mapAntM = {};
+    (antigo.mov || []).forEach(m => mapAntM[m.id] = m);
+    (novo.mov || []).forEach(m => {
+      if (!mapAntM[m.id]) {
+        linhas.push('📋 Mov: ' + m.tipo + ' · ' + (m.produto || '?') + ' · qtd ' + m.qtd);
+      }
+    });
 
-    return partes.length > 0 ? partes.join(' · ') : null;
+    return linhas.length ? linhas : null;
   }
 
   async function sincronizar() {
@@ -87,22 +131,25 @@
       let local = null;
       try { local = JSON.parse(localStorage.getItem(CHAVE)); } catch (e) {}
 
-      const nRemoto = (remoto.produtos || []).length;
-      const nLocal  = (local && local.produtos) ? local.produtos.length : 0;
-      const pagRemoto = (remoto.pag || []).flat().length;
-      const pagLocal  = (local && local.pag) ? local.pag.flat().length : 0;
+      const nRemoto  = (remoto.produtos || []).length;
+      const nLocal   = local ? (local.produtos || []).length : 0;
+      const pagR     = (remoto.pag || []).flat().length;
+      const pagL     = local ? (local.pag || []).flat().length : 0;
+      const rtuR     = (remoto.rtu || []).length;
+      const rtuL     = local ? (local.rtu || []).length : 0;
 
-      if (nRemoto >= nLocal || pagRemoto > pagLocal) {
-        const diff = _diffGestao(local, remoto);
+      if (nRemoto >= nLocal || pagR >= pagL || rtuR >= rtuL) {
+        const linhas = _diffGestao(local, remoto);
         localStorage.setItem(CHAVE, JSON.stringify(remoto));
         localStorage.removeItem('zg_lock');
-        if (diff) _notifSync('Zyntra Gestão — Dados atualizados', diff);
+        if (linhas) {
+          const qtd = linhas.length;
+          _notifSync('Zyntra Gestão — ' + qtd + ' alteração(ões)', linhas);
+        }
         return true;
       }
       return false;
-    } catch (e) {
-      return false;
-    }
+    } catch (e) { return false; }
   }
 
   const atualizou = await sincronizar();
@@ -114,7 +161,20 @@
     }
   }
 
-  setInterval(sincronizar, 120000);
+  // Polling a cada 30s quando visível, 120s em background
+  function iniciarPolling() {
+    let timer;
+    function agendar() {
+      clearTimeout(timer);
+      timer = setTimeout(async function() {
+        await sincronizar();
+        agendar();
+      }, document.hidden ? 120000 : 30000);
+    }
+    document.addEventListener('visibilitychange', function() { agendar(); });
+    agendar();
+  }
+  iniciarPolling();
 
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/zyntra-app/sw.js', { scope: '/zyntra-app/' })
