@@ -1084,7 +1084,7 @@
       "cod": 78,
       "ncm": "8471.60.53",
       "cat": "Mouse",
-      "qty": 1,
+      "qty": 0,
       "min": 10,
       "cmv": 202.02,
       "preco": 0,
@@ -1125,6 +1125,15 @@
       "id": 14,
       "prodId": 72,
       "prodNome": "MOUSE GAMER REDRAGON M724P - ROSA",
+      "tipo": "Saída",
+      "qty": 1,
+      "data": "05/06/2026",
+      "obs": ""
+    },
+    {
+      "id": 15,
+      "prodId": 78,
+      "prodNome": "MOUSE GAMER REDRAGON KING PRO M916P-PRO 26000 DPI USB-C - ROSA",
       "tipo": "Saída",
       "qty": 1,
       "data": "05/06/2026",
@@ -1628,5 +1637,5 @@
   ],
   "nRtu": 13,
   "nPag": 100,
-  "nMov": 15
+  "nMov": 16
 }
