@@ -1189,6 +1189,11 @@ function pNotifG(){
     }
     h+='</div>';
   }
+  h+='<div class="sec" style="margin-top:14px">📡 Status Sync</div>';
+  h+='<div class="card"><div class="lbl">Última verificação</div><div class="val" style="font-size:13px;color:var(--t2)">'+(window._zyntraLastSyncG||'Ainda não sincronizou')+'</div>';
+  h+='<div class="sub" style="margin-top:4px;font-size:10px;color:var(--t3)">'+(window._zyntraSyncStatusG||'—')+'</div>';
+  h+='<div style="margin-top:10px"><button class="btn btnp" style="width:100%;justify-content:center" onclick="notifTestarDiretoG()">🧪 Disparar notificação agora</button></div></div>';
+
   var alertas=_calcAlertasG();
   h+='<div class="sec" style="margin-top:14px">⚠️ Alertas Ativos</div>';
   if(alertas.length===0){
@@ -1231,6 +1236,23 @@ function notifAtivarG(){
   });
 }
 
+function notifTestarDiretoG(){
+  if(!('serviceWorker' in navigator)){alert('Service Worker não suportado');return;}
+  navigator.serviceWorker.ready.then(function(reg){
+    reg.showNotification('🧪 Zyntra Gestão — Teste',{
+      body:'Notificação funcionando! '+new Date().toLocaleTimeString('pt-BR'),
+      icon:'/zyntra-app/icon-192.png',
+      badge:'/zyntra-app/icon-192.png',
+      tag:'zyntra-teste-'+Date.now()
+    }).then(function(){
+      _notif('✅ Disparado!','Verifique a central de notificações','grn');
+    }).catch(function(e){
+      _notif('❌ Erro: '+e.message,'','red');
+    });
+  }).catch(function(e){
+    _notif('❌ SW não pronto: '+e.message,'','red');
+  });
+}
 function notifTestarG(){
   if(Notification.permission!=='granted'){_notif('❌ Sem permissão','Ative as notificações primeiro','red');return;}
   navigator.serviceWorker.ready.then(function(reg){
