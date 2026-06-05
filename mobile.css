@@ -1,16 +1,17 @@
 @media (max-width: 768px) {
 
-  /* ── BASE: liberar scroll vertical e horizontal ── */
-  html, body {
-    height: 100% !important;
-    min-height: 100dvh;
-    overflow: visible !important;
-    -webkit-overflow-scrolling: touch;
+  /* ── BASE ── */
+  html {
+    height: 100%;
+    overflow-x: hidden;
   }
   body {
     flex-direction: column !important;
+    min-height: 100dvh;
+    height: auto !important;
     overflow-x: hidden !important;
     overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
   }
 
   /* ── Sidebar → escondida ── */
@@ -39,30 +40,30 @@
     z-index: 100;
   }
   .topbar-title { font-size: 13px; }
-  #frase { font-size: 11px; display: none; }
+  #frase { display: none; }
   .chip { display: none; }
   #fs-status { font-size: 10px; }
 
-  /* ── PÁGINA: scroll vertical livre até o fim ── */
+  /* ── PÁGINA: SEM overflow-x hidden (bloquearia scroll lateral das tabelas) ── */
   .pg {
     flex: 1 !important;
     height: auto !important;
     min-height: 0 !important;
     max-height: none !important;
-    overflow-x: hidden !important;
+    overflow-x: visible !important;
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior-y: contain;
     padding: 12px !important;
     padding-bottom: calc(80px + env(safe-area-inset-bottom)) !important;
   }
 
-  /* ── TABELAS: scroll horizontal em TODAS ── */
-  .tw, .mob-table-wrap {
+  /* ── TABELAS: scroll horizontal ── */
+  .tw {
     display: block !important;
     overflow-x: auto !important;
     -webkit-overflow-scrolling: touch !important;
     width: 100% !important;
-    max-width: 100vw !important;
   }
   table {
     display: table !important;
@@ -83,13 +84,6 @@
   .g2 { grid-template-columns: 1fr 1fr !important; }
   .g3, .g4, .g5 { grid-template-columns: 1fr 1fr !important; }
   .row2 { grid-template-columns: 1fr !important; }
-
-  /* ── Grids inline do dashboard ── */
-  div[style*="grid-template-columns:1fr 1fr 1fr"] {
-    grid-template-columns: 1fr !important;
-  }
-  div[style*="font-size:32px"] { font-size: 20px !important; }
-  div[style*="padding:24px 28px"] { padding: 14px !important; }
 
   /* ── Cards ── */
   .card .val { font-size: 16px !important; }
@@ -156,12 +150,11 @@
   .login-form-side {
     width: 100% !important;
     flex: 1 !important;
-    padding: 48px 28px !important;
+    padding: 40px 28px 32px !important;
     display: flex !important;
     flex-direction: column !important;
     justify-content: center !important;
   }
-  .login-form-side { padding: 40px 28px 32px !important; }
   .login-logo-mob {
     display: flex !important;
     flex-direction: column !important;
@@ -174,7 +167,7 @@
     object-fit: contain !important;
     display: block !important;
     margin: 0 auto 16px !important;
-    filter: drop-shadow(0 0 28px rgba(107,33,168,.9)) drop-shadow(0 0 8px rgba(107,33,168,.5)) !important;
+    filter: drop-shadow(0 0 28px rgba(107,33,168,.9)) !important;
   }
   .login-logo-mob .t1 {
     font-size: 18px !important;
@@ -184,7 +177,7 @@
     text-transform: uppercase !important;
     text-align: center !important;
   }
-  .login-logo-mob .t1 em { color: #c9a84c !important; font-style: normal !important; margin: 0 6px !important; }
+  .login-logo-mob .t1 em { color: #c9a84c !important; font-style: normal !important; }
   .login-input { font-size: 16px !important; padding: 14px 16px !important; border-radius: 10px !important; }
   .login-btn { padding: 15px !important; font-size: 14px !important; border-radius: 10px !important; margin-top: 6px !important; }
   .login-field { margin-bottom: 12px !important; }
