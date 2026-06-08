@@ -1363,6 +1363,8 @@ var _wt=null;function _iniciarWatch(){if(_wt)clearInterval(_wt);_wt=setInterval(
 function checkSessao(){localStorage.removeItem('zg_sess');document.getElementById('login-bg').classList.remove('hidden');setTimeout(function(){var u=document.getElementById('li-user');if(u)u.focus();_lgLock();},150);return false;}
 
 // ── INIT ──────────────────────────────────────────────
+// Limpa lockout ao abrir o app (evita usuário ficar travado)
+try{localStorage.removeItem('zg_lock');}catch(e){}
 document.getElementById('tdate').textContent=new Date().toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});
 initFrases();
 checkSessao();
