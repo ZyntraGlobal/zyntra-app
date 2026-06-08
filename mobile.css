@@ -131,16 +131,23 @@
   .macts    { gap: 8px !important; flex-wrap: wrap !important; }
   .macts .btn { flex: 1 !important; justify-content: center !important; min-width: 120px; }
 
-  /* Login */
+  /* Login — scroll para o botão não ficar atrás do teclado iOS */
+  .login-bg {
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
   .login-wrap {
     flex-direction: column !important; width: 100% !important;
     min-height: 100dvh !important; border-radius: 0 !important;
     border: none !important; box-shadow: none !important;
+    overflow: visible !important;
   }
   .login-brand { display: none !important; }
   .login-form-side {
-    width: 100% !important; flex: 1 !important; padding: 40px 28px 32px !important;
-    display: flex !important; flex-direction: column !important; justify-content: center !important;
+    width: 100% !important; flex: 1 !important;
+    padding: 40px 28px calc(40px + env(safe-area-inset-bottom)) !important;
+    display: flex !important; flex-direction: column !important;
+    justify-content: flex-start !important; overflow-y: visible !important;
   }
   .login-logo-mob {
     display: flex !important; flex-direction: column !important;
