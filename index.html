@@ -1358,7 +1358,39 @@ async function sha256h(s){var b=await crypto.subtle.digest('SHA-256',new TextEnc
 function _lgShake(){var b=document.querySelector('.login-form-side');if(b){b.style.animation='none';b.offsetHeight;b.style.animation='lgShake .35s ease';}}
 var _lockTent=0,_lockAte=0;
 function _lgLock(){if(_lockAte>0&&Date.now()<_lockAte){var r=Math.ceil((_lockAte-Date.now())/1000);document.getElementById('li-lock').style.display='block';document.getElementById('li-lock').textContent='🔒 Aguarde '+Math.floor(r/60)+'m '+r%60+'s';document.getElementById('li-btn').disabled=true;setTimeout(_lgLock,1000);return true;}_lockAte=0;_lockTent=0;document.getElementById('li-lock').style.display='none';document.getElementById('li-btn').disabled=false;return false;}
-async function doLogin(){if(_lgLock())return;var user=document.getElementById('li-user').value.trim().toLowerCase(),pass=document.getElementById('li-pass').value,err=document.getElementById('li-err');err.textContent='';if(!user||!pass){err.textContent='Preencha usuário e senha.';return;}var btn=document.getElementById('li-btn');btn.disabled=true;btn.textContent='Verificando...';var hash=await sha256h(user+':'+pass+':'+_SALT);btn.disabled=false;btn.textContent='ENTRAR NO SISTEMA';if(_USERS[user]&&_USERS[user]===hash){var role=_ROLES[user]||'dono';localStorage.setItem('zg_sess',JSON.stringify({user:user,role:role,until:Date.now()+4*60*60*1000}));document.getElementById('login-bg').classList.add('hidden');badges();if(role==='funcionario'){ir('est_produtos');}else{pDash();}  _iniciarWatch();}else{document.getElementById('li-pass').value='';_lgShake();_lockTent++;if(_lockTent>=_MAX_TENT){_lockAte=Date.now()+_LOCK_MS;_lockTent=0;err.textContent='';_lgLock();}else{var rem=_MAX_TENT-_lockTent;err.textContent='Incorreto. '+rem+' tentativa'+(rem>1?'s':'')+' restante'+(rem>1?'s':'')+'.';}}}
+async function doLogin(){
+  if(_lgLock())return;
+  var user=document.getElementById('li-user').value.trim().toLowerCase();
+  var pass=document.getElementById('li-pass').value;
+  var err=document.getElementById('li-err');
+  var btn=document.getElementById('li-btn');
+  err.textContent='';
+  if(!user||!pass){err.textContent='Preencha usuário e senha.';return;}
+  btn.disabled=true;btn.textContent='Verificando...';
+  try{
+    var hash=await sha256h(user+':'+pass+':'+_SALT);
+    if(_USERS[user]&&_USERS[user]===hash){
+      btn.textContent='✓ Entrando...';
+      await new Promise(function(r){setTimeout(r,350);});
+      var role=_ROLES[user]||'dono';
+      localStorage.setItem('zg_sess',JSON.stringify({user:user,role:role,until:Date.now()+4*60*60*1000}));
+      document.getElementById('login-bg').classList.add('hidden');
+      try{badges();}catch(e){}
+      try{if(role==='funcionario'){ir('est_produtos');}else{pDash();}}catch(e){console.error('pDash error',e);}
+      _iniciarWatch();
+    }else{
+      btn.disabled=false;btn.textContent='ENTRAR NO SISTEMA';
+      document.getElementById('li-pass').value='';
+      _lgShake();
+      _lockTent++;
+      if(_lockTent>=_MAX_TENT){_lockAte=Date.now()+_LOCK_MS;_lockTent=0;err.textContent='';_lgLock();}
+      else{var rem=_MAX_TENT-_lockTent;err.textContent='Usuário ou senha incorretos. '+rem+' tentativa'+(rem>1?'s':'')+' restante'+(rem>1?'s':'')+'.';}
+    }
+  }catch(e){
+    btn.disabled=false;btn.textContent='ENTRAR NO SISTEMA';
+    err.textContent='Erro ao processar login. Verifique sua conexão e tente novamente.';
+  }
+}}
 function _expirar(){localStorage.removeItem('zg_sess');document.getElementById('login-bg').classList.remove('hidden');document.getElementById('li-pass').value='';var e=document.createElement('div');e.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#1a1917;border:1px solid var(--glb);color:var(--gold);padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;z-index:10000;box-shadow:0 8px 32px rgba(0,0,0,.5)';e.textContent='🔒 Sessão expirada. Faça login novamente.';document.body.appendChild(e);setTimeout(function(){e.remove();},4000);setTimeout(function(){var u=document.getElementById('li-user');if(u)u.focus();},200);}
 var _wt=null;function _iniciarWatch(){if(_wt)clearInterval(_wt);_wt=setInterval(function(){var raw=localStorage.getItem('zg_sess');if(!raw){_expirar();clearInterval(_wt);return;}try{var s=JSON.parse(raw);if(!s.until||Date.now()>=s.until){_expirar();clearInterval(_wt);}}catch(e){_expirar();clearInterval(_wt);}},60000);}
 function checkSessao(){localStorage.removeItem('zg_sess');var bg=document.getElementById('login-bg');if(bg)bg.classList.remove('hidden');setTimeout(function(){var u=document.getElementById('li-user');if(u)u.focus();_lgLock();},150);return false;}
