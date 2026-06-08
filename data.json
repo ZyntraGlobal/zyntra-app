@@ -34,7 +34,7 @@
       "cod": 3,
       "ncm": "8473.30.90",
       "cat": "Acessório",
-      "qty": 2,
+      "qty": 0,
       "min": 5,
       "cmv": 85,
       "preco": 0,
@@ -1138,6 +1138,15 @@
       "qty": 1,
       "data": "05/06/2026",
       "obs": ""
+    },
+    {
+      "id": 16,
+      "prodId": 3,
+      "prodNome": "SUPORTE HEADSET REDRAGON H300 PRO RGB PRETO",
+      "tipo": "Saída",
+      "qty": 2,
+      "data": "08/06/2026",
+      "obs": ""
     }
   ],
   "pag": [
@@ -1637,5 +1646,6 @@
   ],
   "nRtu": 13,
   "nPag": 100,
-  "nMov": 16
+  "nMov": 17,
+  "_savedAt": 1780929788502
 }
