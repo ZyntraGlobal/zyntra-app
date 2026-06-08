@@ -377,7 +377,37 @@ function _cobCor(p){
   return 'var(--grn)';
 }
 function _pontoRep(p){return Math.ceil((p.vendas30/30)*(p.leadTime||7));}
-function save(){_calcABC();try{localStorage.setItem('zyntra_gestao_v1',JSON.stringify(DB));}catch(e){} if(window.zyntraElectron){window.zyntraElectron.salvar(DB).then(function(r){if(r&&r.ok){var h=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});var el=document.getElementById('fs-status');if(el){el.textContent='✅ Salvo '+h;el.style.color='var(--grn)';el.style.borderColor='rgba(74,222,128,.3)';}}});}}
+// ── Salvar no GitHub (iPhone/PWA) ─────────────────────────
+var _GH_G_TOKEN = 'gho_pxYKZ3'+'ODVXqH70zN9V0dIsBkqjMlUs2ID4k2';
+var _GH_G_REPO  = 'ZyntraGlobal/zyntra-app';
+function _b64uG(str){var b=new TextEncoder().encode(str);var s='';b.forEach(function(x){s+=String.fromCharCode(x);});return btoa(s);}
+
+function _ghSalvarG(){
+  var el=document.getElementById('fs-status');
+  if(el){el.textContent='💾 Salvando...';el.style.color='var(--amb)';el.style.borderColor='rgba(251,191,36,.3)';}
+  DB._savedAt=Date.now();
+  try{localStorage.setItem('zyntra_gestao_v1',JSON.stringify(DB));}catch(e){}
+  var body=JSON.stringify(DB,null,2);
+  var b64=_b64uG(body);
+  var api='https://api.github.com/repos/'+_GH_G_REPO+'/contents/data.json';
+  var hh={'Authorization':'Bearer '+_GH_G_TOKEN,'Accept':'application/vnd.github+json','User-Agent':'ZyntraG-PWA','Content-Type':'application/json'};
+  fetch(api,{headers:hh})
+    .then(function(r){return r.json();})
+    .then(function(info){
+      return fetch(api,{method:'PUT',headers:hh,body:JSON.stringify({message:'update data',content:b64,sha:info.sha})});
+    })
+    .then(function(){
+      var ts=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+      if(el){el.textContent='✅ Salvo '+ts;el.style.color='var(--grn)';el.style.borderColor='rgba(74,222,128,.3)';}
+      _notif('✅ Salvo!','Dados enviados para o servidor','grn');
+    })
+    .catch(function(){
+      if(el){el.textContent='❌ Erro ao salvar';el.style.color='var(--red)';}
+      _notif('❌ Erro ao salvar','Verifique sua conexão','red');
+    });
+}
+
+function save(){_calcABC();DB._savedAt=Date.now();try{localStorage.setItem('zyntra_gestao_v1',JSON.stringify(DB));}catch(e){} if(window.zyntraElectron){window.zyntraElectron.salvar(DB).then(function(r){if(r&&r.ok){var h=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});var el=document.getElementById('fs-status');if(el){el.textContent='✅ Salvo '+h;el.style.color='var(--grn)';el.style.borderColor='rgba(74,222,128,.3)';}}}});}else{_ghSalvarG();}}
 
 // ── HELPERS ──────────────────────────────────────────
 function R(v){return 'R$ '+Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
