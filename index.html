@@ -1353,7 +1353,7 @@ var _USERS={
 var _ROLES={'felipe':'dono','admin':'dono','colab':'funcionario'};
 function _isFuncionario(){try{var s=JSON.parse(localStorage.getItem('zg_sess')||'{}');return s.role==='funcionario';}catch(e){return false;}}
 function _bloqueadoFunc(){setPage('<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:60vh;gap:16px"><div style="font-size:48px">🔒</div><div style="font-size:16px;font-weight:700;color:var(--t)">Acesso Restrito</div><div style="font-size:13px;color:var(--t3);text-align:center">Esta seção é exclusiva do proprietário.</div></div>');}
-var _MAX_TENT=3,_LOCK_MS=5*60*1000;
+var _MAX_TENT=10,_LOCK_MS=2*60*1000;
 async function sha256h(s){var b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,'0');}).join('');}
 function _lgShake(){var b=document.querySelector('.login-form-side');if(b){b.style.animation='none';b.offsetHeight;b.style.animation='lgShake .35s ease';}}
 function _lgLock(){var ld=JSON.parse(localStorage.getItem('zg_lock')||'{}');if(ld.until&&Date.now()<ld.until){var r=Math.ceil((ld.until-Date.now())/1000);document.getElementById('li-lock').style.display='block';document.getElementById('li-lock').textContent='🔒 Aguarde '+Math.floor(r/60)+'m '+r%60+'s';document.getElementById('li-btn').disabled=true;setTimeout(_lgLock,1000);return true;}document.getElementById('li-lock').style.display='none';document.getElementById('li-btn').disabled=false;return false;}
