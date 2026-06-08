@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Zyntra Gestão — Reset</title>
+<style>
+  body{background:#111;color:#f0ede8;font-family:'Inter',sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;flex-direction:column;gap:16px;text-align:center;padding:20px}
+  .ico{font-size:56px}
+  .msg{font-size:18px;font-weight:700}
+  .sub{font-size:13px;color:#a09c92}
+  .btn{margin-top:8px;padding:14px 32px;background:#c9a84c;color:#111;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block}
+</style>
+</head>
+<body>
+<div class="ico">🔓</div>
+<div class="msg" id="msg">Desbloqueando...</div>
+<div class="sub" id="sub">Aguarde um momento</div>
+<script>
+  try {
+    localStorage.removeItem('zg_lock');
+    localStorage.removeItem('zg_sess');
+    document.getElementById('msg').textContent = '✅ Desbloqueado!';
+    document.getElementById('sub').textContent = 'Agora abra o app pelo ícone na tela inicial';
+  } catch(e) {
+    document.getElementById('msg').textContent = '⚠️ Erro';
+    document.getElementById('sub').textContent = e.message;
+  }
+</script>
+<a class="btn" href="/zyntra-app/">Abrir Zyntra Gestão</a>
+</body>
+</html>
