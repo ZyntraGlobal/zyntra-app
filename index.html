@@ -1346,10 +1346,10 @@ function initFrases(){setInterval(function(){_fi=(_fi+1)%FRASES.length;var el=do
 // ── LOGIN SEGURO ─────────────────────────────────────
 var _SALT='zyntra_gestao_2026';
 var _USERS={
-  'felipe':      '2d71431802e57e1ccb68e23240fa3e71f25b0c18283705eaf58ea27c9bcc102e',
-  'funcionario': '31308868d6885a77be2bfee1dd1abbdf0f3f671de364c0786310e2fb65e564cd'
+  'felipe': '2d71431802e57e1ccb68e23240fa3e71f25b0c18283705eaf58ea27c9bcc102e',
+  'colab':  '4d34d096f77b962e35c979af0a7e5f74c26df5e439321e3764b3422f828faad0'
 };
-var _ROLES={'felipe':'dono','funcionario':'funcionario'};
+var _ROLES={'felipe':'dono','colab':'funcionario'};
 function _isFuncionario(){try{var s=JSON.parse(localStorage.getItem('zg_sess')||'{}');return s.role==='funcionario';}catch(e){return false;}}
 function _bloqueadoFunc(){setPage('<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:60vh;gap:16px"><div style="font-size:48px">🔒</div><div style="font-size:16px;font-weight:700;color:var(--t)">Acesso Restrito</div><div style="font-size:13px;color:var(--t3);text-align:center">Esta seção é exclusiva do proprietário.</div></div>');}
 var _MAX_TENT=10,_LOCK_MS=2*60*1000;
