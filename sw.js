@@ -1,5 +1,5 @@
-﻿const CACHE = 'zyntra-app-v15';
-// index.html FORA do cache â€” sempre baixa o mais recente da internet
+const CACHE = 'zyntra-app-v16';
+// index.html FORA do cache — sempre baixa o mais recente da internet
 const ASSETS = [
   '/zyntra-app/mobile.css',
   '/zyntra-app/manifest.json',
@@ -13,7 +13,7 @@ const ASSETS = [
 self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(CACHE).then(c => c.addAll(ASSETS))
-      .then(() => self.skipWaiting())
+      .then(() => self.skipWaiting()) // ativa imediatamente, sem esperar aba fechar
   );
 });
 
@@ -21,14 +21,20 @@ self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys =>
       Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
-    ).then(() => self.clients.claim())
+    ).then(() => self.clients.claim()) // assume controle de todas as abas abertas
+     .then(() => {
+       // Avisa todas as páginas abertas para recarregar com o novo código
+       return self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+     }).then(cls => {
+       cls.forEach(c => c.postMessage({ type: 'SW_UPDATED', cache: CACHE }));
+     })
   );
 });
 
 self.addEventListener('fetch', e => {
   const url = e.request.url;
 
-  // Requisições ao GitHub API e externas: NUNCA interceptar — deixa passar direto
+  // Requisições ao GitHub API e externas: NUNCA interceptar — passa direto
   if (url.includes('api.github.com') || url.includes('ntfy.sh') || url.includes('googleapis.com/oauth')) {
     return;
   }
@@ -42,7 +48,7 @@ self.addEventListener('fetch', e => {
     return;
   }
 
-  // data.json (só do próprio GitHub Pages, não da API): rede primeiro, fallback cache
+  // data.json (só raw GitHub Pages, não a API): rede primeiro, fallback cache
   if (url.includes('data.json') && url.includes('raw.githubusercontent.com')) {
     e.respondWith(
       fetch(e.request)
@@ -75,9 +81,9 @@ self.addEventListener('fetch', e => {
 });
 
 self.addEventListener('push', e => {
-  const data = e.data ? e.data.json() : { title: 'Zyntra GestÃ£o', body: 'Nova notificaÃ§Ã£o' };
+  const data = e.data ? e.data.json() : { title: 'Zyntra Gestão', body: 'Nova notificação' };
   e.waitUntil(
-    self.registration.showNotification(data.title || 'Zyntra GestÃ£o', {
+    self.registration.showNotification(data.title || 'Zyntra Gestão', {
       body: data.body || '',
       icon: '/zyntra-app/icon-192.png',
       badge: '/zyntra-app/icon-192.png',
@@ -98,5 +104,3 @@ self.addEventListener('notificationclick', e => {
     })
   );
 });
-
-

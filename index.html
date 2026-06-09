@@ -1556,4 +1556,16 @@ checkSessao();
     }, 2000);
   });
 })();
+
+// Auto-reload quando SW atualizar — sem precisar limpar cache manualmente
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.addEventListener('message', function(e){
+    if(e.data && e.data.type === 'SW_UPDATED'){
+      window.location.reload();
+    }
+  });
+  navigator.serviceWorker.register('/zyntra-app/sw.js').then(function(reg){
+    reg.update();
+  }).catch(function(){});
+}
 </script></body></html>
