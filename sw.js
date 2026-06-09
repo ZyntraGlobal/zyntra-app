@@ -1,4 +1,4 @@
-﻿const CACHE = 'zyntra-app-v13';
+﻿const CACHE = 'zyntra-app-v14';
 // index.html FORA do cache â€” sempre baixa o mais recente da internet
 const ASSETS = [
   '/zyntra-app/mobile.css',
