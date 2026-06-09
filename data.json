@@ -1388,7 +1388,7 @@
         "valor": 100,
         "forma": "Pix",
         "datavenc": "10/06/2026",
-        "status": "Pago",
+        "status": "Pendente",
         "datapag": "",
         "prior": "Alta",
         "resp": "",
@@ -1647,5 +1647,5 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 17,
-  "_savedAt": 1780968689518
+  "_savedAt": 1780968715763
 }
