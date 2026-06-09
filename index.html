@@ -407,7 +407,7 @@ function _ghSalvarG(){
     });
 }
 
-function save(){_calcABC();DB._savedAt=Date.now();try{localStorage.setItem('zyntra_gestao_v1',JSON.stringify(DB));}catch(e){} if(window.zyntraElectron){window.zyntraElectron.salvar(DB).then(function(r){if(r&&r.ok){var h=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});var el=document.getElementById('fs-status');if(el){el.textContent='✅ Salvo '+h;el.style.color='var(--grn)';el.style.borderColor='rgba(74,222,128,.3)';}}}});}else{_ghSalvarG();}}
+function save(){_calcABC();DB._savedAt=Date.now();try{localStorage.setItem('zyntra_gestao_v1',JSON.stringify(DB));}catch(e){} if(window.zyntraElectron){window.zyntraElectron.salvar(DB).then(function(r){if(r&&r.ok){var h=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});var el=document.getElementById('fs-status');if(el){el.textContent='✅ Salvo '+h;el.style.color='var(--grn)';el.style.borderColor='rgba(74,222,128,.3)';}}});}else{_ghSalvarG();}}
 
 // ── HELPERS ──────────────────────────────────────────
 function R(v){return 'R$ '+Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
@@ -1390,7 +1390,7 @@ async function doLogin(){
     btn.disabled=false;btn.textContent='ENTRAR NO SISTEMA';
     err.textContent='Erro ao processar login. Verifique sua conexão e tente novamente.';
   }
-}}
+}
 function _expirar(){localStorage.removeItem('zg_sess');document.getElementById('login-bg').classList.remove('hidden');document.getElementById('li-pass').value='';var e=document.createElement('div');e.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#1a1917;border:1px solid var(--glb);color:var(--gold);padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;z-index:10000;box-shadow:0 8px 32px rgba(0,0,0,.5)';e.textContent='🔒 Sessão expirada. Faça login novamente.';document.body.appendChild(e);setTimeout(function(){e.remove();},4000);setTimeout(function(){var u=document.getElementById('li-user');if(u)u.focus();},200);}
 var _wt=null;function _iniciarWatch(){if(_wt)clearInterval(_wt);_wt=setInterval(function(){var raw=localStorage.getItem('zg_sess');if(!raw){_expirar();clearInterval(_wt);return;}try{var s=JSON.parse(raw);if(!s.until||Date.now()>=s.until){_expirar();clearInterval(_wt);}}catch(e){_expirar();clearInterval(_wt);}},60000);}
 function checkSessao(){localStorage.removeItem('zg_sess');var bg=document.getElementById('login-bg');if(bg)bg.classList.remove('hidden');setTimeout(function(){var u=document.getElementById('li-user');if(u)u.focus();_lgLock();},150);return false;}
