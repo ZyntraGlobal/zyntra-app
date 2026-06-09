@@ -431,11 +431,12 @@ function _ghSalvarG(){
   var b64=_b64uG(body);
   var api='https://api.github.com/repos/'+_GH_G_REPO+'/contents/data.json';
   var hh={'Authorization':'Bearer '+_GH_G_TOKEN,'Accept':'application/vnd.github+json','User-Agent':'ZyntraG-PWA','Content-Type':'application/json'};
-  fetch(api,{headers:hh})
+  // cache:'no-store' garante que o SW não intercepta nem usa cache — sempre vai direto ao GitHub
+  fetch(api,{headers:hh,cache:'no-store'})
     .then(function(r){return r.json();})
     .then(function(info){
       if(!info||!info.sha){throw new Error('SHA não encontrado — tente novamente');}
-      return fetch(api,{method:'PUT',headers:hh,body:JSON.stringify({message:'update data',content:b64,sha:info.sha})});
+      return fetch(api,{method:'PUT',headers:hh,cache:'no-store',body:JSON.stringify({message:'update data',content:b64,sha:info.sha})});
     })
     .then(function(r){
       if(!r.ok){throw new Error('GitHub retornou erro '+r.status);}
