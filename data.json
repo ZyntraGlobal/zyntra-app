@@ -104,7 +104,7 @@
       "cod": 8,
       "ncm": "8471.60.53",
       "cat": "Mouse",
-      "qty": 0,
+      "qty": 2,
       "min": 15,
       "cmv": 157.92,
       "preco": 0,
@@ -1147,6 +1147,15 @@
       "qty": 2,
       "data": "08/06/2026",
       "obs": ""
+    },
+    {
+      "id": 17,
+      "prodId": 8,
+      "prodNome": "MOUSE GAMER REDRAGON M913 IMPACT ELITE WIRELESS / RGB - PRETO",
+      "tipo": "Entrada",
+      "qty": 2,
+      "data": "09/06/2026",
+      "obs": ""
     }
   ],
   "pag": [
@@ -1646,6 +1655,6 @@
   ],
   "nRtu": 13,
   "nPag": 100,
-  "nMov": 17,
-  "_savedAt": 1780968715763
+  "nMov": 18,
+  "_savedAt": 1781034972274
 }
