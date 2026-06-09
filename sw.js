@@ -1,4 +1,4 @@
-﻿const CACHE = 'zyntra-app-v14';
+﻿const CACHE = 'zyntra-app-v15';
 // index.html FORA do cache â€” sempre baixa o mais recente da internet
 const ASSETS = [
   '/zyntra-app/mobile.css',
@@ -28,7 +28,12 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   const url = e.request.url;
 
-  // index.html: SEMPRE da rede â€” nunca do cache
+  // Requisições ao GitHub API e externas: NUNCA interceptar — deixa passar direto
+  if (url.includes('api.github.com') || url.includes('ntfy.sh') || url.includes('googleapis.com/oauth')) {
+    return;
+  }
+
+  // index.html: SEMPRE da rede — nunca do cache
   if (url.endsWith('/zyntra-app/') || url.includes('/zyntra-app/index.html')) {
     e.respondWith(
       fetch(e.request, { cache: 'no-store' })
@@ -37,8 +42,8 @@ self.addEventListener('fetch', e => {
     return;
   }
 
-  // data.json: rede primeiro, fallback cache
-  if (url.includes('data.json')) {
+  // data.json (só do próprio GitHub Pages, não da API): rede primeiro, fallback cache
+  if (url.includes('data.json') && url.includes('raw.githubusercontent.com')) {
     e.respondWith(
       fetch(e.request)
         .then(r => { caches.open(CACHE).then(c => c.put(e.request, r.clone())); return r; })
