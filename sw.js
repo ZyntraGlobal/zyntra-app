@@ -1,5 +1,5 @@
-const CACHE = 'zyntra-app-v11';
-// index.html FORA do cache — sempre baixa o mais recente da internet
+﻿const CACHE = 'zyntra-app-v12';
+// index.html FORA do cache â€” sempre baixa o mais recente da internet
 const ASSETS = [
   '/zyntra-app/mobile.css',
   '/zyntra-app/manifest.json',
@@ -28,7 +28,7 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   const url = e.request.url;
 
-  // index.html: SEMPRE da rede — nunca do cache
+  // index.html: SEMPRE da rede â€” nunca do cache
   if (url.endsWith('/zyntra-app/') || url.includes('/zyntra-app/index.html')) {
     e.respondWith(
       fetch(e.request, { cache: 'no-store' })
@@ -70,9 +70,9 @@ self.addEventListener('fetch', e => {
 });
 
 self.addEventListener('push', e => {
-  const data = e.data ? e.data.json() : { title: 'Zyntra Gestão', body: 'Nova notificação' };
+  const data = e.data ? e.data.json() : { title: 'Zyntra GestÃ£o', body: 'Nova notificaÃ§Ã£o' };
   e.waitUntil(
-    self.registration.showNotification(data.title || 'Zyntra Gestão', {
+    self.registration.showNotification(data.title || 'Zyntra GestÃ£o', {
       body: data.body || '',
       icon: '/zyntra-app/icon-192.png',
       badge: '/zyntra-app/icon-192.png',
@@ -93,3 +93,4 @@ self.addEventListener('notificationclick', e => {
     })
   );
 });
+
