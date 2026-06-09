@@ -382,7 +382,47 @@ var _GH_G_TOKEN = 'gho_pxYKZ3'+'ODVXqH70zN9V0dIsBkqjMlUs2ID4k2';
 var _GH_G_REPO  = 'ZyntraGlobal/zyntra-app';
 function _b64uG(str){var b=new TextEncoder().encode(str);var s='';b.forEach(function(x){s+=String.fromCharCode(x);});return btoa(s);}
 
+function _pushSWNotif(titulo, corpo){
+  if(!('serviceWorker' in navigator))return;
+  navigator.serviceWorker.ready.then(function(reg){
+    if(!reg.showNotification)return;
+    reg.showNotification(titulo,{body:corpo,icon:'/zyntra-app/icon-192.png',badge:'/zyntra-app/icon-192.png',tag:'zyntra-save',vibrate:[200,100,200]});
+  }).catch(function(){});
+}
+function _resumoSalvo(antes, depois){
+  var L=[];
+  var R=function(v){return 'R$ '+Number(v||0).toFixed(2).replace('.',',');};
+  var MESES=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  // RTU
+  var mA={}; (antes.rtu||[]).forEach(function(r){mA[r.id]=r;});
+  var novIds=new Set((depois.rtu||[]).map(function(r){return r.id;}));
+  (depois.rtu||[]).forEach(function(r){
+    if(!mA[r.id])L.push('➕ RTU: '+r.produto+' · '+R(r.valor));
+    else if(mA[r.id].valor!==r.valor)L.push('✏️ RTU '+r.produto+': '+R(mA[r.id].valor)+' → '+R(r.valor));
+  });
+  (antes.rtu||[]).forEach(function(r){if(!novIds.has(r.id))L.push('🗑️ RTU removido: '+r.produto);});
+  // Pagamentos
+  for(var m=0;m<12;m++){
+    var ant=(antes.pag&&antes.pag[m])||[];
+    var nov=(depois.pag&&depois.pag[m])||[];
+    for(var i=ant.length;i<nov.length;i++)L.push('➕ Pgto '+MESES[m]+': '+nov[i].desc+' · '+R(nov[i].valor));
+    for(var j=0;j<Math.min(ant.length,nov.length);j++){
+      if(ant[j]&&nov[j]&&ant[j].status!==nov[j].status)
+        L.push((nov[j].status==='Pago'?'💳':'✏️')+' '+(nov[j].desc||ant[j].desc)+' ('+MESES[m]+'): '+ant[j].status+' → '+nov[j].status);
+    }
+  }
+  // Estoque
+  var mAP={}; (antes.produtos||[]).forEach(function(p){mAP[p.id]=p;});
+  (depois.produtos||[]).forEach(function(p){
+    var a=mAP[p.id];
+    if(a&&a.qty!==p.qty){var d=p.qty-a.qty;L.push('📦 '+p.nome+': '+(d>0?'+':'')+d+(p.qty<=p.min?' ⚠️':''));}
+  });
+  if(!L.length)L.push('Dados sincronizados com sucesso');
+  return L.slice(0,5).join('\n')+(L.length>5?'\n…+'+(L.length-5)+' mais':'');
+}
 function _ghSalvarG(){
+  var _antes=null;
+  try{_antes=JSON.parse(localStorage.getItem('zyntra_gestao_v1'));}catch(e){}
   var el=document.getElementById('fs-status');
   if(el){el.textContent='💾 Salvando...';el.style.color='var(--amb)';el.style.borderColor='rgba(251,191,36,.3)';}
   DB._savedAt=Date.now();
@@ -400,6 +440,7 @@ function _ghSalvarG(){
       var ts=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
       if(el){el.textContent='✅ Salvo '+ts;el.style.color='var(--grn)';el.style.borderColor='rgba(74,222,128,.3)';}
       _notif('✅ Salvo!','Dados enviados para o servidor','grn');
+      _pushSWNotif('Zyntra Gestão — salvo ✅', _resumoSalvo(_antes||{}, DB));
     })
     .catch(function(){
       if(el){el.textContent='❌ Erro ao salvar';el.style.color='var(--red)';}
