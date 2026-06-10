@@ -1473,9 +1473,9 @@
         "desc": "IMPOSTO",
         "cat": "Impostos",
         "tipo": "Imposto",
-        "valor": 0,
+        "valor": 365.44,
         "forma": "Pix",
-        "datavenc": "20/06/2026",
+        "datavenc": "22/06/2026",
         "status": "Pendente",
         "datapag": "",
         "prior": "Alta",
@@ -1665,5 +1665,5 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 19,
-  "_savedAt": 1781110341838
+  "_savedAt": 1781110385457
 }
