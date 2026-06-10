@@ -94,7 +94,14 @@
 
       const tRemoto = remoto._savedAt || 0;
       const tLocal  = local ? (local._savedAt || 0) : 0;
-      if (tRemoto <= tLocal) return false;
+      if (tRemoto <= tLocal) {
+        // Local é mais recente que GitHub — push automático (dados ficaram presos por falha anterior)
+        if (tLocal > tRemoto && typeof _ghSalvarG === 'function' && typeof DB !== 'undefined' && DB && DB.produtos) {
+          console.log('[ZyntraG] Auto-push: local mais recente que GitHub — enviando...');
+          _ghSalvarG();
+        }
+        return false;
+      }
 
       const linhas = _diffGestao(local, remoto);
       localStorage.setItem(CHAVE, JSON.stringify(remoto));
