@@ -1452,6 +1452,24 @@ async function doLogin(){
       try{badges();}catch(e){}
       try{if(role==='funcionario'){ir('est_produtos');}else{pDash();}}catch(e){console.error('pDash error',e);}
       _iniciarWatch();
+      // Auto-push: se há dados no iPhone mais recentes que o GitHub, envia automaticamente
+      if(!window.zyntraElectron){setTimeout(function(){
+        try{
+          var local=JSON.parse(localStorage.getItem('zyntra_gestao_v1')||'{}');
+          if(!local||!local._savedAt||!local.produtos)return;
+          fetch('https://api.github.com/repos/'+_GH_G_REPO+'/contents/data.json',{headers:{'Authorization':'Bearer '+_GH_G_TOKEN,'Accept':'application/vnd.github+json','User-Agent':'ZyntraG-PWA'},cache:'no-store'})
+            .then(function(r){return r.json();})
+            .then(function(info){
+              if(!info||!info.content)return;
+              var bytes=Uint8Array.from(atob(info.content.replace(/\n/g,'')),function(c){return c.charCodeAt(0);});
+              var rem=JSON.parse(new TextDecoder().decode(bytes));
+              if(local._savedAt>(rem._savedAt||0)){
+                console.log('[ZyntraG] Auto-push login: local mais recente — enviando para GitHub...');
+                _ghSalvarG();
+              }
+            }).catch(function(){});
+        }catch(e){}
+      },2000);}
     }else{
       btn.disabled=false;btn.textContent='ENTRAR NO SISTEMA';
       document.getElementById('li-pass').value='';
