@@ -1585,7 +1585,7 @@
         "desc": "CARTÃO DE CRÉDITO SICOOB",
         "cat": "Cartão/Taxas",
         "tipo": "Outros",
-        "valor": 0,
+        "valor": 2.48558,
         "forma": "Pix",
         "datavenc": "11/06/2026",
         "status": "Pendente",
@@ -1665,5 +1665,5 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 19,
-  "_savedAt": 1781095538148
+  "_savedAt": 1781110320439
 }
