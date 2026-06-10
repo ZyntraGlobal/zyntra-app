@@ -426,7 +426,11 @@ function _ghSalvarG(tentativa){
   try{_antes=JSON.parse(localStorage.getItem('zyntra_gestao_v1'));}catch(e){}
   var el=document.getElementById('fs-status');
   if(tentativa===1&&el){el.textContent='💾 Salvando...';el.style.color='var(--amb)';el.style.background='';el.style.borderColor='rgba(251,191,36,.3)';}
-  var body=JSON.stringify(DB,null,2);
+  // Copia DB com novo timestamp para o PUT — não modifica DB ainda (só aplica se PUT tiver sucesso)
+  var _newSavedAt=Date.now();
+  var _dbEnvio=JSON.parse(JSON.stringify(DB));
+  _dbEnvio._savedAt=_newSavedAt;
+  var body=JSON.stringify(_dbEnvio,null,2);
   var b64=_b64uG(body);
   var api='https://api.github.com/repos/'+_GH_G_REPO+'/contents/data.json';
   var hh={'Authorization':'Bearer '+_GH_G_TOKEN,'Accept':'application/vnd.github+json','User-Agent':'ZyntraG-PWA','Content-Type':'application/json'};
@@ -449,8 +453,8 @@ function _ghSalvarG(tentativa){
         return;
       }
       if(!res.ok)throw new Error('PUT_HTTP_'+res.status+' '+(res.j&&res.j.message||''));
-      // PUT bem-sucedido — só agora avança o _savedAt (evita phantom timestamp)
-      DB._savedAt=Date.now();
+      // PUT bem-sucedido — aplica o timestamp que foi enviado ao GitHub
+      DB._savedAt=_newSavedAt;
       try{localStorage.setItem('zyntra_gestao_v1',JSON.stringify(DB));}catch(e){}
       var ts=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
       if(el){el.textContent='✅ Salvo '+ts;el.style.color='var(--grn)';el.style.background='rgba(74,222,128,.15)';el.style.borderColor='rgba(74,222,128,.3)';}
