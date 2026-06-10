@@ -1434,7 +1434,7 @@
         "valor": 500,
         "forma": "Boleto",
         "datavenc": "10/06/2026",
-        "status": "Pendente",
+        "status": "Pago",
         "datapag": "",
         "prior": "Alta",
         "resp": "",
@@ -1665,5 +1665,5 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 19,
-  "_savedAt": 1781120225371
+  "_savedAt": 1781134027020
 }
