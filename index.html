@@ -420,38 +420,65 @@ function _resumoSalvo(antes, depois){
   if(!L.length)L.push('Dados sincronizados com sucesso');
   return L.slice(0,5).join('\n')+(L.length>5?'\n…+'+(L.length-5)+' mais':'');
 }
-function _ghSalvarG(){
+function _ghSalvarG(tentativa){
+  tentativa=tentativa||1;
   var _antes=null;
   try{_antes=JSON.parse(localStorage.getItem('zyntra_gestao_v1'));}catch(e){}
   var el=document.getElementById('fs-status');
-  if(el){el.textContent='💾 Salvando...';el.style.color='var(--amb)';el.style.borderColor='rgba(251,191,36,.3)';}
-  DB._savedAt=Date.now();
-  try{localStorage.setItem('zyntra_gestao_v1',JSON.stringify(DB));}catch(e){}
+  if(tentativa===1&&el){el.textContent='💾 Salvando...';el.style.color='var(--amb)';el.style.background='';el.style.borderColor='rgba(251,191,36,.3)';}
   var body=JSON.stringify(DB,null,2);
   var b64=_b64uG(body);
   var api='https://api.github.com/repos/'+_GH_G_REPO+'/contents/data.json';
   var hh={'Authorization':'Bearer '+_GH_G_TOKEN,'Accept':'application/vnd.github+json','User-Agent':'ZyntraG-PWA','Content-Type':'application/json'};
   // cache:'no-store' garante que o SW não intercepta nem usa cache — sempre vai direto ao GitHub
   fetch(api,{headers:hh,cache:'no-store'})
-    .then(function(r){return r.json();})
-    .then(function(info){
-      if(!info||!info.sha){throw new Error('SHA não encontrado — tente novamente');}
-      return fetch(api,{method:'PUT',headers:hh,cache:'no-store',body:JSON.stringify({message:'update data',content:b64,sha:info.sha})});
-    })
     .then(function(r){
-      if(!r.ok){throw new Error('GitHub retornou erro '+r.status);}
+      if(!r.ok)throw new Error('GET_HTTP_'+r.status);
+      return r.json();
+    })
+    .then(function(info){
+      if(!info||!info.sha)throw new Error('SHA_NOT_FOUND');
+      return fetch(api,{method:'PUT',headers:hh,cache:'no-store',body:JSON.stringify({message:'update data',content:b64,sha:info.sha})})
+        .then(function(r){return r.json().then(function(j){return{status:r.status,ok:r.ok,j:j};});});
+    })
+    .then(function(res){
+      if(res.status===409&&tentativa<4){
+        // SHA conflict: outro dispositivo salvou entre o GET e o PUT — tenta novamente com SHA fresco
+        console.warn('[ZyntraG] 409 SHA conflict (t'+tentativa+'/3) — retry em '+(800*tentativa)+'ms');
+        setTimeout(function(){_ghSalvarG(tentativa+1);},800*tentativa);
+        return;
+      }
+      if(!res.ok)throw new Error('PUT_HTTP_'+res.status+' '+(res.j&&res.j.message||''));
+      // PUT bem-sucedido — só agora avança o _savedAt (evita phantom timestamp)
+      DB._savedAt=Date.now();
+      try{localStorage.setItem('zyntra_gestao_v1',JSON.stringify(DB));}catch(e){}
       var ts=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-      if(el){el.textContent='✅ Salvo '+ts;el.style.color='var(--grn)';el.style.borderColor='rgba(74,222,128,.3)';}
-      _notif('✅ Salvo e sincronizado!','Notebook vai atualizar em até 30s','grn');
-      _pushSWNotif('Zyntra Gestão — salvo ✅', _resumoSalvo(_antes||{}, DB));
+      if(el){el.textContent='✅ Salvo '+ts;el.style.color='var(--grn)';el.style.background='rgba(74,222,128,.15)';el.style.borderColor='rgba(74,222,128,.3)';}
+      _notif('✅ Salvo e sincronizado!','Notebook vai atualizar em instantes','grn');
+      _pushSWNotif('Zyntra Gestão — salvo ✅',_resumoSalvo(_antes||{},DB));
+      // Trigger instantâneo: notifica o desktop sem esperar o poll de 30s
+      fetch('https://ntfy.sh/zyntra-trigger-gestao-zg2026',{method:'POST',headers:{'Content-Type':'text/plain'},body:'sync',cache:'no-store'}).catch(function(){});
     })
     .catch(function(err){
-      if(el){el.textContent='❌ Erro ao salvar';el.style.color='var(--red)';el.style.background='rgba(239,68,68,.1)';}
+      console.error('[ZyntraG] Erro ao salvar (t'+tentativa+'):',(err&&err.message)||err);
+      if(el){el.textContent='❌ Erro — '+(err&&err.message||'rede');el.style.color='var(--red)';el.style.background='rgba(239,68,68,.1)';el.style.borderColor='rgba(239,68,68,.3)';}
       _notif('❌ Erro ao salvar','Verifique sua conexão e tente novamente','red');
     });
 }
 
-function save(){_calcABC();DB._savedAt=Date.now();try{localStorage.setItem('zyntra_gestao_v1',JSON.stringify(DB));}catch(e){} if(window.zyntraElectron){window.zyntraElectron.salvar(DB).then(function(r){if(r&&r.ok){var h=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});var el=document.getElementById('fs-status');if(el){el.textContent='✅ Salvo '+h;el.style.color='var(--grn)';el.style.borderColor='rgba(74,222,128,.3)';}}});}else{_ghSalvarG();}}
+function save(){
+  _calcABC();
+  if(window.zyntraElectron){
+    DB._savedAt=Date.now();
+    try{localStorage.setItem('zyntra_gestao_v1',JSON.stringify(DB));}catch(e){}
+    window.zyntraElectron.salvar(DB).then(function(r){if(r&&r.ok){var h=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});var el=document.getElementById('fs-status');if(el){el.textContent='✅ Salvo '+h;el.style.color='var(--grn)';el.style.borderColor='rgba(74,222,128,.3)';}}});
+  } else {
+    // Persiste os dados no localStorage imediatamente (sem avançar _savedAt)
+    // _savedAt só avança após o PUT no GitHub ser confirmado (evita phantom timestamp)
+    try{localStorage.setItem('zyntra_gestao_v1',JSON.stringify(DB));}catch(e){}
+    _ghSalvarG();
+  }
+}
 
 // ── HELPERS ──────────────────────────────────────────
 function R(v){return 'R$ '+Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
