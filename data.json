@@ -1608,6 +1608,20 @@
         "resp": "",
         "rec": "Única",
         "obs": ""
+      },
+      {
+        "desc": "CARTÃO DE CRÉDITO CRESOL",
+        "cat": "Cartão/Taxas",
+        "tipo": "Conta Fixa",
+        "valor": 1,
+        "forma": "Pix",
+        "datavenc": "10/06/2026",
+        "status": "Pago",
+        "datapag": "",
+        "prior": "Média",
+        "resp": "",
+        "rec": "Única",
+        "obs": ""
       }
     ],
     [
@@ -1679,5 +1693,5 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 19,
-  "_savedAt": 1781211872305
+  "_savedAt": 1781211933533
 }
