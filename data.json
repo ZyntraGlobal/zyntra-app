@@ -1604,7 +1604,7 @@
         "datavenc": "11/06/2026",
         "status": "Pendente",
         "datapag": "",
-        "prior": "Média",
+        "prior": "Alta",
         "resp": "",
         "rec": "Única",
         "obs": ""
@@ -1679,5 +1679,5 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 19,
-  "_savedAt": 1781211944847
+  "_savedAt": 1781211994392
 }
