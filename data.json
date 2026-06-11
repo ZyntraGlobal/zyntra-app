@@ -1608,6 +1608,20 @@
         "resp": "",
         "rec": "Única",
         "obs": ""
+      },
+      {
+        "desc": "CAPITAL SOCIAL SICOOB",
+        "cat": "Outros",
+        "tipo": "Conta Fixa",
+        "valor": 100,
+        "forma": "Débito Automático",
+        "datavenc": "10/06/2026",
+        "status": "Pago",
+        "datapag": "",
+        "prior": "Média",
+        "resp": "",
+        "rec": "Única",
+        "obs": ""
       }
     ],
     [
@@ -1679,5 +1693,5 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 19,
-  "_savedAt": 1781211994392
+  "_savedAt": 1781212097121
 }
