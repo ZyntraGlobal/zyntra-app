@@ -1693,7 +1693,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 19,
-  "_savedAt": 1781719981504,
+  "_savedAt": 1781720143157,
   "fornecedores": [
     {
       "id": 6,
@@ -1704,7 +1704,7 @@
       "contato": "Micheli",
       "telefone": "11930033360",
       "email": "",
-      "site": "",
+      "site": "micheli@solidpower.com.br",
       "marcas": [
         "Redragon",
         "Lamzu",
