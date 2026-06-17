@@ -6,7 +6,7 @@
       "cod": 1,
       "ncm": "8471.60.53",
       "cat": "Mouse",
-      "qty": 1,
+      "qty": 2,
       "min": 15,
       "cmv": 0,
       "preco": 0,
@@ -1174,6 +1174,15 @@
       "qty": 1,
       "data": "17/06/2026",
       "obs": ""
+    },
+    {
+      "id": 20,
+      "prodId": 1,
+      "prodNome": "MOUSE REDRAGON STORM M808W RGB BRANCO",
+      "tipo": "Entrada",
+      "qty": 1,
+      "data": "17/06/2026",
+      "obs": ""
     }
   ],
   "pag": [
@@ -1701,8 +1710,8 @@
   ],
   "nRtu": 13,
   "nPag": 100,
-  "nMov": 20,
-  "_savedAt": 1781720205218,
+  "nMov": 21,
+  "_savedAt": 1781720245276,
   "fornecedores": [
     {
       "id": 6,
