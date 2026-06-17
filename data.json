@@ -1693,7 +1693,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 19,
-  "_savedAt": 1781717222684,
+  "_savedAt": 1781717239824,
   "fornecedores": [
     {
       "id": 6,
@@ -1707,7 +1707,8 @@
       "site": "",
       "marcas": [
         "Redragon",
-        "Lamzu e Lian Li"
+        "Lamzu",
+        "Lian Li"
       ],
       "obs": "",
       "ativo": true
