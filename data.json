@@ -1693,7 +1693,25 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 19,
-  "_savedAt": 1781716997337,
-  "fornecedores": [],
-  "nForn": 6
+  "_savedAt": 1781717222684,
+  "fornecedores": [
+    {
+      "id": 6,
+      "nome": "Solid Power",
+      "apelido": "Solid Power",
+      "cat": "Importador",
+      "cnpj": "18.370.548/0001-99",
+      "contato": "Micheli",
+      "telefone": "11930033360",
+      "email": "",
+      "site": "",
+      "marcas": [
+        "Redragon",
+        "Lamzu e Lian Li"
+      ],
+      "obs": "",
+      "ativo": true
+    }
+  ],
+  "nForn": 7
 }
