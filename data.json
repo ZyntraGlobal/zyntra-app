@@ -1693,7 +1693,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 19,
-  "_savedAt": 1781716888308,
+  "_savedAt": 1781716916627,
   "fornecedores": [
     {
       "id": 1,
@@ -1727,7 +1727,23 @@
       ],
       "obs": "Distribuidora oficial HyperX e Kingston no Brasil. Periféricos gamer e memórias RAM.",
       "ativo": true
+    },
+    {
+      "id": 3,
+      "nome": "Corsair Memory Brasil",
+      "apelido": "Corsair",
+      "cat": "Importador",
+      "cnpj": "",
+      "contato": "",
+      "telefone": "",
+      "email": "",
+      "site": "",
+      "marcas": [
+        "Corsair"
+      ],
+      "obs": "Periféricos premium, memórias e armazenamento Corsair.",
+      "ativo": true
     }
   ],
-  "nForn": 3
+  "nForn": 4
 }
