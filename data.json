@@ -1693,24 +1693,8 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 19,
-  "_savedAt": 1781716955259,
+  "_savedAt": 1781716990040,
   "fornecedores": [
-    {
-      "id": 1,
-      "nome": "Redragon Brasil Importação LTDA",
-      "apelido": "Redragon",
-      "cat": "Importador",
-      "cnpj": "",
-      "contato": "",
-      "telefone": "",
-      "email": "",
-      "site": "",
-      "marcas": [
-        "Redragon"
-      ],
-      "obs": "Principal fornecedor de periféricos gamer. Marcas próprias.",
-      "ativo": true
-    },
     {
       "id": 2,
       "nome": "HyperX / Kingston Technology",
