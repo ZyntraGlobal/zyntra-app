@@ -1693,7 +1693,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 19,
-  "_savedAt": 1781717316145,
+  "_savedAt": 1781717362196,
   "fornecedores": [
     {
       "id": 6,
@@ -1730,7 +1730,23 @@
       ],
       "obs": "",
       "ativo": true
+    },
+    {
+      "id": 8,
+      "nome": "JOOG",
+      "apelido": "JOOG",
+      "cat": "Fabricante",
+      "cnpj": "",
+      "contato": "Diego",
+      "telefone": "11987306616",
+      "email": "",
+      "site": "",
+      "marcas": [
+        "JOOG"
+      ],
+      "obs": "",
+      "ativo": true
     }
   ],
-  "nForn": 8
+  "nForn": 9
 }
