@@ -1711,7 +1711,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 21,
-  "_savedAt": 1781732923079,
+  "_savedAt": 1781733307891,
   "fornecedores": [
     {
       "id": 6,
@@ -1729,7 +1729,7 @@
         "Lian Li"
       ],
       "obs": "",
-      "ativo": true
+      "ativo": false
     },
     {
       "id": 7,
