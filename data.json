@@ -1711,7 +1711,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 21,
-  "_savedAt": 1781731403077,
+  "_savedAt": 1781731411194,
   "fornecedores": [
     {
       "id": 6,
@@ -1764,7 +1764,21 @@
       ],
       "obs": "",
       "ativo": true
+    },
+    {
+      "id": 13,
+      "nome": "tewtewt",
+      "apelido": "tewtwetwe",
+      "cat": "Importador",
+      "cnpj": "",
+      "contato": "",
+      "telefone": "",
+      "email": "",
+      "site": "",
+      "marcas": [],
+      "obs": "",
+      "ativo": true
     }
   ],
-  "nForn": 13
+  "nForn": 14
 }
