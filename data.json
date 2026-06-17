@@ -1693,7 +1693,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 19,
-  "_savedAt": 1781719214880,
+  "_savedAt": 1781719747998,
   "fornecedores": [
     {
       "id": 6,
@@ -1744,20 +1744,6 @@
       "marcas": [
         "JOOG"
       ],
-      "obs": "",
-      "ativo": true
-    },
-    {
-      "id": 10,
-      "nome": "jhujh",
-      "apelido": "",
-      "cat": "Importador",
-      "cnpj": "",
-      "contato": "",
-      "telefone": "",
-      "email": "",
-      "site": "",
-      "marcas": [],
       "obs": "",
       "ativo": true
     }
