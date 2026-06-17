@@ -1711,7 +1711,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 21,
-  "_savedAt": 1781720245276,
+  "_savedAt": 1781720366879,
   "fornecedores": [
     {
       "id": 6,
@@ -1764,7 +1764,21 @@
       ],
       "obs": "",
       "ativo": true
+    },
+    {
+      "id": 12,
+      "nome": "gsregrseg",
+      "apelido": "",
+      "cat": "Importador",
+      "cnpj": "",
+      "contato": "",
+      "telefone": "",
+      "email": "",
+      "site": "",
+      "marcas": [],
+      "obs": "",
+      "ativo": true
     }
   ],
-  "nForn": 12
+  "nForn": 13
 }
