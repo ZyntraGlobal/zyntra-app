@@ -1693,7 +1693,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 19,
-  "_savedAt": 1781719747998,
+  "_savedAt": 1781719817349,
   "fornecedores": [
     {
       "id": 6,
@@ -1746,7 +1746,21 @@
       ],
       "obs": "",
       "ativo": true
+    },
+    {
+      "id": 11,
+      "nome": "yryw",
+      "apelido": "",
+      "cat": "Importador",
+      "cnpj": "",
+      "contato": "",
+      "telefone": "",
+      "email": "",
+      "site": "",
+      "marcas": [],
+      "obs": "",
+      "ativo": true
     }
   ],
-  "nForn": 11
+  "nForn": 12
 }
