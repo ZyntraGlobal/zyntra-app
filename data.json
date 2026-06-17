@@ -1693,7 +1693,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 19,
-  "_savedAt": 1781717362196,
+  "_savedAt": 1781718636952,
   "fornecedores": [
     {
       "id": 6,
@@ -1746,7 +1746,21 @@
       ],
       "obs": "",
       "ativo": true
+    },
+    {
+      "id": 9,
+      "nome": "rweqrwqr",
+      "apelido": "",
+      "cat": "Importador",
+      "cnpj": "",
+      "contato": "",
+      "telefone": "",
+      "email": "",
+      "site": "",
+      "marcas": [],
+      "obs": "",
+      "ativo": true
     }
   ],
-  "nForn": 9
+  "nForn": 10
 }
