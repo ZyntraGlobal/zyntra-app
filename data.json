@@ -1711,7 +1711,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 21,
-  "_savedAt": 1781730479092,
+  "_savedAt": 1781730885273,
   "fornecedores": [
     {
       "id": 6,
@@ -1755,8 +1755,8 @@
       "apelido": "JOOG",
       "cat": "Fabricante",
       "cnpj": "",
-      "contato": "Diego",
-      "telefone": "11987306616",
+      "contato": "Anderson",
+      "telefone": "54996600463",
       "email": "",
       "site": "",
       "marcas": [
