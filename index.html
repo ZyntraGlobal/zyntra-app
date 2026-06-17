@@ -1462,7 +1462,7 @@ function pFornecedores(busca,filtCat,filtSt){
       var marcasPills=(f.marcas||[]).map(function(m){
         return '<span style="display:inline-block;font-size:10px;padding:2px 8px;border-radius:12px;background:rgba(201,168,76,.13);color:var(--gold);border:1px solid rgba(201,168,76,.28);margin:1px 2px 1px 0;font-weight:600;white-space:nowrap">'+m+'</span>';
       }).join('');
-      h+='<tr>';
+      h+='<tr onclick="editForn('+f.id+')" style="cursor:pointer" title="Toque para editar">';
       h+='<td style="min-width:160px"><div style="font-weight:600;color:var(--t);font-size:13px">'+f.nome+'</div>';
       if(f.apelido)h+='<div style="font-size:10px;color:var(--gold);font-weight:600;margin-top:1px">'+f.apelido+'</div>';
       if(f.cnpj)h+='<div style="font-size:10px;color:var(--t3);font-family:monospace;margin-top:2px">'+f.cnpj+'</div>';
@@ -1477,7 +1477,7 @@ function pFornecedores(busca,filtCat,filtSt){
       if(ativo)h+='<span class="pill pok">Ativo</span>';
       else h+='<span class="pill patrasado">Inativo</span>';
       h+='</td>';
-      h+='<td class="tnw"><button class="btn bsm" onclick="editForn('+f.id+')" title="Editar">✏</button> <button class="btn bsm btnd" onclick="delForn('+f.id+')" title="Excluir">✕</button></td>';
+      h+='<td class="tnw" onclick="event.stopPropagation()"><button class="btn bsm" onclick="editForn('+f.id+')" title="Editar">✏</button> <button class="btn bsm btnd" onclick="delForn('+f.id+')" title="Excluir">✕</button></td>';
       h+='</tr>';
     });
     h+='</tbody></table></div>';

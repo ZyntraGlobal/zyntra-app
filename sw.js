@@ -1,4 +1,4 @@
-const CACHE = 'zyntra-app-v18';
+const CACHE = 'zyntra-app-v19';
 // index.html e web-sync.js FORA do cache — sempre baixa o mais recente da internet
 const ASSETS = [
   '/zyntra-app/mobile.css',
@@ -81,14 +81,15 @@ self.addEventListener('fetch', e => {
 });
 
 self.addEventListener('push', e => {
-  const data = e.data ? e.data.json() : { title: 'Zyntra Gestão', body: 'Nova notificação' };
+  let data = { title: 'Zyntra Gestão', body: 'Dados atualizados' };
+  try { if (e.data) data = e.data.json(); } catch(ex) {}
   e.waitUntil(
     self.registration.showNotification(data.title || 'Zyntra Gestão', {
-      body: data.body || '',
+      body: data.body || 'Dados atualizados',
       icon: '/zyntra-app/icon-192.png',
       badge: '/zyntra-app/icon-192.png',
-      tag: data.tag || 'zyntra-app',
-      data: data
+      tag: 'zyntra-gestao-' + Date.now(),
+      renotify: true
     })
   );
 });
