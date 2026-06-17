@@ -1693,24 +1693,8 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 19,
-  "_savedAt": 1781716991905,
+  "_savedAt": 1781716993499,
   "fornecedores": [
-    {
-      "id": 3,
-      "nome": "Corsair Memory Brasil",
-      "apelido": "Corsair",
-      "cat": "Importador",
-      "cnpj": "",
-      "contato": "",
-      "telefone": "",
-      "email": "",
-      "site": "",
-      "marcas": [
-        "Corsair"
-      ],
-      "obs": "Periféricos premium, memórias e armazenamento Corsair.",
-      "ativo": true
-    },
     {
       "id": 4,
       "nome": "GameSir Brasil",
