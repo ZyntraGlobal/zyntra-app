@@ -195,6 +195,8 @@ tfoot td{font-weight:700;border-top:2px solid var(--bdr2);border-bottom:none!imp
   <div class="sb-sec">Controle RTU</div>
   <div class="ni" onclick="ir('rtu_lanc',this)"><span class="ico">🏦</span><span class="lbl">Lançamentos</span><span class="bdg" id="b-rtu">0</span></div>
   <div class="ni" onclick="ir('rtu_resumo',this)"><span class="ico">📈</span><span class="lbl">Resumo Anual</span></div>
+  <div class="sb-sec">Fornecedores</div>
+  <div class="ni" onclick="ir('fornecedores',this)"><span class="ico">🏭</span><span class="lbl">Fornecedores</span><span class="bdg" id="b-forn" style="display:none">0</span></div>
   <div class="sb-sec">Sistema</div>
   <div class="ni" onclick="fazerBackupG()" id="ni-backup"><span class="ico">💾</span><span class="lbl">Backup</span></div>
 </nav>
@@ -332,13 +334,14 @@ function _normProd(p){
   };
 }
 function loadDB(){
-  try{var s=localStorage.getItem('zyntra_gestao_v1');if(s){var d=JSON.parse(s);d.produtos=d.produtos.map(_normProd);return d;}}catch(e){}
+  try{var s=localStorage.getItem('zyntra_gestao_v1');if(s){var d=JSON.parse(s);d.produtos=d.produtos.map(_normProd);if(!d.fornecedores)d.fornecedores=[];if(!d.nForn)d.nForn=1;return d;}}catch(e){}
   return{
     produtos:JSON.parse(JSON.stringify(PRODUTOS_BASE)).map(_normProd),
     mov:[],
     pag:[[],[],[],[],[],[],[],[],[],[],[],[]],
     rtu:JSON.parse(JSON.stringify(RTU_BASE)),
-    nRtu:10,nPag:100,nMov:100
+    nRtu:10,nPag:100,nMov:100,
+    fornecedores:[],nForn:1
   };
 }
 var DB=loadDB();
@@ -514,6 +517,9 @@ function badges(){
   }
   // RTU
   document.getElementById('b-rtu').textContent=DB.rtu.filter(function(r){return r.valor;}).length;
+  // Fornecedores
+  var bf=document.getElementById('b-forn');
+  if(bf){var nfA=(DB.fornecedores||[]).filter(function(f){return f.ativo!==false;}).length;bf.textContent=nfA;bf.style.display=nfA>0?'inline':'none';}
 }
 
 // ── NAVEGAÇÃO ─────────────────────────────────────────
@@ -526,7 +532,7 @@ function ir(tipo,arg,el){
   // Seções bloqueadas para funcionário
   var _bloq=['dash','est_fin','rtu_resumo','notif'];
   if(_isFuncionario()&&_bloq.indexOf(tipo)>=0){_bloqueadoFunc();document.getElementById('ptitle').textContent='Acesso Restrito';return;}
-  var titulos={dash:'Dashboard',est_produtos:'Estoque — Produtos',est_fin:'Estoque — Financeiro',est_mov:'Estoque — Movimentações',est_alertas:'Estoque — Alertas',rtu_lanc:'Controle RTU — Lançamentos',rtu_resumo:'Controle RTU — Resumo Anual',notif:'Alertas & Notificações'};
+  var titulos={dash:'Dashboard',est_produtos:'Estoque — Produtos',est_fin:'Estoque — Financeiro',est_mov:'Estoque — Movimentações',est_alertas:'Estoque — Alertas',rtu_lanc:'Controle RTU — Lançamentos',rtu_resumo:'Controle RTU — Resumo Anual',notif:'Alertas & Notificações',fornecedores:'Fornecedores'};
   document.getElementById('ptitle').textContent=titulos[tipo]||(tipo==='pag'?'Pagamentos — '+MFULL[(arg||1)-1]+' 2026':tipo);
   if(tipo==='dash')pDash();
   else if(tipo==='est_produtos')pEstProdutos();
@@ -537,6 +543,7 @@ function ir(tipo,arg,el){
   else if(tipo==='rtu_lanc')pRtuLanc();
   else if(tipo==='rtu_resumo')pRtuResumo();
   else if(tipo==='notif')pNotifG();
+  else if(tipo==='fornecedores')pFornecedores();
 }
 
 // ── DASHBOARD ─────────────────────────────────────────
@@ -1396,6 +1403,185 @@ function notifTestarG(){
     }
     _notif('📤 Notificação enviada!','Veja a central de notificações','grn');
   });
+}
+
+// ── FORNECEDORES ──────────────────────────────────────
+var FORN_CATS=['Importador','Distribuidor','Representante','Fabricante','Outros'];
+
+function pFornecedores(busca,filtCat,filtSt){
+  busca=busca||'';filtCat=filtCat||'';filtSt=filtSt||'';
+  if(!DB.fornecedores)DB.fornecedores=[];
+  var todos=DB.fornecedores;
+  var lista=todos.slice();
+  if(busca)lista=lista.filter(function(f){
+    var b=busca.toLowerCase();
+    return (f.nome||'').toLowerCase().indexOf(b)>=0||(f.apelido||'').toLowerCase().indexOf(b)>=0||
+           (f.marcas||[]).join(' ').toLowerCase().indexOf(b)>=0||(f.contato||'').toLowerCase().indexOf(b)>=0;
+  });
+  if(filtCat)lista=lista.filter(function(f){return f.cat===filtCat;});
+  if(filtSt)lista=lista.filter(function(f){return filtSt==='ativo'?f.ativo!==false:f.ativo===false;});
+
+  var ativos=todos.filter(function(f){return f.ativo!==false;}).length;
+  var inativos=todos.filter(function(f){return f.ativo===false;}).length;
+  var todasMarcas=[];
+  todos.forEach(function(f){(f.marcas||[]).forEach(function(m){if(m&&todasMarcas.indexOf(m)<0)todasMarcas.push(m);});});
+
+  var h='<div class="g4">';
+  h+='<div class="card hl"><div class="lbl">Total Fornecedores</div><div class="val gld">'+todos.length+'</div><div class="sub">Cadastrados no sistema</div></div>';
+  h+='<div class="card ok"><div class="lbl">Ativos</div><div class="val grn">'+ativos+'</div><div class="sub">Trabalhando atualmente</div></div>';
+  h+='<div class="card"><div class="lbl">Inativos</div><div class="val" style="color:var(--t3)">'+inativos+'</div><div class="sub">Fora de operação</div></div>';
+  h+='<div class="card"><div class="lbl">Marcas Cadastradas</div><div class="val blu">'+todasMarcas.length+'</div><div class="sub">Marcas distintas</div></div>';
+  h+='</div>';
+
+  h+='<div class="brow">';
+  h+='<input class="inp" id="forn-s" style="width:260px" placeholder="Buscar por nome, marca ou contato..." value="'+busca+'" oninput="_refForn()">';
+  h+='<select class="sel" id="forn-cat" onchange="_refForn()"><option value="">Todas categorias</option>';
+  FORN_CATS.forEach(function(c){h+='<option value="'+c+'"'+(filtCat===c?' selected':'')+'>'+c+'</option>';});
+  h+='</select>';
+  h+='<select class="sel" id="forn-st" onchange="_refForn()"><option value="">Todos</option><option value="ativo"'+(filtSt==='ativo'?' selected':'')+'>Ativos</option><option value="inativo"'+(filtSt==='inativo'?' selected':'')+'>Inativos</option></select>';
+  if(busca||filtCat||filtSt)h+='<button class="btn bsm" onclick="pFornecedores()">✕ Limpar</button>';
+  h+='<button class="btn btnp" style="margin-left:auto" onclick="modalAddForn()">+ Novo Fornecedor</button>';
+  h+='</div>';
+
+  h+='<div class="panel"><div class="ph"><div class="pt">Fornecedores ('+lista.length+')</div></div>';
+  if(lista.length===0){
+    h+='<div class="empty" style="padding:56px 36px">';
+    if(todos.length===0){
+      h+='<div style="font-size:32px;margin-bottom:12px">🏭</div>';
+      h+='<div style="font-size:14px;font-weight:600;color:var(--t2);margin-bottom:6px">Nenhum fornecedor cadastrado</div>';
+      h+='<div style="font-size:12px;color:var(--t3);margin-bottom:16px">Cadastre seus fornecedores e controle as marcas que você trabalha</div>';
+      h+='<button class="btn btnp" onclick="modalAddForn()">+ Cadastrar Primeiro Fornecedor</button>';
+    } else {
+      h+='<div style="font-size:12px;color:var(--t3)">Nenhum fornecedor encontrado com os filtros aplicados.</div>';
+    }
+    h+='</div>';
+  } else {
+    h+='<div class="ts tw"><table><thead><tr><th>FORNECEDOR</th><th>CATEGORIA</th><th>CONTATO</th><th>TELEFONE</th><th>E-MAIL</th><th>MARCAS</th><th>STATUS</th><th></th></tr></thead><tbody>';
+    lista.forEach(function(f){
+      var ativo=f.ativo!==false;
+      var marcasPills=(f.marcas||[]).map(function(m){
+        return '<span style="display:inline-block;font-size:10px;padding:2px 8px;border-radius:12px;background:rgba(201,168,76,.13);color:var(--gold);border:1px solid rgba(201,168,76,.28);margin:1px 2px 1px 0;font-weight:600;white-space:nowrap">'+m+'</span>';
+      }).join('');
+      h+='<tr>';
+      h+='<td style="min-width:160px"><div style="font-weight:600;color:var(--t);font-size:13px">'+f.nome+'</div>';
+      if(f.apelido)h+='<div style="font-size:10px;color:var(--gold);font-weight:600;margin-top:1px">'+f.apelido+'</div>';
+      if(f.cnpj)h+='<div style="font-size:10px;color:var(--t3);font-family:monospace;margin-top:2px">'+f.cnpj+'</div>';
+      if(f.site)h+='<div style="font-size:10px;color:var(--blu);margin-top:2px">'+f.site+'</div>';
+      h+='</td>';
+      h+='<td><span class="pill pn" style="font-size:10px">'+(f.cat||'—')+'</span></td>';
+      h+='<td style="font-size:12px">'+(f.contato||'<span style="color:var(--t3)">—</span>')+'</td>';
+      h+='<td style="font-size:12px;white-space:nowrap">'+(f.telefone||'<span style="color:var(--t3)">—</span>')+'</td>';
+      h+='<td style="font-size:12px">'+(f.email||'<span style="color:var(--t3)">—</span>')+'</td>';
+      h+='<td style="min-width:140px;max-width:240px">'+(marcasPills||'<span style="color:var(--t3);font-size:11px">—</span>')+'</td>';
+      h+='<td class="tc">';
+      if(ativo)h+='<span class="pill pok">Ativo</span>';
+      else h+='<span class="pill patrasado">Inativo</span>';
+      h+='</td>';
+      h+='<td class="tnw"><button class="btn bsm" onclick="editForn('+f.id+')" title="Editar">✏</button> <button class="btn bsm btnd" onclick="delForn('+f.id+')" title="Excluir">✕</button></td>';
+      h+='</tr>';
+    });
+    h+='</tbody></table></div>';
+  }
+  h+='</div>';
+
+  if(todasMarcas.length>0){
+    var marcaMap={};
+    todos.forEach(function(f){
+      (f.marcas||[]).forEach(function(m){
+        if(!m)return;
+        if(!marcaMap[m])marcaMap[m]=[];
+        marcaMap[m].push({nome:f.nome,ativo:f.ativo!==false});
+      });
+    });
+    h+='<div class="sec">Visão por Marca</div>';
+    h+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;margin-bottom:16px">';
+    Object.keys(marcaMap).sort().forEach(function(m){
+      h+='<div class="card" style="padding:12px 14px">';
+      h+='<div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:8px;display:flex;align-items:center;gap:6px"><span>🏷</span>'+m+'</div>';
+      marcaMap[m].forEach(function(f){
+        h+='<div style="font-size:11px;color:'+(f.ativo?'var(--t2)':'var(--t3)')+';padding:2px 0;display:flex;align-items:center;gap:5px">';
+        h+='<span style="font-size:9px">'+(f.ativo?'●':'○')+'</span>'+f.nome+'</div>';
+      });
+      h+='</div>';
+    });
+    h+='</div>';
+  }
+
+  setPage(h);
+}
+
+function _refForn(){
+  var b=document.getElementById('forn-s');
+  var c=document.getElementById('forn-cat');
+  var s=document.getElementById('forn-st');
+  pFornecedores(b?b.value:'',c?c.value:'',s?s.value:'');
+}
+
+function _formForn(vals){
+  vals=vals||{};
+  var marcasStr=(vals.marcas||[]).join(', ');
+  var catsOpts=FORN_CATS.map(function(c){return '<option value="'+c+'"'+(vals.cat===c?' selected':'')+'>'+c+'</option>';}).join('');
+  return '<div class="fg f2">'+
+    '<div style="grid-column:1/-1"><label>Nome do Fornecedor *</label><input id="nf-nome" value="'+(vals.nome||'')+'" placeholder="Ex: Redragon Brasil Importação LTDA"></div>'+
+    '<div><label>Apelido / Nome Curto</label><input id="nf-apelido" value="'+(vals.apelido||'')+'" placeholder="Ex: Redragon"></div>'+
+    '<div><label>Categoria</label><select id="nf-cat">'+catsOpts+'</select></div>'+
+    '<div><label>CNPJ</label><input id="nf-cnpj" value="'+(vals.cnpj||'')+'" placeholder="00.000.000/0000-00"></div>'+
+    '<div><label>Status</label><select id="nf-ativo"><option value="1"'+(vals.ativo!==false?' selected':'')+'>Ativo</option><option value="0"'+(vals.ativo===false?' selected':'')+'>Inativo</option></select></div>'+
+    '<div><label>Nome do Contato</label><input id="nf-contato" value="'+(vals.contato||'')+'" placeholder="Nome do representante comercial"></div>'+
+    '<div><label>Telefone / WhatsApp</label><input id="nf-tel" value="'+(vals.telefone||'')+'" placeholder="(11) 99999-9999"></div>'+
+    '<div><label>E-mail</label><input id="nf-email" value="'+(vals.email||'')+'" placeholder="comercial@fornecedor.com.br"></div>'+
+    '<div><label>Site / Portal B2B</label><input id="nf-site" value="'+(vals.site||'')+'" placeholder="www.fornecedor.com.br"></div>'+
+    '<div style="grid-column:1/-1"><label>Marcas que Trabalha <span style="color:var(--t3);font-weight:400">(separadas por vírgula)</span></label><input id="nf-marcas" value="'+marcasStr+'" placeholder="Ex: Redragon, HyperX, Corsair"></div>'+
+    '<div style="grid-column:1/-1"><label>Observações</label><textarea id="nf-obs" style="width:100%;resize:vertical;min-height:64px;padding:7px 9px;font-size:12px;font-family:Inter,sans-serif;border:1px solid var(--bdr2);border-radius:6px;background:var(--w2);color:var(--t);outline:none">'+(vals.obs||'')+'</textarea></div>'+
+    '</div>';
+}
+
+function _lerFormForn(){
+  var marcasRaw=(document.getElementById('nf-marcas').value||'');
+  var marcas=marcasRaw.split(',').map(function(m){return m.trim();}).filter(Boolean);
+  return{
+    nome:(document.getElementById('nf-nome').value||'').trim(),
+    apelido:(document.getElementById('nf-apelido').value||'').trim(),
+    cat:document.getElementById('nf-cat').value,
+    cnpj:(document.getElementById('nf-cnpj').value||'').trim(),
+    contato:(document.getElementById('nf-contato').value||'').trim(),
+    telefone:(document.getElementById('nf-tel').value||'').trim(),
+    email:(document.getElementById('nf-email').value||'').trim(),
+    site:(document.getElementById('nf-site').value||'').trim(),
+    marcas:marcas,
+    obs:(document.getElementById('nf-obs').value||'').trim(),
+    ativo:document.getElementById('nf-ativo').value==='1'
+  };
+}
+
+function modalAddForn(){
+  abrirM('Novo Fornecedor',_formForn(),function(){
+    var dados=_lerFormForn();
+    if(!dados.nome){alert('Informe o nome do fornecedor.');return;}
+    if(!DB.fornecedores)DB.fornecedores=[];
+    if(!DB.nForn)DB.nForn=1;
+    DB.fornecedores.push(Object.assign({id:DB.nForn++},dados));
+    save();badges();fecharM();pFornecedores();
+  },true);
+}
+
+function editForn(id){
+  if(!DB.fornecedores)return;
+  var f=DB.fornecedores.find(function(x){return x.id===id;});if(!f)return;
+  abrirM('Editar Fornecedor — '+f.nome,_formForn(f),function(){
+    var dados=_lerFormForn();
+    if(!dados.nome){alert('Informe o nome do fornecedor.');return;}
+    Object.assign(f,dados);
+    save();badges();fecharM();pFornecedores();
+  },true);
+}
+
+function delForn(id){
+  if(!DB.fornecedores)return;
+  var f=DB.fornecedores.find(function(x){return x.id===id;});if(!f)return;
+  if(!confirm('Excluir o fornecedor "'+f.nome+'"?\n\nEsta ação não pode ser desfeita.'))return;
+  DB.fornecedores=DB.fornecedores.filter(function(x){return x.id!==id;});
+  save();badges();pFornecedores();
 }
 
 function notifChecarG(){
