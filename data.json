@@ -1693,7 +1693,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 19,
-  "_savedAt": 1781717239824,
+  "_savedAt": 1781717316145,
   "fornecedores": [
     {
       "id": 6,
@@ -1712,7 +1712,25 @@
       ],
       "obs": "",
       "ativo": true
+    },
+    {
+      "id": 7,
+      "nome": "Kase Distribuidora",
+      "apelido": "Kase",
+      "cat": "Distribuidor",
+      "cnpj": "",
+      "contato": "Lucas",
+      "telefone": "11955836037",
+      "email": "",
+      "site": "",
+      "marcas": [
+        "Havit",
+        "Attack Shark",
+        "Onikuma"
+      ],
+      "obs": "",
+      "ativo": true
     }
   ],
-  "nForn": 7
+  "nForn": 8
 }
