@@ -1638,6 +1638,8 @@ async function doLogin(){
       try{badges();}catch(e){}
       try{if(role==='funcionario'){ir('est_produtos');}else{pDash();}}catch(e){console.error('pDash error',e);}
       _iniciarWatch();
+      // Renova push subscription ao fazer login
+      try{_assinarPushG();}catch(e){}
       // Auto-push: se há dados no iPhone mais recentes que o GitHub, envia automaticamente
       if(!window.zyntraElectron){setTimeout(function(){
         try{
