@@ -6,7 +6,7 @@
       "cod": 1,
       "ncm": "8471.60.53",
       "cat": "Mouse",
-      "qty": 1,
+      "qty": 0,
       "min": 15,
       "cmv": 0,
       "preco": 0,
@@ -1711,7 +1711,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 21,
-  "_savedAt": 1781888768745,
+  "_savedAt": 1781888783246,
   "fornecedores": [
     {
       "id": 6,
