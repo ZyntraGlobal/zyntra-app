@@ -125,34 +125,40 @@
     }
   }
 
+  // Renova subscription push e republica no relay ntfy
+  var _lastPushRenew = 0;
+  function _renewPushG() {
+    if (!('serviceWorker' in navigator) || !('Notification' in window) || Notification.permission !== 'granted') return;
+    var now = Date.now();
+    if (now - _lastPushRenew < 1200000) return; // a cada 20 min
+    _lastPushRenew = now;
+    navigator.serviceWorker.ready.then(function(reg) {
+      function urlB64(b){var p='='.repeat((4-b.length%4)%4);var s=(b+p).replace(/-/g,'+').replace(/_/g,'/');var r=window.atob(s);var o=new Uint8Array(r.length);for(var i=0;i<r.length;i++)o[i]=r.charCodeAt(i);return o;}
+      var salvar = function(s){ fetch('https://ntfy.sh/zyntra-sub-gestao-zg2026x',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(s)}).catch(function(){}); };
+      reg.pushManager.getSubscription().then(function(sub) {
+        if (sub) { salvar(sub); return; }
+        reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlB64('BBhENPjxNvUjD-1ug7UJMdfnWJU3AvpBunQKj8dR_JNlr0J3_RFKCpRVEBbrmKIK6J_E9aCSv4y3thL_R0xMONE') })
+          .then(salvar).catch(function(){});
+      });
+    }).catch(function(){});
+  }
+
   // Polling: 10s com app aberto, 60s em background
   function iniciarPolling() {
     let timer;
     function agendar() {
       clearTimeout(timer);
-      timer = setTimeout(async function() { await sincronizar(); agendar(); },
+      timer = setTimeout(async function() { await sincronizar(); _renewPushG(); agendar(); },
         document.hidden ? 60000 : 10000);
     }
-    document.addEventListener('visibilitychange', agendar);
+    document.addEventListener('visibilitychange', function() { _renewPushG(); agendar(); });
     agendar();
   }
   iniciarPolling();
 
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/zyntra-app/sw.js', { scope: '/zyntra-app/' })
-      .then(function() {
-        if ('Notification' in window && Notification.permission === 'granted') {
-          navigator.serviceWorker.ready.then(function(reg) {
-            reg.pushManager.getSubscription().then(function(sub) {
-              function urlB64(b){var p='='.repeat((4-b.length%4)%4);var s=(b+p).replace(/-/g,'+').replace(/_/g,'/');var r=window.atob(s);var o=new Uint8Array(r.length);for(var i=0;i<r.length;i++)o[i]=r.charCodeAt(i);return o;}
-              var salvar = function(s){ fetch('https://ntfy.sh/zyntra-sub-gestao-zg2026x',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(s)}).catch(function(){}); };
-              if (sub) { salvar(sub); return; }
-              reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlB64('BBhENPjxNvUjD-1ug7UJMdfnWJU3AvpBunQKj8dR_JNlr0J3_RFKCpRVEBbrmKIK6J_E9aCSv4y3thL_R0xMONE') })
-                .then(salvar).catch(function(){});
-            });
-          });
-        }
-      })
+      .then(function() { _renewPushG(); })
       .catch(function(e) { console.warn('SW:', e); });
   }
 })();
