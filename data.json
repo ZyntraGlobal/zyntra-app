@@ -1711,7 +1711,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 21,
-  "_savedAt": 1781901695931,
+  "_savedAt": 1782243818063,
   "fornecedores": [
     {
       "id": 6,
@@ -1764,7 +1764,32 @@
       ],
       "obs": "",
       "ativo": true
+    },
+    {
+      "id": 14,
+      "nome": "AXTN DISTRIBUIDORA",
+      "apelido": "AXTN",
+      "cat": "Distribuidor",
+      "cnpj": "",
+      "contato": "Rodrigo",
+      "telefone": "5435386900",
+      "email": "",
+      "site": "",
+      "marcas": [
+        "Acer",
+        "AOC",
+        "ASUS",
+        "Cooler Master",
+        "Intel",
+        "Kingston",
+        "Logitech",
+        "NVIDIA",
+        "Seagate",
+        "TP-LINK"
+      ],
+      "obs": "",
+      "ativo": true
     }
   ],
-  "nForn": 14
+  "nForn": 15
 }
