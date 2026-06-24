@@ -1464,9 +1464,9 @@
         "cat": "Internet/Telefone",
         "tipo": "Conta Fixa",
         "valor": 110,
-        "forma": "Pix",
+        "forma": "Boleto",
         "datavenc": "15/06/2026",
-        "status": "Atrasado",
+        "status": "Pago",
         "datapag": "",
         "prior": "Alta",
         "resp": "",
@@ -1711,7 +1711,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 21,
-  "_savedAt": 1782246889842,
+  "_savedAt": 1782262655458,
   "fornecedores": [
     {
       "id": 6,
