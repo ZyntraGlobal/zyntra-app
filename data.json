@@ -1894,6 +1894,20 @@
         "resp": "",
         "rec": "Única",
         "obs": ""
+      },
+      {
+        "desc": "EMPRESTIMO ML PARCELAS",
+        "cat": "Outros",
+        "tipo": "Conta Variável",
+        "valor": 95.98,
+        "forma": "Débito Automático",
+        "datavenc": "28/07/2026",
+        "status": "Pendente",
+        "datapag": "",
+        "prior": "Alta",
+        "resp": "",
+        "rec": "Única",
+        "obs": ""
       }
     ],
     [],
@@ -1949,7 +1963,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 21,
-  "_savedAt": 1782399383322,
+  "_savedAt": 1782399424194,
   "fornecedores": [
     {
       "id": 6,
