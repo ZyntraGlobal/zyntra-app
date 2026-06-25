@@ -1795,7 +1795,7 @@
         "prior": "Alta",
         "resp": "",
         "rec": "Única",
-        "obs": ""
+        "obs": "ESPERAR CONTADOR ENVIAR"
       }
     ],
     [],
@@ -1851,7 +1851,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 21,
-  "_savedAt": 1782398955934,
+  "_savedAt": 1782398971439,
   "fornecedores": [
     {
       "id": 6,
