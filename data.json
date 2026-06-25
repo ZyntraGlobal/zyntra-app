@@ -1829,7 +1829,7 @@
         "desc": "FATURA MERCADO LIVRE",
         "cat": "Cartão/Taxas",
         "tipo": "Conta Variável",
-        "valor": 4,
+        "valor": 0,
         "forma": "Débito Automático",
         "datavenc": "10/07/2026",
         "status": "Pendente",
@@ -1893,7 +1893,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 21,
-  "_savedAt": 1782399148945,
+  "_savedAt": 1782399153456,
   "fornecedores": [
     {
       "id": 6,
