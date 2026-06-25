@@ -1787,7 +1787,7 @@
         "desc": "SIMPLES NACIONAL - IMPOSTO",
         "cat": "Impostos",
         "tipo": "Imposto",
-        "valor": 300,
+        "valor": 0,
         "forma": "Boleto",
         "datavenc": "20/07/2026",
         "status": "Pendente",
@@ -1851,7 +1851,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 21,
-  "_savedAt": 1782398949727,
+  "_savedAt": 1782398955934,
   "fornecedores": [
     {
       "id": 6,
