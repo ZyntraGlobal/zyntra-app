@@ -1726,6 +1726,20 @@
         "resp": "",
         "rec": "Única",
         "obs": ""
+      },
+      {
+        "desc": "AMAZON MENSALIDADE",
+        "cat": "Serviços Terceiros",
+        "tipo": "Conta Fixa",
+        "valor": 19,
+        "forma": "Débito Automático",
+        "datavenc": "05/07/2026",
+        "status": "Pendente",
+        "datapag": "",
+        "prior": "Alta",
+        "resp": "",
+        "rec": "Única",
+        "obs": ""
       }
     ],
     [],
@@ -1781,7 +1795,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 21,
-  "_savedAt": 1782398517313,
+  "_savedAt": 1782398656312,
   "fornecedores": [
     {
       "id": 6,
