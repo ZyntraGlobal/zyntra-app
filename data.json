@@ -1698,6 +1698,20 @@
         "resp": "",
         "rec": "Única",
         "obs": ""
+      },
+      {
+        "desc": "CONTADOR",
+        "cat": "Serviços Terceiros",
+        "tipo": "Conta Fixa",
+        "valor": 500,
+        "forma": "Boleto",
+        "datavenc": "10/07/2026",
+        "status": "Pendente",
+        "datapag": "",
+        "prior": "Alta",
+        "resp": "",
+        "rec": "Única",
+        "obs": ""
       }
     ],
     [],
@@ -1753,7 +1767,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 21,
-  "_savedAt": 1782398471230,
+  "_savedAt": 1782398497734,
   "fornecedores": [
     {
       "id": 6,
