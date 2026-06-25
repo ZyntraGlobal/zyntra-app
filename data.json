@@ -1684,6 +1684,20 @@
         "resp": "",
         "rec": "Mensal",
         "obs": ""
+      },
+      {
+        "desc": "ERP",
+        "cat": "Sistema/Software",
+        "tipo": "Conta Fixa",
+        "valor": 55,
+        "forma": "Pix",
+        "datavenc": "10/07/2026",
+        "status": "Pendente",
+        "datapag": "",
+        "prior": "Alta",
+        "resp": "",
+        "rec": "Única",
+        "obs": ""
       }
     ],
     [],
@@ -1739,7 +1753,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 21,
-  "_savedAt": 1782398411240,
+  "_savedAt": 1782398471230,
   "fornecedores": [
     {
       "id": 6,
