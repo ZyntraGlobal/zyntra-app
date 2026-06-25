@@ -1042,7 +1042,7 @@
       "cod": 75,
       "ncm": "8471.60.53",
       "cat": "Mouse",
-      "qty": 1,
+      "qty": 0,
       "min": 10,
       "cmv": 598.35,
       "preco": 0,
@@ -1182,6 +1182,15 @@
       "tipo": "Entrada",
       "qty": 1,
       "data": "17/06/2026",
+      "obs": ""
+    },
+    {
+      "id": 21,
+      "prodId": 75,
+      "prodNome": "MOUSE GAMER LAMZU MAYA X AIKLABS - AZUL",
+      "tipo": "Saída",
+      "qty": 1,
+      "data": "25/06/2026",
       "obs": ""
     }
   ],
@@ -1990,8 +1999,8 @@
   ],
   "nRtu": 13,
   "nPag": 100,
-  "nMov": 21,
-  "_savedAt": 1782402439990,
+  "nMov": 22,
+  "_savedAt": 1782425312569,
   "fornecedores": [
     {
       "id": 6,
