@@ -1782,6 +1782,20 @@
         "resp": "",
         "rec": "Única",
         "obs": ""
+      },
+      {
+        "desc": "SIMPLES NACIONAL - IMPOSTO",
+        "cat": "Impostos",
+        "tipo": "Imposto",
+        "valor": 300,
+        "forma": "Boleto",
+        "datavenc": "20/07/2026",
+        "status": "Pendente",
+        "datapag": "",
+        "prior": "Alta",
+        "resp": "",
+        "rec": "Única",
+        "obs": ""
       }
     ],
     [],
@@ -1837,7 +1851,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 21,
-  "_savedAt": 1782398897284,
+  "_savedAt": 1782398949727,
   "fornecedores": [
     {
       "id": 6,
