@@ -1866,6 +1866,20 @@
         "resp": "",
         "rec": "Única",
         "obs": ""
+      },
+      {
+        "desc": "CARTÃO DE CRÉDITO CRESOL",
+        "cat": "Outros",
+        "tipo": "Conta Variável",
+        "valor": 3793.12,
+        "forma": "Dinheiro",
+        "datavenc": "10/07/2026",
+        "status": "Pendente",
+        "datapag": "",
+        "prior": "Alta",
+        "resp": "",
+        "rec": "Única",
+        "obs": ""
       }
     ],
     [],
@@ -1921,7 +1935,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 21,
-  "_savedAt": 1782399226283,
+  "_savedAt": 1782399292439,
   "fornecedores": [
     {
       "id": 6,
