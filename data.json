@@ -1636,7 +1636,7 @@
         "datavenc": "10/06/2026",
         "status": "Pago",
         "datapag": "",
-        "prior": "Média",
+        "prior": "Alta",
         "resp": "",
         "rec": "Única",
         "obs": ""
@@ -1935,7 +1935,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 21,
-  "_savedAt": 1782399292439,
+  "_savedAt": 1782399309836,
   "fornecedores": [
     {
       "id": 6,
