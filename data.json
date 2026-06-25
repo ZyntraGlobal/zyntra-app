@@ -1656,6 +1656,20 @@
         "resp": "Empresa",
         "rec": "Única",
         "obs": ""
+      },
+      {
+        "desc": "ALUGUEL SALA COMERCIAL",
+        "cat": "Aluguel",
+        "tipo": "Conta Fixa",
+        "valor": 800,
+        "forma": "Boleto",
+        "datavenc": "10/07/2026",
+        "status": "Pendente",
+        "datapag": "",
+        "prior": "Alta",
+        "resp": "",
+        "rec": "Mensal",
+        "obs": ""
       }
     ],
     [],
@@ -1711,7 +1725,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 21,
-  "_savedAt": 1782262670616,
+  "_savedAt": 1782398357019,
   "fornecedores": [
     {
       "id": 6,
