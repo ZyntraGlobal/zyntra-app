@@ -1901,13 +1901,13 @@
         "tipo": "Conta Variável",
         "valor": 95.98,
         "forma": "Débito Automático",
-        "datavenc": "28/07/2026",
+        "datavenc": "29/07/2026",
         "status": "Pendente",
         "datapag": "",
         "prior": "Alta",
         "resp": "",
         "rec": "Única",
-        "obs": ""
+        "obs": "4/9"
       }
     ],
     [],
@@ -1963,7 +1963,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 21,
-  "_savedAt": 1782399424194,
+  "_savedAt": 1782399456729,
   "fornecedores": [
     {
       "id": 6,
