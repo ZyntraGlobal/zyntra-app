@@ -1824,6 +1824,20 @@
         "resp": "",
         "rec": "Única",
         "obs": ""
+      },
+      {
+        "desc": "FATURA MERCADO LIVRE",
+        "cat": "Cartão/Taxas",
+        "tipo": "Conta Variável",
+        "valor": 4,
+        "forma": "Débito Automático",
+        "datavenc": "10/07/2026",
+        "status": "Pendente",
+        "datapag": "",
+        "prior": "Alta",
+        "resp": "",
+        "rec": "Única",
+        "obs": ""
       }
     ],
     [],
@@ -1879,7 +1893,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 21,
-  "_savedAt": 1782399085450,
+  "_savedAt": 1782399148945,
   "fornecedores": [
     {
       "id": 6,
