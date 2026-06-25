@@ -1852,6 +1852,20 @@
         "resp": "",
         "rec": "Única",
         "obs": ""
+      },
+      {
+        "desc": "CAPITAL SOCIAL CRESOL",
+        "cat": "Outros",
+        "tipo": "Conta Fixa",
+        "valor": 100,
+        "forma": "Débito Automático",
+        "datavenc": "10/07/2026",
+        "status": "Pendente",
+        "datapag": "",
+        "prior": "Alta",
+        "resp": "",
+        "rec": "Única",
+        "obs": ""
       }
     ],
     [],
@@ -1907,7 +1921,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 21,
-  "_savedAt": 1782399197667,
+  "_savedAt": 1782399226283,
   "fornecedores": [
     {
       "id": 6,
