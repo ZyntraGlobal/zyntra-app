@@ -1712,6 +1712,20 @@
         "resp": "",
         "rec": "Única",
         "obs": ""
+      },
+      {
+        "desc": "INTERNET",
+        "cat": "Internet/Telefone",
+        "tipo": "Conta Fixa",
+        "valor": 109.9,
+        "forma": "Boleto",
+        "datavenc": "15/07/2026",
+        "status": "Pendente",
+        "datapag": "",
+        "prior": "Alta",
+        "resp": "",
+        "rec": "Única",
+        "obs": ""
       }
     ],
     [],
@@ -1767,7 +1781,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 21,
-  "_savedAt": 1782398497734,
+  "_savedAt": 1782398517313,
   "fornecedores": [
     {
       "id": 6,
