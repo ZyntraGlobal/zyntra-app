@@ -1913,7 +1913,7 @@
         "desc": "FATURA AZUL LOGÍSTICAS",
         "cat": "Fornecedor",
         "tipo": "Conta Fixa",
-        "valor": 8,
+        "valor": 0,
         "forma": "Boleto",
         "datavenc": "10/07/2026",
         "status": "Pendente",
@@ -1977,7 +1977,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 21,
-  "_savedAt": 1782399567902,
+  "_savedAt": 1782399572091,
   "fornecedores": [
     {
       "id": 6,
