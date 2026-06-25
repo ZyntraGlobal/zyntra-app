@@ -1754,6 +1754,20 @@
         "resp": "",
         "rec": "Única",
         "obs": "PARCELA 4/5"
+      },
+      {
+        "desc": "TAXA DE LIXO",
+        "cat": "Cartão/Taxas",
+        "tipo": "Conta Fixa",
+        "valor": 122.18,
+        "forma": "Pix",
+        "datavenc": "15/07/2026",
+        "status": "Pendente",
+        "datapag": "",
+        "prior": "Alta",
+        "resp": "",
+        "rec": "Única",
+        "obs": ""
       }
     ],
     [],
@@ -1809,7 +1823,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 21,
-  "_savedAt": 1782398794781,
+  "_savedAt": 1782398844370,
   "fornecedores": [
     {
       "id": 6,
