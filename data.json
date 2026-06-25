@@ -1880,6 +1880,20 @@
         "resp": "",
         "rec": "Única",
         "obs": ""
+      },
+      {
+        "desc": "LUZ",
+        "cat": "Energia",
+        "tipo": "Conta Variável",
+        "valor": 92.5,
+        "forma": "Pix",
+        "datavenc": "10/07/2026",
+        "status": "Pendente",
+        "datapag": "",
+        "prior": "Alta",
+        "resp": "",
+        "rec": "Única",
+        "obs": ""
       }
     ],
     [],
@@ -1935,7 +1949,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 21,
-  "_savedAt": 1782399309836,
+  "_savedAt": 1782399383322,
   "fornecedores": [
     {
       "id": 6,
