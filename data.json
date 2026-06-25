@@ -1670,6 +1670,20 @@
         "resp": "",
         "rec": "Mensal",
         "obs": ""
+      },
+      {
+        "desc": "CONDOMINIO-CONTA DE AGUA",
+        "cat": "Água",
+        "tipo": "Conta Fixa",
+        "valor": 100,
+        "forma": "Boleto",
+        "datavenc": "10/07/2026",
+        "status": "Pendente",
+        "datapag": "",
+        "prior": "Alta",
+        "resp": "",
+        "rec": "Mensal",
+        "obs": ""
       }
     ],
     [],
@@ -1725,7 +1739,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 21,
-  "_savedAt": 1782398357019,
+  "_savedAt": 1782398411240,
   "fornecedores": [
     {
       "id": 6,
