@@ -1768,6 +1768,20 @@
         "resp": "",
         "rec": "Única",
         "obs": ""
+      },
+      {
+        "desc": "PRO LABORE E INSS",
+        "cat": "Impostos",
+        "tipo": "Imposto",
+        "valor": 176,
+        "forma": "Boleto",
+        "datavenc": "20/07/2026",
+        "status": "Pendente",
+        "datapag": "",
+        "prior": "Alta",
+        "resp": "",
+        "rec": "Única",
+        "obs": ""
       }
     ],
     [],
@@ -1823,7 +1837,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 21,
-  "_savedAt": 1782398844370,
+  "_savedAt": 1782398883225,
   "fornecedores": [
     {
       "id": 6,
