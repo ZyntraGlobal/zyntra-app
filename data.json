@@ -1796,6 +1796,20 @@
         "resp": "",
         "rec": "Única",
         "obs": "ESPERAR CONTADOR ENVIAR"
+      },
+      {
+        "desc": "REGISTRO DE MARCA",
+        "cat": "Serviços Terceiros",
+        "tipo": "Conta Fixa",
+        "valor": 274.8,
+        "forma": "Pix",
+        "datavenc": "22/07/2026",
+        "status": "Pendente",
+        "datapag": "",
+        "prior": "Alta",
+        "resp": "",
+        "rec": "Mensal",
+        "obs": ""
       }
     ],
     [],
@@ -1851,7 +1865,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 21,
-  "_savedAt": 1782398971439,
+  "_savedAt": 1782399003858,
   "fornecedores": [
     {
       "id": 6,
