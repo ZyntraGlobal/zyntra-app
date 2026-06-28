@@ -1934,20 +1934,6 @@
       },
       {
         "desc": "FRETE TERCEIRIZADO",
-        "cat": "Logística/Frete",
-        "tipo": "Conta Variável",
-        "valor": 460,
-        "forma": "Pix",
-        "datavenc": "05/07/2026",
-        "status": "Pendente",
-        "datapag": "",
-        "prior": "Alta",
-        "resp": "",
-        "rec": "Única",
-        "obs": ""
-      },
-      {
-        "desc": "FRETE TERCEIRIZADO",
         "cat": "Funcionários/Pró-labore",
         "tipo": "Conta Fixa",
         "valor": 520,
@@ -2014,7 +2000,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 22,
-  "_savedAt": 1782605466968,
+  "_savedAt": 1782605475520,
   "fornecedores": [
     {
       "id": 6,
