@@ -1936,7 +1936,7 @@
         "desc": "FRETE TERCEIRIZADO",
         "cat": "Funcionários/Pró-labore",
         "tipo": "Conta Fixa",
-        "valor": 520,
+        "valor": 560,
         "forma": "Pix",
         "datavenc": "05/07/2026",
         "status": "Pendente",
@@ -2000,7 +2000,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 22,
-  "_savedAt": 1782605475520,
+  "_savedAt": 1782741374471,
   "fornecedores": [
     {
       "id": 6,
