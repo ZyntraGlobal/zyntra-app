@@ -244,7 +244,7 @@
       "cod": 18,
       "ncm": "8518.29.90",
       "cat": "Som",
-      "qty": 1,
+      "qty": 0,
       "min": 5,
       "cmv": 71.59,
       "preco": 0,
@@ -1192,6 +1192,15 @@
       "qty": 1,
       "data": "25/06/2026",
       "obs": ""
+    },
+    {
+      "id": 22,
+      "prodId": 18,
+      "prodNome": "CAIXA DE SOM REDRAGON GS510 RGB - PRETO",
+      "tipo": "Saída",
+      "qty": 1,
+      "data": "30/06/2026",
+      "obs": ""
     }
   ],
   "pag": [
@@ -1999,8 +2008,8 @@
   ],
   "nRtu": 13,
   "nPag": 100,
-  "nMov": 22,
-  "_savedAt": 1782753664091,
+  "nMov": 23,
+  "_savedAt": 1782838819441,
   "fornecedores": [
     {
       "id": 6,
