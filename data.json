@@ -1596,7 +1596,7 @@
         "valor": 95.58,
         "forma": "Pix",
         "datavenc": "29/06/2026",
-        "status": "Pendente",
+        "status": "Pago",
         "datapag": "",
         "prior": "Alta",
         "resp": "",
@@ -2023,7 +2023,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1782917006199,
+  "_savedAt": 1782941636484,
   "fornecedores": [
     {
       "id": 6,
