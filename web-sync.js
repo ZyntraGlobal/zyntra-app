@@ -125,8 +125,26 @@
     }
   }
 
-  // Renova subscription push e republica no relay ntfy
+  // Renova subscription push, republica no relay ntfy (instantâneo, mas expira em 12h)
+  // e persiste no GitHub (push-sub.json — não expira, é a fonte confiável pro desktop)
   var _lastPushRenew = 0;
+  var PUSH_SUB_API_G = 'https://api.github.com/repos/ZyntraGlobal/zyntra-app/contents/push-sub.json';
+  function _salvarSubGitHubG(sub) {
+    try {
+      if (localStorage.getItem('zg_push_ep') === sub.endpoint) return; // já publicado, sem mudança
+      var b64 = btoa(unescape(encodeURIComponent(JSON.stringify(sub))));
+      var hh = { 'Authorization': 'Bearer ' + GH_TOKEN, 'Accept': 'application/vnd.github+json', 'User-Agent': 'ZyntraG-PWA', 'Content-Type': 'application/json' };
+      fetch(PUSH_SUB_API_G, { headers: hh, cache: 'no-store' })
+        .then(function(r) { return r.status === 404 ? null : r.json(); })
+        .then(function(info) {
+          var payload = { message: 'update push subscription', content: b64 };
+          if (info && info.sha) payload.sha = info.sha;
+          return fetch(PUSH_SUB_API_G, { method: 'PUT', headers: hh, cache: 'no-store', body: JSON.stringify(payload) });
+        })
+        .then(function(r) { if (r && r.ok) localStorage.setItem('zg_push_ep', sub.endpoint); })
+        .catch(function(){});
+    } catch(e) {}
+  }
   function _renewPushG() {
     if (!('serviceWorker' in navigator) || !('Notification' in window) || Notification.permission !== 'granted') return;
     var now = Date.now();
@@ -134,7 +152,10 @@
     _lastPushRenew = now;
     navigator.serviceWorker.ready.then(function(reg) {
       function urlB64(b){var p='='.repeat((4-b.length%4)%4);var s=(b+p).replace(/-/g,'+').replace(/_/g,'/');var r=window.atob(s);var o=new Uint8Array(r.length);for(var i=0;i<r.length;i++)o[i]=r.charCodeAt(i);return o;}
-      var salvar = function(s){ fetch('https://ntfy.sh/zyntra-sub-gestao-zg2026x',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(s)}).catch(function(){}); };
+      var salvar = function(s){
+        fetch('https://ntfy.sh/zyntra-sub-gestao-zg2026x',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(s)}).catch(function(){});
+        _salvarSubGitHubG(s);
+      };
       reg.pushManager.getSubscription().then(function(sub) {
         if (sub) { salvar(sub); return; }
         reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlB64('BBhENPjxNvUjD-1ug7UJMdfnWJU3AvpBunQKj8dR_JNlr0J3_RFKCpRVEBbrmKIK6J_E9aCSv4y3thL_R0xMONE') })
