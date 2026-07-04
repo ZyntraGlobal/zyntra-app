@@ -2038,7 +2038,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1783202780964,
+  "_savedAt": 1783202857096,
   "fornecedores": [
     {
       "id": 6,
@@ -2135,7 +2135,23 @@
       "data": "04/07/2026",
       "plataforma": "Amazon",
       "dataCompra": "06/07/2026"
+    },
+    {
+      "id": 2,
+      "produto": "MOUSE GAMER REDRAGON M908 IMPACT - PRETO",
+      "fornecedor": "",
+      "cat": "Mouse",
+      "plataforma": "Amazon",
+      "dataCompra": "06/07/2026",
+      "status": "Pendente",
+      "qtd": 1,
+      "valorCompra": 113,
+      "freteUnit": 0,
+      "impostoPct": 0,
+      "precoVenda": 259.99,
+      "obs": "",
+      "data": "04/07/2026"
     }
   ],
-  "nCompras": 2
+  "nCompras": 3
 }
