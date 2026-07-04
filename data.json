@@ -1157,22 +1157,7 @@
   "nMov": 100,
   "fornecedores": [],
   "nForn": 1,
-  "compras": [
-    {
-      "id": 1,
-      "produto": "MOUSE GAMER TESTE X1",
-      "fornecedor": "Redragon Import LTDA",
-      "cat": "Mouse",
-      "status": "Comprado",
-      "qtd": 10,
-      "valorCompra": 80,
-      "freteUnit": 0,
-      "impostoPct": 37,
-      "precoVenda": 200,
-      "obs": "",
-      "data": "04/07/2026"
-    }
-  ],
-  "nCompras": 3,
-  "_savedAt": 1783196227698
+  "compras": [],
+  "nCompras": 4,
+  "_savedAt": 1783196271367
 }
