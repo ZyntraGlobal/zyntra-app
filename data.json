@@ -1163,7 +1163,7 @@
       "produto": "MOUSE GAMER TESTE X1",
       "fornecedor": "Redragon Import LTDA",
       "cat": "Mouse",
-      "status": "Pendente",
+      "status": "Comprado",
       "qtd": 10,
       "valorCompra": 80,
       "freteUnit": 0,
@@ -1174,5 +1174,5 @@
     }
   ],
   "nCompras": 2,
-  "_savedAt": 1783196018977
+  "_savedAt": 1783196040042
 }
