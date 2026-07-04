@@ -2038,7 +2038,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1783202857096,
+  "_savedAt": 1783202928903,
   "fornecedores": [
     {
       "id": 6,
@@ -2151,7 +2151,23 @@
       "precoVenda": 259.99,
       "obs": "",
       "data": "04/07/2026"
+    },
+    {
+      "id": 3,
+      "produto": "GABINETE GAMER LIAN LI O11 VISION COMPACT - BRANCO",
+      "fornecedor": "LIAN LI",
+      "cat": "Mouse",
+      "plataforma": "",
+      "dataCompra": "06/07/2026",
+      "status": "Pendente",
+      "qtd": 1,
+      "valorCompra": 590,
+      "freteUnit": 0,
+      "impostoPct": 0,
+      "precoVenda": 1499.99,
+      "obs": "",
+      "data": "04/07/2026"
     }
   ],
-  "nCompras": 3
+  "nCompras": 4
 }
