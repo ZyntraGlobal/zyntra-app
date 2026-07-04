@@ -2038,7 +2038,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1783202928903,
+  "_savedAt": 1783207056353,
   "fornecedores": [
     {
       "id": 6,
@@ -2122,51 +2122,51 @@
   "compras": [
     {
       "id": 1,
-      "produto": "MOUSE GAMER REDRAGON M913 IMPACT ELITE - PRETO",
       "fornecedor": "ATACADO",
+      "produto": "MOUSE GAMER REDRAGON M913 IMPACT ELITE - PRETO",
       "cat": "Mouse",
-      "status": "Pendente",
+      "plataforma": "Amazon",
       "qtd": 4,
       "valorCompra": 161.04,
       "freteUnit": 0,
       "impostoPct": 0,
       "precoVenda": 359.99,
+      "status": "Pendente",
       "obs": "",
       "data": "04/07/2026",
-      "plataforma": "Amazon",
       "dataCompra": "06/07/2026"
     },
     {
       "id": 2,
-      "produto": "MOUSE GAMER REDRAGON M908 IMPACT - PRETO",
       "fornecedor": "",
+      "produto": "MOUSE GAMER REDRAGON M908 IMPACT - PRETO",
       "cat": "Mouse",
       "plataforma": "Amazon",
-      "dataCompra": "06/07/2026",
-      "status": "Pendente",
       "qtd": 1,
       "valorCompra": 113,
       "freteUnit": 0,
       "impostoPct": 0,
       "precoVenda": 259.99,
+      "status": "Pendente",
       "obs": "",
-      "data": "04/07/2026"
+      "data": "04/07/2026",
+      "dataCompra": "06/07/2026"
     },
     {
       "id": 3,
-      "produto": "GABINETE GAMER LIAN LI O11 VISION COMPACT - BRANCO",
       "fornecedor": "LIAN LI",
+      "produto": "GABINETE GAMER LIAN LI O11 VISION COMPACT - BRANCO",
       "cat": "Mouse",
-      "plataforma": "",
-      "dataCompra": "06/07/2026",
-      "status": "Pendente",
+      "plataforma": "Amazon",
       "qtd": 1,
       "valorCompra": 590,
       "freteUnit": 0,
-      "impostoPct": 0,
+      "impostoPct": 37,
       "precoVenda": 1499.99,
+      "status": "Pendente",
       "obs": "",
-      "data": "04/07/2026"
+      "data": "04/07/2026",
+      "dataCompra": "06/07/2026"
     }
   ],
   "nCompras": 4
