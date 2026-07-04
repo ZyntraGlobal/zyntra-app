@@ -1171,22 +1171,8 @@
       "precoVenda": 200,
       "obs": "",
       "data": "04/07/2026"
-    },
-    {
-      "id": 2,
-      "produto": "TECLADO PREJUIZO TESTE",
-      "fornecedor": "",
-      "cat": "Mouse",
-      "status": "Pendente",
-      "qtd": 1,
-      "valorCompra": 150,
-      "freteUnit": 0,
-      "impostoPct": 37,
-      "precoVenda": 180,
-      "obs": "",
-      "data": "04/07/2026"
     }
   ],
   "nCompras": 3,
-  "_savedAt": 1783196069084
+  "_savedAt": 1783196227698
 }
