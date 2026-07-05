@@ -35,6 +35,10 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);font-siz
 .topbar-title{font-size:13px;font-weight:600;flex:0 0 auto;color:var(--t2)}
 #frase{flex:1;font-size:13px;color:var(--gold);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 16px;opacity:1;transition:opacity .3s}
 .chip{background:var(--gl);color:var(--gold);border:1px solid var(--glb);border-radius:20px;padding:2px 8px;font-size:10px;font-weight:600;white-space:nowrap}
+.sync-fab{position:fixed;bottom:24px;right:20px;z-index:9999;width:58px;height:58px;border-radius:50%;border:none;background:var(--gold);color:#1a1a1a;font-size:26px;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(0,0,0,.45);cursor:pointer;transition:transform .15s ease}
+.sync-fab:active{transform:scale(.9)}
+.sync-fab.syncing{animation:sf-spin .9s linear infinite}
+@keyframes sf-spin{to{transform:rotate(360deg)}}
 .pg{overflow-y:auto;flex:1;padding:14px 16px}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
 .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px}
@@ -209,7 +213,6 @@ tfoot td{font-weight:700;border-top:2px solid var(--bdr2);border-bottom:none!imp
     <span id="frase">⚡ Gestão inteligente. Resultado real.</span>
     <span style="font-size:11px;color:var(--t3);white-space:nowrap;margin-right:8px" id="tdate"></span>
     <span id="fs-status" style="font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap;background:rgba(160,156,146,.12);color:var(--t3);border:1px solid var(--bdr);margin-right:6px;cursor:pointer">💾 Auto-save</span>
-    <span id="btn-sync" onclick="forcarSincronizar()" title="Buscar atualizações agora, sem sair do sistema" style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;cursor:pointer;white-space:nowrap;background:rgba(160,156,146,.12);color:var(--t3);border:1px solid var(--bdr);margin-right:6px;transition:all .2s">🔄 Atualizar</span>
     <span class="chip">Zyntra 2026</span>
   </div>
   <div class="pg" id="pg"><div class="empty">Carregando...</div></div>
@@ -335,9 +338,8 @@ var _sincronizando=false;
 async function forcarSincronizar(){
   if(_sincronizando)return;
   _sincronizando=true;
-  var el=document.getElementById('btn-sync');
-  var txtOriginal=el?el.innerHTML:'';
-  if(el)el.innerHTML='⏳ Verificando...';
+  var el=document.getElementById('btn-sync-fab');
+  if(el)el.classList.add('syncing');
   try{
     if(window.zyntraElectron&&window.zyntraElectron.forcarSync){
       await window.zyntraElectron.forcarSync();
@@ -348,7 +350,7 @@ async function forcarSincronizar(){
   }catch(e){
     _notif('❌ Erro ao atualizar','Verifique sua conexão','red');
   }finally{
-    if(el)el.innerHTML=txtOriginal;
+    if(el)el.classList.remove('syncing');
     _sincronizando=false;
   }
 }
@@ -2261,4 +2263,6 @@ if('serviceWorker' in navigator){
     reg.update();
   }).catch(function(){});
 }
-</script></body></html>
+</script>
+<button class="sync-fab" id="btn-sync-fab" onclick="forcarSincronizar()" title="Atualizar agora">🔄</button>
+</body></html>
