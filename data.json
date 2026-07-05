@@ -2038,7 +2038,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1783269963577,
+  "_savedAt": 1783270327113,
   "fornecedores": [
     {
       "id": 6,
@@ -2263,7 +2263,23 @@
       "precoVenda": 389.99,
       "obs": "",
       "data": "05/07/2026"
+    },
+    {
+      "id": 10,
+      "produto": "GABINETE GAMER LIAN O11 VISION COMPACT - PRETO",
+      "fornecedor": "",
+      "cat": "Outros",
+      "plataforma": "Shopee",
+      "dataCompra": "06/07/2026",
+      "status": "Pendente",
+      "qtd": 1,
+      "valorCompra": 633,
+      "freteUnit": 0,
+      "impostoPct": 0,
+      "precoVenda": 1299.99,
+      "obs": "",
+      "data": "05/07/2026"
     }
   ],
-  "nCompras": 10
+  "nCompras": 11
 }
