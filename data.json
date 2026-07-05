@@ -2038,7 +2038,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1783269090416,
+  "_savedAt": 1783269612244,
   "fornecedores": [
     {
       "id": 6,
@@ -2167,7 +2167,23 @@
       "obs": "",
       "data": "04/07/2026",
       "dataCompra": "06/07/2026"
+    },
+    {
+      "id": 4,
+      "produto": "MOUSE GAMER CORSAIR SMICITAR - PRETO",
+      "fornecedor": "",
+      "cat": "Mouse",
+      "plataforma": "Mercado Livre",
+      "dataCompra": "06/07/2026",
+      "status": "Pendente",
+      "qtd": 1,
+      "valorCompra": 160,
+      "freteUnit": 0,
+      "impostoPct": 0,
+      "precoVenda": 399.99,
+      "obs": "",
+      "data": "05/07/2026"
     }
   ],
-  "nCompras": 4
+  "nCompras": 5
 }
