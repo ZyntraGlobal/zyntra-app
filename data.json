@@ -2038,7 +2038,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1783269949345,
+  "_savedAt": 1783269963577,
   "fornecedores": [
     {
       "id": 6,
@@ -2224,10 +2224,10 @@
       "plataforma": "Mercado Livre",
       "dataCompra": "06/07/2026",
       "status": "Pendente",
-      "qtd": 2,
+      "qtd": 3,
       "valorCompra": 633,
       "freteUnit": 0,
-      "impostoPct": 0,
+      "impostoPct": 37,
       "precoVenda": 1499.99,
       "obs": "",
       "data": "05/07/2026"
