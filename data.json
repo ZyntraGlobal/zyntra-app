@@ -2038,7 +2038,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1783269851931,
+  "_savedAt": 1783269903136,
   "fornecedores": [
     {
       "id": 6,
@@ -2231,7 +2231,23 @@
       "precoVenda": 1499.99,
       "obs": "",
       "data": "05/07/2026"
+    },
+    {
+      "id": 8,
+      "produto": "MOUSE GAMER CORSAIR HARPOON PRO - PRETO",
+      "fornecedor": "",
+      "cat": "Mouse",
+      "plataforma": "Mercado Livre",
+      "dataCompra": "06/07/2026",
+      "status": "Pendente",
+      "qtd": 1,
+      "valorCompra": 130,
+      "freteUnit": 0,
+      "impostoPct": 0,
+      "precoVenda": 389.99,
+      "obs": "",
+      "data": "05/07/2026"
     }
   ],
-  "nCompras": 8
+  "nCompras": 9
 }
