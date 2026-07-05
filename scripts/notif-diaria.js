@@ -8,11 +8,11 @@ const VAPID_PUBLIC = process.env.VAPID_PUBLIC_KEY;
 const VAPID_PRIVATE = process.env.VAPID_PRIVATE_KEY;
 
 const FRASES = [
-  '💰 Hoje você precisa investir {valor} na Zyntra',
-  '🛒 De olho no caixa: {valor} em compras esperando por você hoje',
-  '📦 Hora de comprar! {valor} em mercadoria pendente pra hoje',
-  '⚡ Investimento do dia: {valor} pra manter o estoque girando',
-  '🎯 Foco de hoje: {valor} em compras pra fechar'
+  '💰 Hoje você precisa investir {valor} em {qtd} na Zyntra',
+  '🛒 De olho no caixa: {valor} em {qtd} esperando por você hoje',
+  '📦 Hora de comprar! {valor} em {qtd} te esperando hoje',
+  '⚡ Investimento do dia: {valor} em {qtd} pra manter o estoque girando',
+  '🎯 Foco de hoje: {valor} em {qtd} pra fechar'
 ];
 
 function hojeBRT() {
@@ -67,8 +67,9 @@ async function main() {
 
   const total = pendentesVencidos.reduce((a, c) => a + custoTotalCompra(c), 0);
   const valorFmt = 'R$ ' + total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const qtdFmt = pendentesVencidos.length + ' produto' + (pendentesVencidos.length > 1 ? 's' : '');
   const frase = FRASES[Math.floor(Math.random() * FRASES.length)];
-  const titulo = frase.replace('{valor}', valorFmt);
+  const titulo = frase.replace('{valor}', valorFmt).replace('{qtd}', qtdFmt);
   const produtos = pendentesVencidos.slice(0, 5).map(c => '• ' + c.produto + ' (' + c.qtd + 'x)').join('\n');
   const corpo = produtos + (pendentesVencidos.length > 5 ? '\n…+' + (pendentesVencidos.length - 5) + ' mais' : '');
 
