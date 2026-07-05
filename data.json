@@ -1947,7 +1947,7 @@
         "tipo": "Conta Fixa",
         "valor": 600,
         "forma": "Pix",
-        "datavenc": "05/07/2026",
+        "datavenc": "06/07/2026",
         "status": "Pendente",
         "datapag": "",
         "prior": "Alta",
@@ -2038,7 +2038,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1783259267991,
+  "_savedAt": 1783259286974,
   "fornecedores": [
     {
       "id": 6,
