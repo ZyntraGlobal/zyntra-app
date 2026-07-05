@@ -35,9 +35,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);font-siz
 .topbar-title{font-size:13px;font-weight:600;flex:0 0 auto;color:var(--t2)}
 #frase{flex:1;font-size:13px;color:var(--gold);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 16px;opacity:1;transition:opacity .3s}
 .chip{background:var(--gl);color:var(--gold);border:1px solid var(--glb);border-radius:20px;padding:2px 8px;font-size:10px;font-weight:600;white-space:nowrap}
-.sync-fab{position:fixed;top:calc(58px + env(safe-area-inset-top));right:14px;z-index:10000;width:48px;height:48px;border-radius:50%;border:none;background:var(--gold);color:#1a1a1a;font-size:21px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,.4);cursor:pointer;transition:transform .15s ease}
-.sync-fab:active{transform:scale(.9)}
-.sync-fab.syncing{animation:sf-spin .9s linear infinite}
+#btn-sync{font-size:13px;padding:3px 8px;border-radius:20px;cursor:pointer;white-space:nowrap;background:rgba(160,156,146,.12);color:var(--t3);border:1px solid var(--bdr);margin-right:6px;transition:transform .15s ease}
+#btn-sync.syncing{animation:sf-spin .9s linear infinite;display:inline-block}
 @keyframes sf-spin{to{transform:rotate(360deg)}}
 .pg{overflow-y:auto;flex:1;padding:14px 16px}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
@@ -213,6 +212,7 @@ tfoot td{font-weight:700;border-top:2px solid var(--bdr2);border-bottom:none!imp
     <span id="frase">⚡ Gestão inteligente. Resultado real.</span>
     <span style="font-size:11px;color:var(--t3);white-space:nowrap;margin-right:8px" id="tdate"></span>
     <span id="fs-status" style="font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap;background:rgba(160,156,146,.12);color:var(--t3);border:1px solid var(--bdr);margin-right:6px;cursor:pointer">💾 Auto-save</span>
+    <span id="btn-sync" onclick="forcarSincronizar()" title="Atualizar agora">🔄</span>
     <span class="chip">Zyntra 2026</span>
   </div>
   <div class="pg" id="pg"><div class="empty">Carregando...</div></div>
@@ -338,7 +338,7 @@ var _sincronizando=false;
 async function forcarSincronizar(){
   if(_sincronizando)return;
   _sincronizando=true;
-  var el=document.getElementById('btn-sync-fab');
+  var el=document.getElementById('btn-sync');
   if(el)el.classList.add('syncing');
   try{
     if(window.zyntraElectron&&window.zyntraElectron.forcarSync){
@@ -2264,5 +2264,4 @@ if('serviceWorker' in navigator){
   }).catch(function(){});
 }
 </script>
-<button class="sync-fab" id="btn-sync-fab" onclick="forcarSincronizar()" title="Atualizar agora">🔄</button>
 </body></html>
