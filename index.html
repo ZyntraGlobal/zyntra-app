@@ -209,6 +209,7 @@ tfoot td{font-weight:700;border-top:2px solid var(--bdr2);border-bottom:none!imp
     <span id="frase">⚡ Gestão inteligente. Resultado real.</span>
     <span style="font-size:11px;color:var(--t3);white-space:nowrap;margin-right:8px" id="tdate"></span>
     <span id="fs-status" style="font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap;background:rgba(160,156,146,.12);color:var(--t3);border:1px solid var(--bdr);margin-right:6px;cursor:pointer">💾 Auto-save</span>
+    <span id="btn-sync" onclick="forcarSincronizar()" title="Buscar atualizações agora, sem sair do sistema" style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;cursor:pointer;white-space:nowrap;background:rgba(160,156,146,.12);color:var(--t3);border:1px solid var(--bdr);margin-right:6px;transition:all .2s">🔄 Atualizar</span>
     <span class="chip">Zyntra 2026</span>
   </div>
   <div class="pg" id="pg"><div class="empty">Carregando...</div></div>
@@ -330,6 +331,28 @@ var COMPRA_MARGEM_MIN=15; // % mínimo de margem pra considerar "vale a pena"
 var COMPRA_PLATAFORMAS=['Amazon','Shopee','Mercado Livre','TikTok Shop','Site Zyntra'];
 
 // ── BANCO DE DADOS ────────────────────────────────────
+var _sincronizando=false;
+async function forcarSincronizar(){
+  if(_sincronizando)return;
+  _sincronizando=true;
+  var el=document.getElementById('btn-sync');
+  var txtOriginal=el?el.innerHTML:'';
+  if(el)el.innerHTML='⏳ Verificando...';
+  try{
+    if(window.zyntraElectron&&window.zyntraElectron.forcarSync){
+      await window.zyntraElectron.forcarSync();
+    }else if(typeof window.forcarSincronizarG==='function'){
+      await window.forcarSincronizarG();
+    }
+    _notif('✅ Atualizado','Você está com os dados mais recentes','grn');
+  }catch(e){
+    _notif('❌ Erro ao atualizar','Verifique sua conexão','red');
+  }finally{
+    if(el)el.innerHTML=txtOriginal;
+    _sincronizando=false;
+  }
+}
+
 function _normProd(p){
   return {
     id:p.id,nome:p.nome||'',cod:p.cod||p.id,ncm:p.ncm||'',cat:p.cat||'Outros',
