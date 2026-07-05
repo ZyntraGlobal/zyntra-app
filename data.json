@@ -2038,7 +2038,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1783269769966,
+  "_savedAt": 1783269851931,
   "fornecedores": [
     {
       "id": 6,
@@ -2215,7 +2215,23 @@
       "precoVenda": 463.79,
       "obs": "",
       "data": "05/07/2026"
+    },
+    {
+      "id": 7,
+      "produto": "GABINETE GAMER LIAN LI 011 VISION COMPACT - PRETO",
+      "fornecedor": "",
+      "cat": "Outros",
+      "plataforma": "Mercado Livre",
+      "dataCompra": "06/07/2026",
+      "status": "Pendente",
+      "qtd": 2,
+      "valorCompra": 633,
+      "freteUnit": 0,
+      "impostoPct": 0,
+      "precoVenda": 1499.99,
+      "obs": "",
+      "data": "05/07/2026"
     }
   ],
-  "nCompras": 7
+  "nCompras": 8
 }
