@@ -2038,7 +2038,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1783269612244,
+  "_savedAt": 1783269674457,
   "fornecedores": [
     {
       "id": 6,
@@ -2183,7 +2183,23 @@
       "precoVenda": 399.99,
       "obs": "",
       "data": "05/07/2026"
+    },
+    {
+      "id": 5,
+      "produto": "CONTROLE GAMER GAMESIR G7 - PRETO",
+      "fornecedor": "",
+      "cat": "Controle",
+      "plataforma": "Mercado Livre",
+      "dataCompra": "06/07/2026",
+      "status": "Pendente",
+      "qtd": 1,
+      "valorCompra": 195,
+      "freteUnit": 0,
+      "impostoPct": 0,
+      "precoVenda": 429.99,
+      "obs": "",
+      "data": "05/07/2026"
     }
   ],
-  "nCompras": 5
+  "nCompras": 6
 }
