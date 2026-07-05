@@ -125,6 +125,19 @@
     }
   }
 
+  // Exposto para o botão "🔄 Atualizar" da topbar — sincroniza sob demanda, sem esperar o polling
+  window.forcarSincronizarG = async function() {
+    const mudou = await sincronizar();
+    if (mudou) {
+      const jaLogado = localStorage.getItem('zg_sess');
+      if (jaLogado) {
+        if (typeof carregarDados === 'function') carregarDados();
+        else window.dispatchEvent(new CustomEvent('zyntra-sync'));
+      }
+    }
+    return mudou;
+  };
+
   // Renova subscription push, republica no relay ntfy (instantâneo, mas expira em 12h)
   // e persiste no GitHub (push-sub.json — não expira, é a fonte confiável pro desktop)
   var _lastPushRenew = 0;
