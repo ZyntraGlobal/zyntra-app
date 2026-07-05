@@ -1931,9 +1931,9 @@
         "desc": "FATURA AZUL LOGÍSTICAS",
         "cat": "Serviços Terceiros",
         "tipo": "Conta Fixa",
-        "valor": 0,
+        "valor": 328.72,
         "forma": "Boleto",
-        "datavenc": "10/07/2026",
+        "datavenc": "15/07/2026",
         "status": "Pendente",
         "datapag": "",
         "prior": "Alta",
@@ -2038,7 +2038,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1783268916088,
+  "_savedAt": 1783269090416,
   "fornecedores": [
     {
       "id": 6,
