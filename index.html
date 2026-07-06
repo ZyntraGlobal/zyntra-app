@@ -1745,9 +1745,24 @@ function _tabelaCompras(lista,titulo){
 
 function pCompras(busca,filtStatus,filtForn){
   if(!DB.compras)DB.compras=[];
-  var h='<div class="brow" style="margin-bottom:10px">';
+
+  // Resumo fixo — aparece em qualquer aba, pra sempre saber os dois números principais
+  var hj=hoje();
+  var todos=DB.compras;
+  var pendentesVenc=todos.filter(function(c){return c.status==='Pendente'&&_diasEmAberto(c.dataCompra||c.data)>=0;});
+  var investirHojeTopo=pendentesVenc.reduce(function(a,c){return a+_calcCompraCalc(c).custoTotal;},0);
+  var investidasHojeTopo=todos.filter(function(c){return c.status==='Comprado'&&(c.dataCompra||c.data)===hj;});
+  var investidoHojeTopo=investidasHojeTopo.reduce(function(a,c){return a+_calcCompraCalc(c).custoTotal;},0);
+  var h='<div class="g3" style="margin-bottom:12px">';
+  h+='<div class="card'+(investirHojeTopo>0?' hl':'')+'"><div class="lbl">💰 Investir Hoje</div><div class="val'+(investirHojeTopo>0?' gld':'')+'">'+R(investirHojeTopo)+'</div><div class="sub">'+pendentesVenc.length+' pendente'+(pendentesVenc.length===1?'':'s')+'</div></div>';
+  h+='<div class="card'+(investidoHojeTopo>0?' hl':'')+'"><div class="lbl">💵 Investido Hoje</div><div class="val'+(investidoHojeTopo>0?' grn':'')+'">'+R(investidoHojeTopo)+'</div><div class="sub">'+investidasHojeTopo.length+' comprado'+(investidasHojeTopo.length===1?'':'s')+'</div></div>';
+  h+='<div class="card"><div class="lbl">📦 Pendentes no Total</div><div class="val amb">'+todos.filter(function(c){return c.status==='Pendente';}).length+'</div><div class="sub">todas as datas</div></div>';
+  h+='</div>';
+
+  h+='<div class="brow" style="margin-bottom:10px">';
   h+=_comprasTabBtn('geral','📋 Visão Geral');
   h+=_comprasTabBtn('hoje','📅 Hoje');
+  h+=_comprasTabBtn('diaria','📆 Diária');
   h+=_comprasTabBtn('mensal','🗓 Mensal');
   h+=_comprasTabBtn('plataformas','🛍 Plataformas');
   h+=_comprasTabBtn('produto','🔢 Por Produto');
@@ -1755,6 +1770,7 @@ function pCompras(busca,filtStatus,filtForn){
   h+='</div>';
 
   if(_comprasView==='hoje')h+=_renderComprasHoje();
+  else if(_comprasView==='diaria')h+=_renderComprasDiaria();
   else if(_comprasView==='mensal')h+=_renderComprasMensal();
   else if(_comprasView==='plataformas')h+=_renderComprasPlataformas();
   else if(_comprasView==='produto')h+=_renderComprasPorProduto();
@@ -1900,6 +1916,73 @@ function _renderComprasMensal(){
     hh+='</div>';
     hh+=_tabelaCompras(itensOrdenados);
   });
+  return hh;
+}
+
+var _comprasDiariaRef={ano:new Date().getFullYear(),mes:new Date().getMonth()+1};
+function _comprasDiariaNav(delta){
+  var m=_comprasDiariaRef.mes+delta,a=_comprasDiariaRef.ano;
+  if(m<1){m=12;a--;} else if(m>12){m=1;a++;}
+  _comprasDiariaRef={ano:a,mes:m};
+  pCompras();
+}
+function _renderComprasDiaria(){
+  var ref=_comprasDiariaRef;
+  var diasNoMes=new Date(ref.ano,ref.mes,0).getDate();
+  var todos=DB.compras||[];
+  var porDia={};
+  for(var d=1;d<=diasNoMes;d++)porDia[d]={investido:0,qtd:0,pendPendentes:0,pendValor:0};
+  todos.forEach(function(c){
+    var dataRef=c.dataCompra||c.data;
+    var p=(dataRef||'').split('/');
+    if(p.length!==3||Number(p[1])!==ref.mes||Number(p[2])!==ref.ano)return;
+    var dia=Number(p[0]);
+    if(!porDia[dia])return;
+    var custo=_calcCompraCalc(c).custoTotal;
+    if(c.status==='Comprado'){porDia[dia].investido+=custo;porDia[dia].qtd++;}
+    else if(c.status==='Pendente'){porDia[dia].pendPendentes++;porDia[dia].pendValor+=custo;}
+  });
+
+  var totalInvestidoMes=0,totalQtdMes=0,totalPendMes=0,totalPendValorMes=0;
+  for(var dd=1;dd<=diasNoMes;dd++){
+    totalInvestidoMes+=porDia[dd].investido;
+    totalQtdMes+=porDia[dd].qtd;
+    totalPendMes+=porDia[dd].pendPendentes;
+    totalPendValorMes+=porDia[dd].pendValor;
+  }
+
+  var ehMesAtual=(ref.mes===new Date().getMonth()+1&&ref.ano===new Date().getFullYear());
+  var hh='<div class="brow" style="margin-bottom:12px;align-items:center">';
+  hh+='<button class="btn bsm" onclick="_comprasDiariaNav(-1)">← Mês anterior</button>';
+  hh+='<div style="font-size:14px;font-weight:700;color:var(--gold);flex:1;text-align:center">'+MFULL[ref.mes-1]+' de '+ref.ano+(ehMesAtual?' <span style="color:var(--t3);font-weight:400;font-size:11px">(atual)</span>':'')+'</div>';
+  hh+='<button class="btn bsm" onclick="_comprasDiariaNav(1)">Próximo mês →</button>';
+  hh+='</div>';
+
+  hh+='<div class="g3" style="margin-bottom:14px">';
+  hh+='<div class="card hl"><div class="lbl">💵 Total Investido no Mês</div><div class="val grn">'+R(totalInvestidoMes)+'</div><div class="sub">'+totalQtdMes+' compra'+(totalQtdMes===1?'':'s')+' realizada'+(totalQtdMes===1?'':'s')+'</div></div>';
+  hh+='<div class="card"><div class="lbl">📦 Pendente no Mês</div><div class="val amb">'+R(totalPendValorMes)+'</div><div class="sub">'+totalPendMes+' item'+(totalPendMes===1?'':'ns')+' pendente'+(totalPendMes===1?'':'s')+'</div></div>';
+  hh+='<div class="card"><div class="lbl">📊 Média Diária Investida</div><div class="val">'+R(totalInvestidoMes/diasNoMes)+'</div><div class="sub">'+diasNoMes+' dias no mês</div></div>';
+  hh+='</div>';
+
+  var linhasComMovimento=[];
+  for(var i=1;i<=diasNoMes;i++){
+    if(porDia[i].investido>0||porDia[i].pendPendentes>0)linhasComMovimento.push(i);
+  }
+  if(linhasComMovimento.length===0){
+    hh+='<div class="panel"><div class="empty" style="padding:36px"><div style="font-size:12px;color:var(--t3)">Nenhuma compra ou pendência neste mês.</div></div></div>';
+    return hh;
+  }
+  hh+='<div class="panel"><div class="ts tw"><table><thead><tr><th>DIA</th><th class="tr">INVESTIDO</th><th class="tc">COMPRAS</th><th class="tr">PENDENTE</th><th class="tc">ITENS PENDENTES</th></tr></thead><tbody>';
+  linhasComMovimento.forEach(function(i){
+    var g=porDia[i];
+    var ehHoje=ehMesAtual&&i===new Date().getDate();
+    hh+='<tr'+(ehHoje?' style="background:var(--gnbg)"':'')+'><td style="font-weight:'+(ehHoje?'700':'400')+'">'+String(i).padStart(2,'0')+'/'+String(ref.mes).padStart(2,'0')+(ehHoje?' <span style="color:var(--gold);font-size:10px">HOJE</span>':'')+'</td>';
+    hh+='<td class="tr" style="font-weight:'+(g.investido>0?'700':'400')+';color:'+(g.investido>0?'var(--grn)':'var(--t3)')+'">'+(g.investido>0?R(g.investido):'—')+'</td>';
+    hh+='<td class="tc">'+(g.qtd||'—')+'</td>';
+    hh+='<td class="tr" style="color:'+(g.pendValor>0?'var(--amb)':'var(--t3)')+'">'+(g.pendValor>0?R(g.pendValor):'—')+'</td>';
+    hh+='<td class="tc">'+(g.pendPendentes||'—')+'</td></tr>';
+  });
+  hh+='</tbody></table></div></div>';
   return hh;
 }
 
