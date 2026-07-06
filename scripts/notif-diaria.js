@@ -21,6 +21,12 @@ function hojeBRT() {
   return { ano: brt.getUTCFullYear(), mes: brt.getUTCMonth() + 1, dia: brt.getUTCDate() };
 }
 
+function hojeStr() {
+  const h = hojeBRT();
+  const pad = n => String(n).padStart(2, '0');
+  return pad(h.dia) + '/' + pad(h.mes) + '/' + h.ano;
+}
+
 function diasEmAberto(dataStr) {
   if (!dataStr) return 0;
   const p = dataStr.split('/');
@@ -57,21 +63,37 @@ async function main() {
   const sub = JSON.parse(fs.readFileSync(subPath, 'utf8'));
 
   const compras = dados.compras || [];
+  const hoje = hojeStr();
   const pendentesVencidos = compras.filter(c => c.status === 'Pendente' && diasEmAberto(c.dataCompra || c.data) >= 0);
+  const investidasHoje = compras.filter(c => c.status === 'Comprado' && (c.dataCompra || c.data) === hoje);
 
   console.log('Compras pendentes vencidas hoje:', pendentesVencidos.length);
-  if (pendentesVencidos.length === 0) {
-    console.log('Nada vencido hoje — não envia notificação.');
+  console.log('Compras investidas hoje:', investidasHoje.length);
+  if (pendentesVencidos.length === 0 && investidasHoje.length === 0) {
+    console.log('Nada vencido nem investido hoje — não envia notificação.');
     return;
   }
 
-  const total = pendentesVencidos.reduce((a, c) => a + custoTotalCompra(c), 0);
-  const valorFmt = 'R$ ' + total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  const qtdFmt = pendentesVencidos.length + ' produto' + (pendentesVencidos.length > 1 ? 's' : '');
-  const frase = FRASES[Math.floor(Math.random() * FRASES.length)];
-  const titulo = frase.replace('{valor}', valorFmt).replace('{qtd}', qtdFmt);
-  const produtos = pendentesVencidos.slice(0, 5).map(c => '• ' + c.produto + ' (' + c.qtd + 'x)').join('\n');
-  const corpo = produtos + (pendentesVencidos.length > 5 ? '\n…+' + (pendentesVencidos.length - 5) + ' mais' : '');
+  const totalInvestido = investidasHoje.reduce((a, c) => a + custoTotalCompra(c), 0);
+  const investidoFmt = 'R$ ' + totalInvestido.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  let titulo, corpo;
+  if (pendentesVencidos.length > 0) {
+    const total = pendentesVencidos.reduce((a, c) => a + custoTotalCompra(c), 0);
+    const valorFmt = 'R$ ' + total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const qtdFmt = pendentesVencidos.length + ' produto' + (pendentesVencidos.length > 1 ? 's' : '');
+    const frase = FRASES[Math.floor(Math.random() * FRASES.length)];
+    titulo = frase.replace('{valor}', valorFmt).replace('{qtd}', qtdFmt);
+    const produtos = pendentesVencidos.slice(0, 5).map(c => '• ' + c.produto + ' (' + c.qtd + 'x)').join('\n');
+    corpo = produtos + (pendentesVencidos.length > 5 ? '\n…+' + (pendentesVencidos.length - 5) + ' mais' : '');
+  } else {
+    titulo = '✅ Nada pendente pra comprar hoje';
+    corpo = '';
+  }
+
+  if (investidasHoje.length > 0) {
+    corpo += (corpo ? '\n\n' : '') + '💵 Já investido hoje: ' + investidoFmt + ' em ' + investidasHoje.length + ' produto' + (investidasHoje.length > 1 ? 's' : '');
+  }
 
   webpush.setVapidDetails('mailto:contato@zyntraglobal.com.br', VAPID_PUBLIC, VAPID_PRIVATE);
 
