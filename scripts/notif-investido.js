@@ -1,5 +1,6 @@
 // Roda via GitHub Actions (agendado) — manda notificação push avisando quanto
-// precisa investir em compras hoje, independente do desktop ou iPhone estarem ligados.
+// JÁ FOI investido em compras hoje. Separada da notificação da manhã (quanto
+// falta investir) pra não estourar o limite de caracteres do título no iOS.
 const fs = require('fs');
 const path = require('path');
 const webpush = require('web-push');
@@ -8,11 +9,10 @@ const VAPID_PUBLIC = process.env.VAPID_PUBLIC_KEY;
 const VAPID_PRIVATE = process.env.VAPID_PRIVATE_KEY;
 
 const FRASES = [
-  '💰 Hoje você precisa investir {valor} em {qtd} na Zyntra',
-  '🛒 De olho no caixa: {valor} em {qtd} esperando por você hoje',
-  '📦 Hora de comprar! {valor} em {qtd} te esperando hoje',
-  '⚡ Investimento do dia: {valor} em {qtd} pra manter o estoque girando',
-  '🎯 Foco de hoje: {valor} em {qtd} pra fechar'
+  '💵 Você investiu {valor} hoje em {qtd}',
+  '✅ Fechamento do dia: {valor} investidos em {qtd}',
+  '📦 Hoje entrou {valor} em {qtd} pro estoque',
+  '💪 Resultado de hoje: {valor} investidos em {qtd}'
 ];
 
 function hojeBRT() {
@@ -21,14 +21,10 @@ function hojeBRT() {
   return { ano: brt.getUTCFullYear(), mes: brt.getUTCMonth() + 1, dia: brt.getUTCDate() };
 }
 
-function diasEmAberto(dataStr) {
-  if (!dataStr) return 0;
-  const p = dataStr.split('/');
-  if (p.length !== 3) return 0;
-  const d = Date.UTC(Number(p[2]), Number(p[1]) - 1, Number(p[0]));
+function hojeStr() {
   const h = hojeBRT();
-  const hUTC = Date.UTC(h.ano, h.mes - 1, h.dia);
-  return Math.floor((hUTC - d) / (1000 * 60 * 60 * 24));
+  const pad = n => String(n).padStart(2, '0');
+  return pad(h.dia) + '/' + pad(h.mes) + '/' + h.ano;
 }
 
 function custoTotalCompra(c) {
@@ -57,25 +53,26 @@ async function main() {
   const sub = JSON.parse(fs.readFileSync(subPath, 'utf8'));
 
   const compras = dados.compras || [];
-  const pendentesVencidos = compras.filter(c => c.status === 'Pendente' && diasEmAberto(c.dataCompra || c.data) >= 0);
+  const hoje = hojeStr();
+  const investidasHoje = compras.filter(c => c.status === 'Comprado' && (c.dataCompra || c.data) === hoje);
 
-  console.log('Compras pendentes vencidas hoje:', pendentesVencidos.length);
-  if (pendentesVencidos.length === 0) {
-    console.log('Nada vencido hoje — não envia notificação.');
+  console.log('Compras investidas hoje:', investidasHoje.length);
+  if (investidasHoje.length === 0) {
+    console.log('Nada investido hoje — não envia notificação.');
     return;
   }
 
-  const total = pendentesVencidos.reduce((a, c) => a + custoTotalCompra(c), 0);
+  const total = investidasHoje.reduce((a, c) => a + custoTotalCompra(c), 0);
   const valorFmt = 'R$ ' + total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  const qtdFmt = pendentesVencidos.length + ' produto' + (pendentesVencidos.length > 1 ? 's' : '');
+  const qtdFmt = investidasHoje.length + ' produto' + (investidasHoje.length > 1 ? 's' : '');
   const frase = FRASES[Math.floor(Math.random() * FRASES.length)];
   const titulo = frase.replace('{valor}', valorFmt).replace('{qtd}', qtdFmt);
-  const produtos = pendentesVencidos.slice(0, 5).map(c => '• ' + c.produto + ' (' + c.qtd + 'x)').join('\n');
-  const corpo = produtos + (pendentesVencidos.length > 5 ? '\n…+' + (pendentesVencidos.length - 5) + ' mais' : '');
+  const produtos = investidasHoje.slice(0, 5).map(c => '• ' + c.produto + ' (' + c.qtd + 'x)').join('\n');
+  const corpo = produtos + (investidasHoje.length > 5 ? '\n…+' + (investidasHoje.length - 5) + ' mais' : '');
 
   webpush.setVapidDetails('mailto:contato@zyntraglobal.com.br', VAPID_PUBLIC, VAPID_PRIVATE);
 
-  const payload = JSON.stringify({ title: titulo, body: corpo, icon: '/zyntra-app/icon-192.png', badge: '/zyntra-app/icon-192.png', tag: 'zyntra-gestao-diaria-' + Date.now() });
+  const payload = JSON.stringify({ title: titulo, body: corpo, icon: '/zyntra-app/icon-192.png', badge: '/zyntra-app/icon-192.png', tag: 'zyntra-gestao-investido-' + Date.now() });
 
   try {
     await webpush.sendNotification(sub, payload);
