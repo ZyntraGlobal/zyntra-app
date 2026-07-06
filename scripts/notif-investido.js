@@ -8,13 +8,13 @@ const webpush = require('web-push');
 const VAPID_PUBLIC = process.env.VAPID_PUBLIC_KEY;
 const VAPID_PRIVATE = process.env.VAPID_PRIVATE_KEY;
 
-// Valor SEMPRE logo no início da frase — o iOS às vezes corta o título por
-// tamanho, e se o valor estivesse no meio/fim ele podia ser cortado junto.
+// Título tem que caber numa linha só (o iOS corta e não expande sozinho na
+// tela de bloqueio) — por isso é bem curto, só o valor. Detalhes (produtos,
+// quantidade) vão no corpo, que consegue mostrar várias linhas sem cortar.
 const FRASES = [
-  '💵 {valor} — investidos hoje em {qtd}',
-  '✅ {valor} — fechamento do dia, {qtd}',
-  '📦 {valor} — entrou hoje pro estoque, {qtd}',
-  '💪 {valor} — resultado de hoje em {qtd}'
+  '💵 Investido: {valor}',
+  '✅ Investi hoje: {valor}',
+  '💪 Resultado: {valor}'
 ];
 
 function hojeBRT() {
@@ -68,9 +68,9 @@ async function main() {
   const valorFmt = 'R$ ' + total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const qtdFmt = investidasHoje.length + ' produto' + (investidasHoje.length > 1 ? 's' : '');
   const frase = FRASES[Math.floor(Math.random() * FRASES.length)];
-  const titulo = frase.replace('{valor}', valorFmt).replace('{qtd}', qtdFmt);
+  const titulo = frase.replace('{valor}', valorFmt);
   const produtos = investidasHoje.slice(0, 5).map(c => '• ' + c.produto + ' (' + c.qtd + 'x)').join('\n');
-  const corpo = produtos + (investidasHoje.length > 5 ? '\n…+' + (investidasHoje.length - 5) + ' mais' : '');
+  const corpo = qtdFmt + ' comprado' + (investidasHoje.length > 1 ? 's' : '') + ' hoje:\n' + produtos + (investidasHoje.length > 5 ? '\n…+' + (investidasHoje.length - 5) + ' mais' : '');
 
   webpush.setVapidDetails('mailto:contato@zyntraglobal.com.br', VAPID_PUBLIC, VAPID_PRIVATE);
 
