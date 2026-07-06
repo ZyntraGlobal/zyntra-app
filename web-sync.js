@@ -74,13 +74,17 @@
 
   async function sincronizar() {
     try {
+      // AbortController: evita travar pra sempre numa rede lenta/instável
+      const ctrl = new AbortController();
+      const to = setTimeout(() => ctrl.abort(), 10000);
       const resp = await fetch(API_URL, {
+        signal: ctrl.signal,
         headers: {
           'Authorization': 'Bearer ' + GH_TOKEN,
           'Accept': 'application/vnd.github+json',
           'User-Agent': 'ZyntraG-PWA'
         }
-      });
+      }).finally(() => clearTimeout(to));
       if (!resp.ok) return false;
       const info = await resp.json();
       if (!info.content) return false;
