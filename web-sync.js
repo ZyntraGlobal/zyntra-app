@@ -123,12 +123,11 @@
   const atualizou = await sincronizar();
   if (atualizou) {
     const jaLogado = localStorage.getItem('zg_sess');
-    if (jaLogado) {
-      // carregarDados() nunca existiu nesse app — sem reload, os dados ficavam
-      // salvos no localStorage mas a tela renderizada continuava com a versão antiga.
-      if (typeof carregarDados === 'function') carregarDados();
-      else window.location.reload();
-    }
+    // 'zyntra-sync' é ouvido pelo index.html, que redesenha a tela em memória
+    // (nunca usar location.reload() aqui — no PWA instalado do iOS isso é
+    // tratado como navegação e chega a tirar o usuário do modo de app)
+    if (jaLogado && typeof carregarDados === 'function') carregarDados();
+    else if (jaLogado) window.dispatchEvent(new CustomEvent('zyntra-sync'));
   }
 
   // Exposto para o botão "🔄 Atualizar" da topbar — sincroniza sob demanda, sem esperar o polling

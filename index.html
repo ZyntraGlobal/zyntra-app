@@ -351,15 +351,14 @@ async function forcarSincronizar(){
     if(window.zyntraElectron&&window.zyntraElectron.forcarSync){
       await window.zyntraElectron.forcarSync();
     }else if(typeof window.forcarSincronizarG==='function'){
-      // Sempre recarrega, mesmo se o polling em segundo plano já tiver
-      // absorvido a mudança em silêncio antes deste clique — só um reload
-      // garante que a TELA (não só o armazenamento local) fique em dia.
+      // Sempre redesenha, mesmo se o polling em segundo plano já tiver
+      // absorvido a mudança em silêncio antes deste clique — sem isso a
+      // TELA (não só o armazenamento local) ficava desatualizada.
       await window.forcarSincronizarG();
+      _atualizarTelaComDadosNovos();
     }
     clearTimeout(trava);
-    _notif('✅ Atualizado','Recarregando com os dados mais recentes...','grn');
-    setTimeout(function(){window.location.reload();},700);
-    return;
+    _notif('✅ Atualizado','Você está com os dados mais recentes','grn');
   }catch(e){
     clearTimeout(trava);
     _notif('❌ Erro ao atualizar','Verifique sua conexão','red');
@@ -2068,6 +2067,18 @@ function notifChecarG(){
     _notif('⚠️ '+alertas.length+' alerta(s) enviados','Veja a central de notificações','grn');
   });
 }
+
+function _atualizarTelaComDadosNovos(){
+  // Atualiza DB e redesenha em memória — NÃO usar location.reload() aqui:
+  // no PWA instalado do iOS um reload é tratado como navegação e chega a
+  // tirar o usuário do modo de app (volta pra tela de início do Safari).
+  try{
+    DB=loadDB();
+    if(typeof badges==='function')badges();
+    if(_curPage && typeof ir==='function') ir(_curPage,_curMes);
+  }catch(e){}
+}
+window.addEventListener('zyntra-sync', _atualizarTelaComDadosNovos);
 
 function _notif(t,m,tipo){var n=document.createElement('div');var c=tipo==='grn'?'var(--grn)':'var(--red)';n.style.cssText='position:fixed;bottom:20px;right:20px;background:#1a1917;border:1px solid #302e28;border-left:4px solid '+c+';border-radius:10px;padding:14px 18px;max-width:300px;box-shadow:0 8px 32px rgba(0,0,0,.6);z-index:9000;animation:slideIn .3s ease';n.innerHTML='<div style="font-size:13px;font-weight:700;color:#f0ede8;margin-bottom:3px">'+t+'</div><div style="font-size:11px;color:#a09c92">'+m+'</div>';document.body.appendChild(n);setTimeout(function(){n.style.opacity='0';n.style.transition='opacity .3s';setTimeout(function(){n.remove();},300);},4000);}
 
