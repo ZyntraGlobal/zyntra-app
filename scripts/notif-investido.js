@@ -8,11 +8,13 @@ const webpush = require('web-push');
 const VAPID_PUBLIC = process.env.VAPID_PUBLIC_KEY;
 const VAPID_PRIVATE = process.env.VAPID_PRIVATE_KEY;
 
+// Valor SEMPRE logo no início da frase — o iOS às vezes corta o título por
+// tamanho, e se o valor estivesse no meio/fim ele podia ser cortado junto.
 const FRASES = [
-  '💵 Você investiu {valor} hoje em {qtd}',
-  '✅ Fechamento do dia: {valor} investidos em {qtd}',
-  '📦 Hoje entrou {valor} em {qtd} pro estoque',
-  '💪 Resultado de hoje: {valor} investidos em {qtd}'
+  '💵 {valor} — investidos hoje em {qtd}',
+  '✅ {valor} — fechamento do dia, {qtd}',
+  '📦 {valor} — entrou hoje pro estoque, {qtd}',
+  '💪 {valor} — resultado de hoje em {qtd}'
 ];
 
 function hojeBRT() {
