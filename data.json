@@ -1509,10 +1509,10 @@
         "desc": "IMPOSTO",
         "cat": "Impostos",
         "tipo": "Imposto",
-        "valor": 365.44,
+        "valor": 385.97,
         "forma": "Pix",
         "datavenc": "22/06/2026",
-        "status": "Atrasado",
+        "status": "Pago",
         "datapag": "",
         "prior": "Alta",
         "resp": "",
@@ -2038,7 +2038,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1783361054480,
+  "_savedAt": 1783366282144,
   "fornecedores": [
     {
       "id": 6,
