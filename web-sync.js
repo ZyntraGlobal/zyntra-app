@@ -124,8 +124,10 @@
   if (atualizou) {
     const jaLogado = localStorage.getItem('zg_sess');
     if (jaLogado) {
+      // carregarDados() nunca existiu nesse app — sem reload, os dados ficavam
+      // salvos no localStorage mas a tela renderizada continuava com a versão antiga.
       if (typeof carregarDados === 'function') carregarDados();
-      else window.dispatchEvent(new CustomEvent('zyntra-sync'));
+      else window.location.reload();
     }
   }
 
