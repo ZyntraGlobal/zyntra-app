@@ -646,7 +646,7 @@ function pDash(){
     h+='</div>';
     h+='<div style="font-size:32px;font-weight:800;color:var(--'+valCor+');letter-spacing:-.5px;margin-bottom:4px">'+valPrincipal+'</div>';
     h+='<div style="font-size:12px;color:var(--t3);margin-bottom:20px">'+sub+'</div>';
-    h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding-top:16px;border-top:1px solid var(--bdr)">';
+    h+='<div style="display:grid;grid-template-columns:repeat('+detalhes.length+',1fr);gap:10px;padding-top:16px;border-top:1px solid var(--bdr)">';
     detalhes.forEach(function(d){h+='<div><div style="font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">'+d[0]+'</div><div style="font-size:14px;font-weight:700;color:'+d[2]+'">'+d[1]+'</div></div>';});
     h+='</div></div>';
     return h;
@@ -657,6 +657,8 @@ function pDash(){
   var comprasPendTodos=comprasTodos.filter(function(c){return c.status==='Pendente';});
   var comprasPendVencidos=comprasPendTodos.filter(function(c){return _diasEmAberto(c.dataCompra||c.data)>=0;});
   var investirHoje=comprasPendVencidos.reduce(function(a,c){return a+_calcCompraCalc(c).custoTotal;},0);
+  var comprasInvestidasHoje=comprasTodos.filter(function(c){return c.status==='Comprado'&&(c.dataCompra||c.data)===hoje();});
+  var investidoHoje=comprasInvestidasHoje.reduce(function(a,c){return a+_calcCompraCalc(c).custoTotal;},0);
   var comprasAtivas=comprasTodos.filter(function(c){return c.status!=='Cancelado';});
   var comprasNaoVale=comprasAtivas.filter(function(c){return _calcCompraCalc(c).viavel==='ruim';}).length;
   var comprasPendTotal=comprasPendVencidos.length;
@@ -691,6 +693,7 @@ function pDash(){
   // Card Compras
   h+=modCard('🛒','Compras Hoje',R(investirHoje),'gold',comprasTodos.length+' ite'+(comprasTodos.length!==1?'ns':'m')+' na lista · '+comprasPendTotal+' pendente'+(comprasPendTotal!==1?'s':''),comprasStatus,comprasLabel,"ir('compras')",[
     ['Investir hoje',R(investirHoje),'var(--gold)'],
+    ['Investido hoje',R(investidoHoje),comprasInvestidasHoje.length>0?'var(--grn)':'var(--t3)'],
     ['Pendentes',comprasPendTotal,comprasPendTotal>0?'var(--amb)':'var(--t3)'],
     ['Sem viabilidade',comprasNaoVale,comprasNaoVale>0?'var(--red)':'var(--t3)']
   ]);
@@ -1747,12 +1750,14 @@ function pCompras(busca,filtStatus,filtForn){
   h+=_comprasTabBtn('hoje','📅 Hoje');
   h+=_comprasTabBtn('mensal','🗓 Mensal');
   h+=_comprasTabBtn('plataformas','🛍 Plataformas');
+  h+=_comprasTabBtn('produto','🔢 Por Produto');
   h+='<button class="btn btnp bsm" style="margin-left:auto" onclick="modalAddCompra()">+ Novo Item</button>';
   h+='</div>';
 
   if(_comprasView==='hoje')h+=_renderComprasHoje();
   else if(_comprasView==='mensal')h+=_renderComprasMensal();
   else if(_comprasView==='plataformas')h+=_renderComprasPlataformas();
+  else if(_comprasView==='produto')h+=_renderComprasPorProduto();
   else h+=_renderComprasGeral(busca||'',filtStatus||'',filtForn||'');
 
   setPage(h);
@@ -1932,6 +1937,38 @@ function _renderComprasPlataformas(){
     hh+='<div class="sec">'+(p==='Sem Plataforma'?'📦 Sem Plataforma Definida':'🛍 '+p)+' <span style="color:var(--t3);font-weight:400;text-transform:none">('+itens.length+' ite'+(itens.length===1?'m':'ns')+')</span></div>';
     hh+=_tabelaCompras(itensOrdenados);
   });
+  return hh;
+}
+
+function _renderComprasPorProduto(){
+  var todos=DB.compras||[];
+  var pendentes=todos.filter(function(c){return c.status==='Pendente';});
+  var grupos={};
+  pendentes.forEach(function(c){
+    var nome=c.produto||'(sem nome)';
+    if(!grupos[nome])grupos[nome]={qtd:0,custoTotal:0,itens:0,cat:c.cat||''};
+    var r=_calcCompraCalc(c);
+    grupos[nome].qtd+=Number(c.qtd)||0;
+    grupos[nome].custoTotal+=r.custoTotal;
+    grupos[nome].itens++;
+  });
+  var nomes=Object.keys(grupos).sort(function(a,b){return grupos[b].qtd-grupos[a].qtd;});
+  var qtdTotal=nomes.reduce(function(a,n){return a+grupos[n].qtd;},0);
+  var valorTotal=nomes.reduce(function(a,n){return a+grupos[n].custoTotal;},0);
+
+  var hh='<div class="card hl" style="margin-bottom:14px"><div class="lbl">🔢 Quantidade Total a Comprar (agrupado por produto)</div><div class="val gld" style="font-size:30px">'+qtdTotal+' un</div><div class="sub">'+nomes.length+' produto'+(nomes.length===1?'':'s')+' diferente'+(nomes.length===1?'':'s')+' · '+R(valorTotal)+' no total</div></div>';
+
+  if(nomes.length===0){
+    hh+='<div class="panel"><div class="empty" style="padding:36px"><div style="font-size:12px;color:var(--t3)">Nenhuma compra pendente.</div></div></div>';
+    return hh;
+  }
+
+  hh+='<div class="panel"><div class="ts tw"><table><thead><tr><th>PRODUTO</th><th>CATEGORIA</th><th class="tc">Nº PEDIDOS</th><th class="tr">QTD TOTAL</th><th class="tr">VALOR TOTAL</th></tr></thead><tbody>';
+  nomes.forEach(function(n){
+    var g=grupos[n];
+    hh+='<tr><td style="font-weight:600">'+n+'</td><td>'+(g.cat?'<span style="color:var(--t3);font-size:11px">'+g.cat+'</span>':'—')+'</td><td class="tc">'+g.itens+'</td><td class="tr" style="font-weight:800;font-size:15px;color:var(--gold)">'+g.qtd+' un</td><td class="tr">'+R(g.custoTotal)+'</td></tr>';
+  });
+  hh+='</tbody></table></div></div>';
   return hh;
 }
 
