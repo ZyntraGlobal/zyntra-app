@@ -2038,7 +2038,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1783377772340,
+  "_savedAt": 1783377833400,
   "fornecedores": [
     {
       "id": 6,
@@ -2295,7 +2295,23 @@
       "precoVenda": 1499.99,
       "obs": "",
       "data": "06/07/2026"
+    },
+    {
+      "id": 12,
+      "produto": "MOUSE GAMER REDRAGON M913 IMPACT ELITE - Preto",
+      "fornecedor": "",
+      "cat": "Mouse",
+      "plataforma": "Site Zyntra",
+      "dataCompra": "07/07/2026",
+      "status": "Pendente",
+      "qtd": 1,
+      "valorCompra": 161,
+      "freteUnit": 0,
+      "impostoPct": 0,
+      "precoVenda": 359.99,
+      "obs": "",
+      "data": "06/07/2026"
     }
   ],
-  "nCompras": 12
+  "nCompras": 13
 }
