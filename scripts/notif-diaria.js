@@ -77,21 +77,26 @@ async function main() {
   const totalInvestido = investidasHoje.reduce((a, c) => a + custoTotalCompra(c), 0);
   const investidoFmt = 'R$ ' + totalInvestido.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-  let titulo, corpo;
+  // Título sempre traz os DOIS números (pendente + já investido) —
+  // o corpo da notificação pode ficar truncado/escondido até expandir,
+  // mas o título nunca é cortado, então é o lugar mais seguro pra isso.
+  let parteFalta, corpo;
   if (pendentesVencidos.length > 0) {
     const total = pendentesVencidos.reduce((a, c) => a + custoTotalCompra(c), 0);
     const valorFmt = 'R$ ' + total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     const qtdFmt = pendentesVencidos.length + ' produto' + (pendentesVencidos.length > 1 ? 's' : '');
     const frase = FRASES[Math.floor(Math.random() * FRASES.length)];
-    titulo = frase.replace('{valor}', valorFmt).replace('{qtd}', qtdFmt);
+    parteFalta = frase.replace('{valor}', valorFmt).replace('{qtd}', qtdFmt);
     const produtos = pendentesVencidos.slice(0, 5).map(c => '• ' + c.produto + ' (' + c.qtd + 'x)').join('\n');
     corpo = produtos + (pendentesVencidos.length > 5 ? '\n…+' + (pendentesVencidos.length - 5) + ' mais' : '');
   } else {
-    titulo = '✅ Nada pendente pra comprar hoje';
+    parteFalta = '✅ Nada pendente pra comprar hoje';
     corpo = '';
   }
 
+  let titulo = parteFalta;
   if (investidasHoje.length > 0) {
+    titulo += ' · 💵 já investi ' + investidoFmt + ' (' + investidasHoje.length + ')';
     corpo += (corpo ? '\n\n' : '') + '💵 Já investido hoje: ' + investidoFmt + ' em ' + investidasHoje.length + ' produto' + (investidasHoje.length > 1 ? 's' : '');
   }
 
