@@ -336,10 +336,17 @@ var COMPRA_PLATAFORMAS=['Amazon','Shopee','Mercado Livre','TikTok Shop','Site Zy
 // ── BANCO DE DADOS ────────────────────────────────────
 var _sincronizando=false;
 async function forcarSincronizar(){
-  if(_sincronizando)return;
+  if(_sincronizando){ _notif('⏳ Já verificando...','Aguarde um instante','amb'); return; }
   _sincronizando=true;
   var el=document.getElementById('btn-sync');
   if(el)el.classList.add('syncing');
+  _notif('🔍 Verificando...','Buscando atualizações no servidor','amb');
+  var trava=setTimeout(function(){
+    // Segurança: se algo travar (rede instável), destrava o botão em vez de ficar morto
+    if(el)el.classList.remove('syncing');
+    _sincronizando=false;
+    _notif('❌ Tempo esgotado','Verifique sua conexão e tente de novo','red');
+  },12000);
   try{
     var mudou=false;
     if(window.zyntraElectron&&window.zyntraElectron.forcarSync){
@@ -347,6 +354,7 @@ async function forcarSincronizar(){
     }else if(typeof window.forcarSincronizarG==='function'){
       mudou=await window.forcarSincronizarG();
     }
+    clearTimeout(trava);
     if(mudou){
       _notif('✅ Atualizado','Novos dados encontrados — recarregando...','grn');
       setTimeout(function(){window.location.reload();},900);
@@ -354,6 +362,7 @@ async function forcarSincronizar(){
     }
     _notif('✅ Atualizado','Você está com os dados mais recentes','grn');
   }catch(e){
+    clearTimeout(trava);
     _notif('❌ Erro ao atualizar','Verifique sua conexão','red');
   }finally{
     if(el)el.classList.remove('syncing');
