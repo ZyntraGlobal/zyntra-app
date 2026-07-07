@@ -16,10 +16,29 @@ const FRASES = [
   '📦 Falta comprar: {valor}'
 ];
 
+// Horário-alvo (hora cheia, BRT) em que a notificação deve disparar.
+// O workflow roda a cada 15 min — isso aqui decide SE é a hora certa.
+const HORAS_ALVO = [8];
+const STATE_PATH = path.join(__dirname, '..', 'notif-state-diaria.json');
+
 function hojeBRT() {
   const now = new Date();
   const brt = new Date(now.getTime() - 3 * 60 * 60 * 1000); // America/Sao_Paulo, UTC-3 fixo (sem horário de verão)
-  return { ano: brt.getUTCFullYear(), mes: brt.getUTCMonth() + 1, dia: brt.getUTCDate() };
+  return { ano: brt.getUTCFullYear(), mes: brt.getUTCMonth() + 1, dia: brt.getUTCDate(), hora: brt.getUTCHours() };
+}
+
+function hojeStr() {
+  const h = hojeBRT();
+  const pad = n => String(n).padStart(2, '0');
+  return pad(h.dia) + '/' + pad(h.mes) + '/' + h.ano;
+}
+
+function lerState() {
+  try { return JSON.parse(fs.readFileSync(STATE_PATH, 'utf8')); } catch (e) { return {}; }
+}
+
+function salvarState(state) {
+  fs.writeFileSync(STATE_PATH, JSON.stringify(state, null, 2) + '\n');
 }
 
 function diasEmAberto(dataStr) {
@@ -54,6 +73,23 @@ async function main() {
     return;
   }
 
+  const agora = hojeBRT();
+  const hoje = hojeStr();
+
+  // O workflow roda a cada 15 min o dia inteiro — só segue se a hora atual
+  // for a hora-alvo, e só se esse horário ainda não foi enviado hoje (evita
+  // duplicar caso o workflow rode mais de uma vez dentro da mesma hora).
+  if (!HORAS_ALVO.includes(agora.hora)) {
+    console.log('Fora do horário-alvo (hora atual: ' + agora.hora + 'h BRT) — não é hora de notificar.');
+    return;
+  }
+  const slotAtual = hoje + '-' + agora.hora;
+  const state = lerState();
+  if (state.ultimoSlot === slotAtual) {
+    console.log('Slot ' + slotAtual + ' já foi notificado hoje — pulando.');
+    return;
+  }
+
   const dados = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
   const sub = JSON.parse(fs.readFileSync(subPath, 'utf8'));
 
@@ -81,6 +117,7 @@ async function main() {
   try {
     await webpush.sendNotification(sub, payload);
     console.log('Push enviado com sucesso:', titulo);
+    salvarState({ ultimoSlot: slotAtual });
   } catch (err) {
     console.log('Erro ao enviar push. statusCode:', err.statusCode, '| body:', err.body);
     process.exitCode = 1;
