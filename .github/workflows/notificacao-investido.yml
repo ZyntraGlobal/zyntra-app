@@ -2,8 +2,14 @@ name: Notificação de investimento do dia
 
 on:
   schedule:
-    - cron: '0 23 * * *'   # 23:00 UTC = 20:00 horário de Brasília
+    # Roda a cada 15 min o dia inteiro — o próprio script decide se é hora de
+    # notificar (20h BRT) e evita duplicar. Isso protege contra o GitHub
+    # Actions atrasar/pular um horário de cron exato ocasionalmente.
+    - cron: '*/15 * * * *'
   workflow_dispatch: {}    # permite disparar manualmente pra testar
+
+permissions:
+  contents: write
 
 jobs:
   notificar:
@@ -20,3 +26,15 @@ jobs:
           VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY }}
           VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
         run: node scripts/notif-investido.js
+      - name: Salvar estado (se mudou)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add notif-state-investido.json
+          if git diff --staged --quiet; then
+            echo "Nada novo pra salvar."
+          else
+            git commit -m "Atualiza estado da notificacao de investido"
+            git pull --rebase origin main
+            git push
+          fi
