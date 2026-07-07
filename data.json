@@ -1948,7 +1948,7 @@
         "valor": 600,
         "forma": "Pix",
         "datavenc": "06/07/2026",
-        "status": "Pendente",
+        "status": "Pago",
         "datapag": "",
         "prior": "Alta",
         "resp": "",
@@ -2038,7 +2038,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1783377833400,
+  "_savedAt": 1783427412935,
   "fornecedores": [
     {
       "id": 6,
@@ -2282,35 +2282,35 @@
     },
     {
       "id": 11,
-      "produto": "GABINETE GAMER LIAN LI O11 Vision Compact - Preto",
       "fornecedor": "",
+      "produto": "GABINETE GAMER LIAN LI O11 Vision Compact - Preto",
       "cat": "Outros",
       "plataforma": "Amazon",
-      "dataCompra": "07/07/2026",
-      "status": "Pendente",
       "qtd": 1,
       "valorCompra": 590,
       "freteUnit": 0,
       "impostoPct": 0,
       "precoVenda": 1499.99,
+      "status": "Pendente",
       "obs": "",
-      "data": "06/07/2026"
+      "data": "06/07/2026",
+      "dataCompra": "07/07/2026"
     },
     {
       "id": 12,
-      "produto": "MOUSE GAMER REDRAGON M913 IMPACT ELITE - Preto",
       "fornecedor": "",
+      "produto": "MOUSE GAMER REDRAGON M913 IMPACT ELITE - Preto",
       "cat": "Mouse",
       "plataforma": "Site Zyntra",
-      "dataCompra": "07/07/2026",
-      "status": "Pendente",
       "qtd": 1,
       "valorCompra": 161,
       "freteUnit": 0,
       "impostoPct": 0,
       "precoVenda": 359.99,
+      "status": "Pendente",
       "obs": "",
-      "data": "06/07/2026"
+      "data": "06/07/2026",
+      "dataCompra": "07/07/2026"
     }
   ],
   "nCompras": 13
