@@ -1,9 +1,9 @@
-name: Notificação diária de compras
+name: Notificação diária de compras e pendências
 
 on:
   schedule:
-    # Roda a cada 15 min o dia inteiro — o próprio script decide se é hora de
-    # notificar (8h BRT) e evita duplicar. Isso protege contra o GitHub
+    # Roda a cada 15 min o dia inteiro — os próprios scripts decidem se é hora de
+    # notificar (8h BRT) e evitam duplicar. Isso protege contra o GitHub
     # Actions atrasar/pular um horário de cron exato ocasionalmente.
     - cron: '*/15 * * * *'
   workflow_dispatch: {}    # permite disparar manualmente pra testar
@@ -21,16 +21,22 @@ jobs:
           node-version: 20
       - name: Instalar dependências
         run: npm install web-push --no-save
-      - name: Verificar e notificar
+      - name: Verificar e notificar — Compras
         env:
           VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY }}
           VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
         run: node scripts/notif-diaria.js
+      - name: Verificar e notificar — Pendências
+        env:
+          VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY }}
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+        run: node scripts/notif-pendencias.js
       - name: Salvar estado (se mudou)
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           [ -f notif-state-diaria.json ] && git add notif-state-diaria.json || true
+          [ -f notif-state-pendencias.json ] && git add notif-state-pendencias.json || true
           if git diff --staged --quiet; then
             echo "Nada novo pra salvar."
           else

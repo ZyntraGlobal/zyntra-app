@@ -337,6 +337,7 @@ var COMPRA_PLATAFORMAS=['Amazon','Shopee','Mercado Livre','TikTok Shop','Site Zy
 var PENDENCIA_STATUS=['Aberta','Em Andamento','Resolvida','Cancelada'];
 var PENDENCIA_PRIORIDADE=['Baixa','Média','Alta','Urgente'];
 var PENDENCIA_PLATAFORMAS=['Site Zyntra','Amazon','Shopee','Mercado Livre','TikTok Shop','Instagram','Outro'];
+var PENDENCIA_CATEGORIA=['Site/Plataforma','Cotidiano','Financeiro','Fornecedor','Outro'];
 
 // ── BANCO DE DADOS ────────────────────────────────────
 var _sincronizando=false;
@@ -392,7 +393,7 @@ function _normCompra(c){
 }
 function _normPendencia(p){
   return {
-    id:p.id, titulo:p.titulo||'', descricao:p.descricao||'', plataforma:p.plataforma||'',
+    id:p.id, titulo:p.titulo||'', descricao:p.descricao||'', categoria:p.categoria||'Site/Plataforma', plataforma:p.plataforma||'',
     responsavel:p.responsavel||'', valor:Number(p.valor)||0, prazo:p.prazo||'',
     prioridade:p.prioridade||'Média', status:p.status||'Aberta', data:p.data||hoje()
   };
@@ -2210,7 +2211,7 @@ function avancarStatusCompra(id){
   save();badges();pCompras();
 }
 
-// ── PENDÊNCIAS (avisos do site/plataformas) ──────────
+// ── PENDÊNCIAS (avisos de site/plataformas + lembretes do cotidiano) ──
 function _pillPendenciaStatus(s){
   var m={Aberta:'palerta',['Em Andamento']:'ppendente',Resolvida:'ppago',Cancelada:'patrasado'};
   var ico={Aberta:'🔴',['Em Andamento']:'🟡',Resolvida:'✅',Cancelada:'✕'};
@@ -2220,15 +2221,20 @@ function _pillPendenciaPrioridade(p){
   var m={Baixa:'pn',Média:'pprogramado',Alta:'ppendente',Urgente:'palerta'};
   return '<span class="pill '+(m[p]||'pn')+'">'+p+'</span>';
 }
+function _pillPendenciaCategoria(c){
+  var m={['Site/Plataforma']:'pn',Cotidiano:'pprogramado',Financeiro:'ppendente',Fornecedor:'pok',Outro:'pn'};
+  return '<span class="pill '+(m[c]||'pn')+'">'+(c||'Outro')+'</span>';
+}
 
 function _tabelaPendencias(lista){
-  var h='<div class="panel"><div class="ts tw"><table><thead><tr><th>TÍTULO</th><th>PLATAFORMA</th><th>RESPONSÁVEL</th><th class="tr">VALOR ENVOLVIDO</th><th class="tc">PRAZO</th><th class="tc">PRIORIDADE</th><th class="tc">STATUS</th><th></th></tr></thead><tbody>';
+  var h='<div class="panel"><div class="ts tw"><table><thead><tr><th>TÍTULO</th><th class="tc">CATEGORIA</th><th>RESPONSÁVEL</th><th class="tr">VALOR ENVOLVIDO</th><th class="tc">PRAZO</th><th class="tc">PRIORIDADE</th><th class="tc">STATUS</th><th></th></tr></thead><tbody>';
   lista.forEach(function(p){
     var vencida=(p.status==='Aberta'||p.status==='Em Andamento')&&p.prazo&&_diasEmAberto(p.prazo)>=0;
     var diasAtraso=vencida?_diasEmAberto(p.prazo):0;
+    var sub=(p.plataforma?p.plataforma:'')+(p.plataforma&&p.descricao?' · ':'')+(p.descricao||'');
     h+='<tr>';
-    h+='<td style="min-width:200px"><div style="font-weight:600;color:var(--t);font-size:12px">'+p.titulo+'</div>'+(p.descricao?'<div style="font-size:10px;color:var(--t3);margin-top:1px">'+p.descricao+'</div>':'')+'</td>';
-    h+='<td class="tc">'+(p.plataforma?'<span class="pill pn">'+p.plataforma+'</span>':'<span style="color:var(--t3);font-size:11px">—</span>')+'</td>';
+    h+='<td style="min-width:200px"><div style="font-weight:600;color:var(--t);font-size:12px">'+p.titulo+'</div>'+(sub?'<div style="font-size:10px;color:var(--t3);margin-top:1px">'+sub+'</div>':'')+'</td>';
+    h+='<td class="tc">'+_pillPendenciaCategoria(p.categoria)+'</td>';
     h+='<td style="font-size:12px">'+(p.responsavel||'<span style="color:var(--t3)">—</span>')+'</td>';
     h+='<td class="tr tnw">'+(p.valor?R(p.valor):'<span style="color:var(--t3)">—</span>')+'</td>';
     h+='<td class="tc tnw">'+(p.prazo||'<span style="color:var(--t3)">—</span>')+(diasAtraso>0?'<div style="font-size:10px;color:var(--red);font-weight:700">atrasado há '+diasAtraso+'d</div>':'')+'</td>';
@@ -2241,38 +2247,64 @@ function _tabelaPendencias(lista){
   return h;
 }
 
-function pPendencias(busca,filtStatus,filtPrior){
+var _pendView='geral';
+function pendIr(view){_pendView=view;pPendencias();}
+function _pendTabBtn(view,label){
+  var on=_pendView===view;
+  return '<button class="btn bsm'+(on?' btnp':'')+'" onclick="pendIr(\''+view+'\')">'+label+'</button>';
+}
+
+function pPendencias(busca,filtStatus,filtPrior,filtCat){
   if(!DB.pendencias)DB.pendencias=[];
-  busca=busca||'';filtStatus=filtStatus||'';filtPrior=filtPrior||'';
+  busca=busca||'';filtStatus=filtStatus||'';filtPrior=filtPrior||'';filtCat=filtCat||'';
   var todos=DB.pendencias;
   var abertas=todos.filter(function(p){return p.status==='Aberta'||p.status==='Em Andamento';});
   var vencidas=abertas.filter(function(p){return p.prazo&&_diasEmAberto(p.prazo)>=0;});
   var urgentes=abertas.filter(function(p){return p.prioridade==='Urgente';});
   var valorEnvolvido=abertas.reduce(function(a,p){return a+(Number(p.valor)||0);},0);
 
-  var h='<div class="g4">';
+  var h='<div class="g4" style="margin-bottom:12px">';
   h+='<div class="card hl"><div class="lbl">Em Aberto</div><div class="val gld">'+abertas.length+'</div><div class="sub">de '+todos.length+' registrada'+(todos.length!==1?'s':'')+'</div></div>';
   h+='<div class="card '+(vencidas.length>0?'danger':'')+'"><div class="lbl">Vencidas</div><div class="val '+(vencidas.length>0?'red':'grn')+'">'+vencidas.length+'</div><div class="sub">prazo já passou</div></div>';
   h+='<div class="card '+(urgentes.length>0?'danger':'')+'"><div class="lbl">Urgentes</div><div class="val '+(urgentes.length>0?'red':'grn')+'">'+urgentes.length+'</div><div class="sub">prioridade máxima</div></div>';
   h+='<div class="card"><div class="lbl">Valor Envolvido</div><div class="val">'+R(valorEnvolvido)+'</div><div class="sub">soma das em aberto</div></div>';
   h+='</div>';
 
-  h+='<div class="brow">';
-  h+='<input class="inp" id="pend-s" style="width:240px" placeholder="Buscar por título ou responsável..." value="'+busca+'" oninput="_refPendencias()">';
+  h+='<div class="brow" style="margin-bottom:10px">';
+  h+=_pendTabBtn('geral','📋 Visão Geral');
+  h+=_pendTabBtn('hoje','📅 Hoje');
+  h+=_pendTabBtn('mensal','🗓 Mensal');
+  h+='<button class="btn btnp bsm" style="margin-left:auto" onclick="modalAddPendencia()">+ Nova Pendência</button>';
+  h+='</div>';
+
+  if(_pendView==='hoje')h+=_renderPendHoje();
+  else if(_pendView==='mensal')h+=_renderPendMensal();
+  else h+=_renderPendGeral(busca,filtStatus,filtPrior,filtCat);
+
+  setPage(h);
+}
+
+function _renderPendGeral(busca,filtStatus,filtPrior,filtCat){
+  var todos=DB.pendencias;
+  var h='<div class="brow">';
+  h+='<input class="inp" id="pend-s" style="width:220px" placeholder="Buscar por título ou responsável..." value="'+busca+'" oninput="_refPendencias()">';
   h+='<select class="sel" id="pend-st" onchange="_refPendencias()"><option value="">Todos status</option>';
   PENDENCIA_STATUS.forEach(function(s){h+='<option value="'+s+'"'+(filtStatus===s?' selected':'')+'>'+s+'</option>';});
   h+='</select>';
   h+='<select class="sel" id="pend-pr" onchange="_refPendencias()"><option value="">Todas prioridades</option>';
   PENDENCIA_PRIORIDADE.forEach(function(p){h+='<option value="'+p+'"'+(filtPrior===p?' selected':'')+'>'+p+'</option>';});
   h+='</select>';
-  if(busca||filtStatus||filtPrior)h+='<button class="btn bsm" onclick="pPendencias()">✕ Limpar</button>';
-  h+='<button class="btn btnp bsm" style="margin-left:auto" onclick="modalAddPendencia()">+ Nova Pendência</button>';
+  h+='<select class="sel" id="pend-cat" onchange="_refPendencias()"><option value="">Todas categorias</option>';
+  PENDENCIA_CATEGORIA.forEach(function(c){h+='<option value="'+c+'"'+(filtCat===c?' selected':'')+'>'+c+'</option>';});
+  h+='</select>';
+  if(busca||filtStatus||filtPrior||filtCat)h+='<button class="btn bsm" onclick="pPendencias()">✕ Limpar</button>';
   h+='</div>';
 
   var lista=todos.slice();
   if(busca){var b=busca.toLowerCase();lista=lista.filter(function(p){return (p.titulo||'').toLowerCase().indexOf(b)>=0||(p.responsavel||'').toLowerCase().indexOf(b)>=0;});}
   if(filtStatus)lista=lista.filter(function(p){return p.status===filtStatus;});
   if(filtPrior)lista=lista.filter(function(p){return p.prioridade===filtPrior;});
+  if(filtCat)lista=lista.filter(function(p){return p.categoria===filtCat;});
   lista.sort(function(a,b){
     var ordS={Aberta:0,['Em Andamento']:1,Resolvida:2,Cancelada:3};
     if(ordS[a.status]!==ordS[b.status])return ordS[a.status]-ordS[b.status];
@@ -2283,32 +2315,120 @@ function pPendencias(busca,filtStatus,filtPrior){
     h+='<div class="panel"><div class="empty" style="padding:56px 36px">';
     h+='<div style="font-size:32px;margin-bottom:12px">📌</div>';
     h+='<div style="font-size:14px;font-weight:600;color:var(--t2);margin-bottom:6px">Nenhuma pendência registrada</div>';
-    h+='<div style="font-size:12px;color:var(--t3);margin-bottom:16px">Anote aqui os problemas do site e das plataformas que precisam ser resolvidos</div>';
+    h+='<div style="font-size:12px;color:var(--t3);margin-bottom:16px">Anote aqui problemas do site, das plataformas e até lembretes do cotidiano</div>';
     h+='<button class="btn btnp" onclick="modalAddPendencia()">+ Adicionar Primeira Pendência</button>';
     h+='</div></div>';
+  } else if(lista.length===0){
+    h+='<div class="panel"><div class="empty" style="padding:36px"><div style="font-size:12px;color:var(--t3)">Nenhuma pendência encontrada com esses filtros.</div></div></div>';
   } else {
     h+=_tabelaPendencias(lista);
   }
+  return h;
+}
 
-  setPage(h);
+function _renderPendHoje(){
+  var hj=hoje();
+  var todosPend=DB.pendencias||[];
+  var abertasTodos=todosPend.filter(function(p){return p.status==='Aberta'||p.status==='Em Andamento';});
+  var vencidas=abertasTodos.filter(function(p){return p.prazo&&_diasEmAberto(p.prazo)>=0;});
+  var adicionadasHoje=todosPend.filter(function(p){return p.data===hj;});
+  var atrasadas=vencidas.filter(function(p){return p.prazo!==hj;});
+
+  var idsSet={};
+  var itensHoje=[];
+  vencidas.concat(adicionadasHoje).forEach(function(p){if(!idsSet[p.id]){idsSet[p.id]=true;itensHoje.push(p);}});
+
+  var valorHoje=vencidas.reduce(function(a,p){return a+(Number(p.valor)||0);},0);
+
+  var hh='<div class="card hl" style="margin-bottom:14px"><div class="lbl">📌 Pendências que vencem hoje ou já venceram</div><div class="val gld" style="font-size:30px">'+vencidas.length+'</div><div class="sub">'+R(valorHoje)+' envolvidos'+(atrasadas.length>0?' · '+atrasadas.length+' em atraso de dias anteriores':'')+'</div></div>';
+
+  hh+='<div class="g3">';
+  hh+='<div class="card"><div class="lbl">Adicionadas Hoje</div><div class="val gld">'+adicionadasHoje.length+'</div></div>';
+  hh+='<div class="card '+(atrasadas.length>0?'warn':'')+'"><div class="lbl">Em Atraso</div><div class="val '+(atrasadas.length>0?'amb':'grn')+'">'+atrasadas.length+'</div></div>';
+  hh+='<div class="card"><div class="lbl">Valor Envolvido Hoje</div><div class="val">'+R(valorHoje)+'</div></div>';
+  hh+='</div>';
+
+  if(itensHoje.length===0){
+    hh+='<div class="panel"><div class="empty" style="padding:56px 36px">';
+    hh+='<div style="font-size:32px;margin-bottom:12px">📅</div>';
+    hh+='<div style="font-size:14px;font-weight:600;color:var(--t2);margin-bottom:6px">Nada pendente por aqui</div>';
+    hh+='<div style="font-size:12px;color:var(--t3);margin-bottom:16px">Pendências com prazo vencido (hoje ou atrasado) e o que você adicionar hoje aparecem aqui até serem resolvidas</div>';
+    hh+='<button class="btn btnp" onclick="modalAddPendencia()">+ Adicionar Pendência</button>';
+    hh+='</div></div>';
+  } else {
+    itensHoje.sort(function(a,b){
+      var aAtraso=a.status!=='Resolvida'&&a.status!=='Cancelada'&&a.prazo&&a.prazo!==hj&&_diasEmAberto(a.prazo)>=0;
+      var bAtraso=b.status!=='Resolvida'&&b.status!=='Cancelada'&&b.prazo&&b.prazo!==hj&&_diasEmAberto(b.prazo)>=0;
+      if(aAtraso&&!bAtraso)return -1;
+      if(!aAtraso&&bAtraso)return 1;
+      if(aAtraso&&bAtraso)return _diasEmAberto(b.prazo)-_diasEmAberto(a.prazo);
+      return (b.id||0)-(a.id||0);
+    });
+    hh+=_tabelaPendencias(itensHoje);
+  }
+  return hh;
+}
+
+function _renderPendMensal(){
+  var anoAtual=new Date().getFullYear();
+  var mesAtual=new Date().getMonth()+1;
+  var grupos={};
+  for(var m=1;m<=12;m++){
+    var chaveM=anoAtual+'-'+String(m).padStart(2,'0');
+    grupos[chaveM]={mes:m,ano:anoAtual,itens:[]};
+  }
+  (DB.pendencias||[]).forEach(function(p){
+    var ma=_mesAnoDe(p.prazo||p.data);
+    if(!ma)return;
+    if(!grupos[ma.chave])grupos[ma.chave]={mes:ma.mes,ano:ma.ano,itens:[]};
+    grupos[ma.chave].itens.push(p);
+  });
+  var chaves=Object.keys(grupos).sort();
+  var hh='';
+  chaves.forEach(function(k){
+    var g=grupos[k];
+    var ehAtual=(g.mes===mesAtual&&g.ano===anoAtual);
+    var tagAtual=ehAtual?' <span style="color:var(--gold);font-weight:700;text-transform:none">· mês atual</span>':'';
+    if(g.itens.length===0){
+      hh+='<div class="sec" style="opacity:.5">'+MFULL[g.mes-1]+' de '+g.ano+tagAtual+' <span style="color:var(--t3);font-weight:400;text-transform:none">(0 registradas)</span></div>';
+      hh+='<div class="panel" style="margin-bottom:16px"><div style="padding:12px 16px;font-size:12px;color:var(--t3)">Nenhuma pendência com prazo neste mês.</div></div>';
+      return;
+    }
+    var itensOrdenados=g.itens.slice().sort(function(a,b){return (b.id||0)-(a.id||0);});
+    var abertasMes=g.itens.filter(function(p){return p.status==='Aberta'||p.status==='Em Andamento';});
+    var valorMes=abertasMes.reduce(function(a,p){return a+(Number(p.valor)||0);},0);
+    var resolvidasMes=g.itens.filter(function(p){return p.status==='Resolvida';}).length;
+    hh+='<div class="sec">'+MFULL[g.mes-1]+' de '+g.ano+tagAtual+' <span style="color:var(--t3);font-weight:400;text-transform:none">('+g.itens.length+' registrada'+(g.itens.length===1?'':'s')+')</span></div>';
+    hh+='<div class="g4">';
+    hh+='<div class="card"><div class="lbl">Em Aberto</div><div class="val amb">'+abertasMes.length+'</div></div>';
+    hh+='<div class="card"><div class="lbl">Valor Envolvido</div><div class="val">'+R(valorMes)+'</div></div>';
+    hh+='<div class="card"><div class="lbl">Resolvidas</div><div class="val grn">'+resolvidasMes+'</div></div>';
+    hh+='<div class="card"><div class="lbl">Total no Mês</div><div class="val gld">'+g.itens.length+'</div></div>';
+    hh+='</div>';
+    hh+=_tabelaPendencias(itensOrdenados);
+  });
+  return hh;
 }
 
 function _refPendencias(){
   var b=document.getElementById('pend-s');
   var st=document.getElementById('pend-st');
   var pr=document.getElementById('pend-pr');
-  pPendencias(b?b.value:'',st?st.value:'',pr?pr.value:'');
+  var ct=document.getElementById('pend-cat');
+  pPendencias(b?b.value:'',st?st.value:'',pr?pr.value:'',ct?ct.value:'');
 }
 
 function _formPendencia(vals){
   vals=vals||{};
+  var catOpts=PENDENCIA_CATEGORIA.map(function(c){return '<option value="'+c+'"'+(vals.categoria===c?' selected':'')+'>'+c+'</option>';}).join('');
   var platOpts='<option value="">— Selecionar —</option>'+PENDENCIA_PLATAFORMAS.map(function(p){return '<option value="'+p+'"'+(vals.plataforma===p?' selected':'')+'>'+p+'</option>';}).join('');
   var prOpts=PENDENCIA_PRIORIDADE.map(function(p){return '<option value="'+p+'"'+(vals.prioridade===p?' selected':'')+'>'+p+'</option>';}).join('');
   var stOpts=PENDENCIA_STATUS.map(function(s){return '<option value="'+s+'"'+(vals.status===s?' selected':'')+'>'+s+'</option>';}).join('');
   return '<div class="fg f2">'+
-    '<div style="grid-column:1/-1"><label>Título *</label><input id="np-titulo" value="'+(vals.titulo||'')+'" placeholder="Ex: Preço errado no anúncio da Shopee" autofocus></div>'+
+    '<div style="grid-column:1/-1"><label>Título *</label><input id="np-titulo" value="'+(vals.titulo||'')+'" placeholder="Ex: Preço errado no anúncio da Shopee, ou Levar carro na revisão" autofocus></div>'+
     '<div style="grid-column:1/-1"><label>Descrição</label><textarea id="np-desc" style="width:100%;resize:vertical;min-height:56px;padding:7px 9px;font-size:12px;font-family:Inter,sans-serif;border:1px solid var(--bdr2);border-radius:6px;background:var(--w2);color:var(--t);outline:none">'+(vals.descricao||'')+'</textarea></div>'+
-    '<div><label>Plataforma / Site</label><select id="np-plataforma">'+platOpts+'</select></div>'+
+    '<div><label>Categoria</label><select id="np-categoria">'+catOpts+'</select></div>'+
+    '<div><label>Plataforma / Site (se aplicável)</label><select id="np-plataforma">'+platOpts+'</select></div>'+
     '<div><label>Responsável</label><input id="np-resp" value="'+(vals.responsavel||'')+'" placeholder="Quem vai resolver"></div>'+
     '<div><label>Valor Envolvido (R$)</label><input id="np-valor" type="number" min="0" step="0.01" value="'+(vals.valor||'')+'" placeholder="0,00"></div>'+
     '<div><label>Prazo</label><input id="np-prazo" value="'+(vals.prazo||'')+'" placeholder="DD/MM/AAAA"></div>'+
@@ -2321,6 +2441,7 @@ function _lerFormPendencia(){
   return{
     titulo:(document.getElementById('np-titulo').value||'').trim(),
     descricao:(document.getElementById('np-desc').value||'').trim(),
+    categoria:document.getElementById('np-categoria').value,
     plataforma:document.getElementById('np-plataforma').value,
     responsavel:(document.getElementById('np-resp').value||'').trim(),
     valor:Number(document.getElementById('np-valor').value)||0,
@@ -2331,7 +2452,7 @@ function _lerFormPendencia(){
 }
 
 function modalAddPendencia(){
-  abrirM('Nova Pendência',_formPendencia({status:'Aberta',prioridade:'Média'}),function(){
+  abrirM('Nova Pendência',_formPendencia({status:'Aberta',prioridade:'Média',categoria:'Site/Plataforma'}),function(){
     var dados=_lerFormPendencia();
     if(!dados.titulo){alert('Informe o título da pendência.');return;}
     if(!DB.pendencias)DB.pendencias=[];
