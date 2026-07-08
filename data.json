@@ -2038,7 +2038,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1783543447498,
+  "_savedAt": 1783543462719,
   "fornecedores": [
     {
       "id": 6,
@@ -2370,7 +2370,7 @@
       "plataforma": "Amazon",
       "responsavel": "",
       "valor": 507.99,
-      "prazo": "22-06-26",
+      "prazo": "22-08-26",
       "prioridade": "Alta",
       "status": "Em Andamento",
       "data": "08/07/2026"
