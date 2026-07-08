@@ -2038,7 +2038,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1783544354920,
+  "_savedAt": 1783545929311,
   "fornecedores": [
     {
       "id": 6,
@@ -2375,7 +2375,20 @@
       "status": "Aberta",
       "data": "08/07/2026",
       "categoria": "Site/Plataforma"
+    },
+    {
+      "id": 2,
+      "titulo": "COBRAR ADEMIR CAPITAL DE GIRO",
+      "descricao": "",
+      "categoria": "Site/Plataforma",
+      "plataforma": "Outro",
+      "responsavel": "",
+      "valor": 0,
+      "prazo": "08/07/2026",
+      "prioridade": "Alta",
+      "status": "Aberta",
+      "data": "08/07/2026"
     }
   ],
-  "nPendencias": 2
+  "nPendencias": 3
 }
