@@ -41,10 +41,17 @@ function salvarState(state) {
 }
 
 function diasEmAberto(dataStr) {
-  if (!dataStr) return 0;
-  const p = dataStr.split('/');
-  if (p.length !== 3) return 0;
-  const d = Date.UTC(Number(p[2]), Number(p[1]) - 1, Number(p[0]));
+  // Aceita "/" ou "-" como separador e ano com 2 ou 4 dígitos. Se não der pra
+  // entender, devolve um número bem negativo (não 0 — 0 significaria "vence
+  // hoje" e dispararia notificação de vencido indevidamente).
+  if (!dataStr) return -999999;
+  const p = dataStr.trim().split(/[\/\-]/);
+  if (p.length !== 3) return -999999;
+  let dia = Number(p[0]), mes = Number(p[1]), ano = Number(p[2]);
+  if (!dia || !mes || !ano) return -999999;
+  if (ano < 100) ano += 2000;
+  const d = Date.UTC(ano, mes - 1, dia);
+  if (isNaN(d)) return -999999;
   const h = hojeBRT();
   const hUTC = Date.UTC(h.ano, h.mes - 1, h.dia);
   return Math.floor((hUTC - d) / (1000 * 60 * 60 * 24));
