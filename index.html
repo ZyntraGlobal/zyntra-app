@@ -558,6 +558,19 @@ function save(){
 function R(v){return 'R$ '+Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
 function N(v){return Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
 function hoje(){var d=new Date();return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear();}
+function _normalizarData(s){
+  // Converte "22-08-26", "22-8-2026" etc pro padrão DD/MM/AAAA usado no resto do app.
+  // Se não der pra entender, devolve o texto original sem mexer.
+  s=(s||'').trim();
+  var p=s.split(/[\/\-]/);
+  if(p.length!==3)return s;
+  var dia=Number(p[0]),mes=Number(p[1]),ano=Number(p[2]);
+  if(!dia||!mes||!ano)return s;
+  if(ano<100)ano+=2000;
+  var d=new Date(ano,mes-1,dia);
+  if(isNaN(d.getTime()))return s;
+  return String(dia).padStart(2,'0')+'/'+String(mes).padStart(2,'0')+'/'+ano;
+}
 function setPage(h){document.getElementById('pg').innerHTML=h;document.querySelector('.pg').scrollTop=0;}
 function pillStatus(s){var m={'Pago':'ppago','Pendente':'ppendente','Atrasado':'patrasado','Programado':'pprogramado','OK':'pok','ALERTA':'palerta'};return '<span class="pill '+(m[s]||'pn')+'">'+s+'</span>';}
 function diasAte(dataStr){if(!dataStr)return null;var p=dataStr.split('/');var d=new Date(p[2],p[1]-1,p[0]);var hoje=new Date();hoje.setHours(0,0,0,0);return Math.ceil((d-hoje)/(1000*60*60*24));}
@@ -1722,9 +1735,16 @@ function _pillCompraStatus(s){
   return '<span class="pill '+(m[s]||'pn')+'">'+(ico[s]||'')+' '+s+'</span>';
 }
 function _diasEmAberto(dataStr){
-  var p=(dataStr||'').split('/');
-  if(p.length!==3)return 0;
-  var d=new Date(p[2],p[1]-1,p[0]);
+  // Aceita "/" ou "-" como separador e ano com 2 ou 4 dígitos.
+  // Se não der pra entender a data, devolve um número bem negativo em vez de 0
+  // — 0 significaria "vence hoje" e faria a pendência aparecer como vencida à toa.
+  var p=(dataStr||'').trim().split(/[\/\-]/);
+  if(p.length!==3)return -999999;
+  var dia=Number(p[0]),mes=Number(p[1]),ano=Number(p[2]);
+  if(!dia||!mes||!ano)return -999999;
+  if(ano<100)ano+=2000;
+  var d=new Date(ano,mes-1,dia);
+  if(isNaN(d.getTime()))return -999999;
   var h=new Date();h.setHours(0,0,0,0);
   return Math.floor((h-d)/(1000*60*60*24));
 }
@@ -2153,7 +2173,7 @@ function _lerFormCompra(){
     fornecedor:(document.getElementById('nc-forn').value||'').trim(),
     cat:document.getElementById('nc-cat').value,
     plataforma:document.getElementById('nc-plataforma').value,
-    dataCompra:(document.getElementById('nc-datacompra').value||'').trim(),
+    dataCompra:_normalizarData((document.getElementById('nc-datacompra').value||'').trim()),
     status:document.getElementById('nc-status').value,
     qtd:Number(document.getElementById('nc-qtd').value)||1,
     valorCompra:Number(document.getElementById('nc-valor').value)||0,
@@ -2445,7 +2465,7 @@ function _lerFormPendencia(){
     plataforma:document.getElementById('np-plataforma').value,
     responsavel:(document.getElementById('np-resp').value||'').trim(),
     valor:Number(document.getElementById('np-valor').value)||0,
-    prazo:(document.getElementById('np-prazo').value||'').trim(),
+    prazo:_normalizarData((document.getElementById('np-prazo').value||'').trim()),
     prioridade:document.getElementById('np-prioridade').value,
     status:document.getElementById('np-status').value
   };
