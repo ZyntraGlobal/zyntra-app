@@ -2038,7 +2038,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1783536536364,
+  "_savedAt": 1783543447498,
   "fornecedores": [
     {
       "id": 6,
@@ -2361,5 +2361,20 @@
       "data": "08/07/2026"
     }
   ],
-  "nCompras": 16
+  "nCompras": 16,
+  "pendencias": [
+    {
+      "id": 1,
+      "titulo": "REEMBOLSO AMAZON - 702-5098244-0339424",
+      "descricao": "COBRAR REEMBOLSO PLATAFORMA",
+      "plataforma": "Amazon",
+      "responsavel": "",
+      "valor": 507.99,
+      "prazo": "22-06-26",
+      "prioridade": "Alta",
+      "status": "Em Andamento",
+      "data": "08/07/2026"
+    }
+  ],
+  "nPendencias": 2
 }
