@@ -693,7 +693,7 @@ function pDash(){
   var pendLabel=pendUrgentes.length>0?pendUrgentes.length+' urgente'+(pendUrgentes.length>1?'s':''):pendVencidas.length>0?pendVencidas.length+' vencida'+(pendVencidas.length>1?'s':''):pendAbertas.length>0?pendAbertas.length+' em aberto':'Nada pendente';
 
   var h='<div style="margin-bottom:8px"><span style="font-size:11px;color:var(--t3)">'+new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'})+'</span></div>';
-  h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:16px;margin-bottom:0">';
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px;margin-bottom:0">';
 
   // Card Estoque
   h+=modCard('📦','Estoque',R(totalVal),'gold',totalQty+' un · '+totalDisp+' disponíveis · '+totalProd+' SKUs',estStatus,estLabel,"ir('est_produtos')",[
@@ -724,13 +724,15 @@ function pDash(){
     ['Sem viabilidade',comprasNaoVale,comprasNaoVale>0?'var(--red)':'var(--t3)']
   ]);
 
-  // Card Pendências
+  h+='</div>';
+
+  // Card Pendências — linha própria, fora do grid apertado dos outros 4
+  h+='<div style="display:grid;grid-template-columns:1fr;gap:16px;margin-top:16px">';
   h+=modCard('📌','Pendências',pendAbertas.length,'gold',pendTodos.length+' registrada'+(pendTodos.length!==1?'s':'')+' · '+R(pendValorEnvolvido)+' envolvidos',pendStatus,pendLabel,"ir('pendencias')",[
     ['Em aberto',pendAbertas.length,pendAbertas.length>0?'var(--amb)':'var(--t3)'],
     ['Vencidas',pendVencidas.length,pendVencidas.length>0?'var(--red)':'var(--t3)'],
     ['Urgentes',pendUrgentes.length,pendUrgentes.length>0?'var(--red)':'var(--t3)']
   ]);
-
   h+='</div>';
   h+='<div style="margin-top:16px;padding:12px 16px;background:var(--w);border:1px solid var(--bdr);border-radius:8px;display:flex;align-items:center;gap:8px;font-size:11px;color:var(--t3)">💡 Clique em qualquer módulo acima para abrir e gerenciar.</div>';
   setPage(h);
