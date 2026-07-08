@@ -202,6 +202,8 @@ tfoot td{font-weight:700;border-top:2px solid var(--bdr2);border-bottom:none!imp
   <div class="ni" onclick="ir('fornecedores',this)"><span class="ico">🏭</span><span class="lbl">Fornecedores</span><span class="bdg" id="b-forn" style="display:none">0</span></div>
   <div class="sb-sec">Compras</div>
   <div class="ni" onclick="ir('compras',this)"><span class="ico">🛒</span><span class="lbl">Lista de Compras</span><span class="bdg" id="b-compras" style="display:none">0</span></div>
+  <div class="sb-sec">Avisos</div>
+  <div class="ni" onclick="ir('pendencias',this)"><span class="ico">📌</span><span class="lbl">Pendências</span><span class="bdg" id="b-pend" style="display:none">0</span></div>
   <div class="sb-sec">Sistema</div>
   <div class="ni" onclick="fazerBackupG()" id="ni-backup"><span class="ico">💾</span><span class="lbl">Backup</span></div>
 </nav>
@@ -332,6 +334,9 @@ var EST_CATS=['Mouse','Teclado','Headset','Mousepad','Controle','Som','Memória'
 var COMPRA_STATUS=['Pendente','Comprado','Recebido','Cancelado'];
 var COMPRA_MARGEM_MIN=15; // % mínimo de margem pra considerar "vale a pena"
 var COMPRA_PLATAFORMAS=['Amazon','Shopee','Mercado Livre','TikTok Shop','Site Zyntra'];
+var PENDENCIA_STATUS=['Aberta','Em Andamento','Resolvida','Cancelada'];
+var PENDENCIA_PRIORIDADE=['Baixa','Média','Alta','Urgente'];
+var PENDENCIA_PLATAFORMAS=['Site Zyntra','Amazon','Shopee','Mercado Livre','TikTok Shop','Instagram','Outro'];
 
 // ── BANCO DE DADOS ────────────────────────────────────
 var _sincronizando=false;
@@ -385,8 +390,15 @@ function _normCompra(c){
     status:c.status||'Pendente', obs:c.obs||'', data:c.data||hoje(), dataCompra:c.dataCompra||c.data||hoje()
   };
 }
+function _normPendencia(p){
+  return {
+    id:p.id, titulo:p.titulo||'', descricao:p.descricao||'', plataforma:p.plataforma||'',
+    responsavel:p.responsavel||'', valor:Number(p.valor)||0, prazo:p.prazo||'',
+    prioridade:p.prioridade||'Média', status:p.status||'Aberta', data:p.data||hoje()
+  };
+}
 function loadDB(){
-  try{var s=localStorage.getItem('zyntra_gestao_v1');if(s){var d=JSON.parse(s);d.produtos=d.produtos.map(_normProd);if(!d.fornecedores)d.fornecedores=[];if(!d.nForn)d.nForn=1;if(!d.compras)d.compras=[];else d.compras=d.compras.map(_normCompra);if(!d.nCompras)d.nCompras=1;return d;}}catch(e){}
+  try{var s=localStorage.getItem('zyntra_gestao_v1');if(s){var d=JSON.parse(s);d.produtos=d.produtos.map(_normProd);if(!d.fornecedores)d.fornecedores=[];if(!d.nForn)d.nForn=1;if(!d.compras)d.compras=[];else d.compras=d.compras.map(_normCompra);if(!d.nCompras)d.nCompras=1;if(!d.pendencias)d.pendencias=[];else d.pendencias=d.pendencias.map(_normPendencia);if(!d.nPendencias)d.nPendencias=1;return d;}}catch(e){}
   return{
     produtos:JSON.parse(JSON.stringify(PRODUTOS_BASE)).map(_normProd),
     mov:[],
@@ -394,7 +406,8 @@ function loadDB(){
     rtu:JSON.parse(JSON.stringify(RTU_BASE)),
     nRtu:10,nPag:100,nMov:100,
     fornecedores:[],nForn:1,
-    compras:[],nCompras:1
+    compras:[],nCompras:1,
+    pendencias:[],nPendencias:1
   };
 }
 var DB=loadDB();
@@ -576,6 +589,9 @@ function badges(){
   // Compras
   var bc=document.getElementById('b-compras');
   if(bc){var nPend=(DB.compras||[]).filter(function(c){return c.status==='Pendente';}).length;bc.textContent=nPend;bc.style.display=nPend>0?'inline':'none';}
+  // Pendências
+  var bp=document.getElementById('b-pend');
+  if(bp){var nPd=(DB.pendencias||[]).filter(function(p){return p.status==='Aberta'||p.status==='Em Andamento';}).length;bp.textContent=nPd;bp.style.display=nPd>0?'inline':'none';}
 }
 
 // ── NAVEGAÇÃO ─────────────────────────────────────────
@@ -588,7 +604,7 @@ function ir(tipo,arg,el){
   // Seções bloqueadas para funcionário
   var _bloq=['dash','est_fin','rtu_resumo','notif'];
   if(_isFuncionario()&&_bloq.indexOf(tipo)>=0){_bloqueadoFunc();document.getElementById('ptitle').textContent='Acesso Restrito';return;}
-  var titulos={dash:'Dashboard',est_produtos:'Estoque — Produtos',est_fin:'Estoque — Financeiro',est_mov:'Estoque — Movimentações',est_alertas:'Estoque — Alertas',rtu_lanc:'Controle RTU — Lançamentos',rtu_resumo:'Controle RTU — Resumo Anual',notif:'Alertas & Notificações',fornecedores:'Fornecedores',compras:'Compras — Lista de Compras'};
+  var titulos={dash:'Dashboard',est_produtos:'Estoque — Produtos',est_fin:'Estoque — Financeiro',est_mov:'Estoque — Movimentações',est_alertas:'Estoque — Alertas',rtu_lanc:'Controle RTU — Lançamentos',rtu_resumo:'Controle RTU — Resumo Anual',notif:'Alertas & Notificações',fornecedores:'Fornecedores',compras:'Compras — Lista de Compras',pendencias:'Avisos & Pendências'};
   document.getElementById('ptitle').textContent=titulos[tipo]||(tipo==='pag'?'Pagamentos — '+MFULL[(arg||1)-1]+' 2026':tipo);
   if(tipo==='dash')pDash();
   else if(tipo==='est_produtos')pEstProdutos();
@@ -601,6 +617,7 @@ function ir(tipo,arg,el){
   else if(tipo==='notif')pNotifG();
   else if(tipo==='fornecedores')pFornecedores();
   else if(tipo==='compras')pCompras();
+  else if(tipo==='pendencias')pPendencias();
 }
 
 // ── DASHBOARD ─────────────────────────────────────────
@@ -666,8 +683,17 @@ function pDash(){
   var comprasStatus=comprasNaoVale>0?'red':comprasPendTotal>0?'amb':'grn';
   var comprasLabel=comprasNaoVale>0?comprasNaoVale+' sem viabilidade':comprasPendTotal>0?comprasPendTotal+' vencida'+(comprasPendTotal>1?'s':'')+(comprasAtrasados>0?' ('+comprasAtrasados+' atrasada'+(comprasAtrasados>1?'s':'')+')':''):'Nada vencido hoje';
 
+  // ── PENDÊNCIAS ──
+  var pendTodos=DB.pendencias||[];
+  var pendAbertas=pendTodos.filter(function(p){return p.status==='Aberta'||p.status==='Em Andamento';});
+  var pendVencidas=pendAbertas.filter(function(p){return p.prazo&&_diasEmAberto(p.prazo)>=0;});
+  var pendUrgentes=pendAbertas.filter(function(p){return p.prioridade==='Urgente';});
+  var pendValorEnvolvido=pendAbertas.reduce(function(a,p){return a+(Number(p.valor)||0);},0);
+  var pendStatus=(pendUrgentes.length>0||pendVencidas.length>0)?'red':pendAbertas.length>0?'amb':'grn';
+  var pendLabel=pendUrgentes.length>0?pendUrgentes.length+' urgente'+(pendUrgentes.length>1?'s':''):pendVencidas.length>0?pendVencidas.length+' vencida'+(pendVencidas.length>1?'s':''):pendAbertas.length>0?pendAbertas.length+' em aberto':'Nada pendente';
+
   var h='<div style="margin-bottom:8px"><span style="font-size:11px;color:var(--t3)">'+new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'})+'</span></div>';
-  h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px;margin-bottom:0">';
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:16px;margin-bottom:0">';
 
   // Card Estoque
   h+=modCard('📦','Estoque',R(totalVal),'gold',totalQty+' un · '+totalDisp+' disponíveis · '+totalProd+' SKUs',estStatus,estLabel,"ir('est_produtos')",[
@@ -696,6 +722,13 @@ function pDash(){
     ['Investido hoje',R(investidoHoje),comprasInvestidasHoje.length>0?'var(--grn)':'var(--t3)'],
     ['Pendentes',comprasPendTotal,comprasPendTotal>0?'var(--amb)':'var(--t3)'],
     ['Sem viabilidade',comprasNaoVale,comprasNaoVale>0?'var(--red)':'var(--t3)']
+  ]);
+
+  // Card Pendências
+  h+=modCard('📌','Pendências',pendAbertas.length,'gold',pendTodos.length+' registrada'+(pendTodos.length!==1?'s':'')+' · '+R(pendValorEnvolvido)+' envolvidos',pendStatus,pendLabel,"ir('pendencias')",[
+    ['Em aberto',pendAbertas.length,pendAbertas.length>0?'var(--amb)':'var(--t3)'],
+    ['Vencidas',pendVencidas.length,pendVencidas.length>0?'var(--red)':'var(--t3)'],
+    ['Urgentes',pendUrgentes.length,pendUrgentes.length>0?'var(--red)':'var(--t3)']
   ]);
 
   h+='</div>';
@@ -2173,6 +2206,157 @@ function avancarStatusCompra(id){
   if(i<0||i>=ordem.length-1)return;
   c.status=ordem[i+1];
   save();badges();pCompras();
+}
+
+// ── PENDÊNCIAS (avisos do site/plataformas) ──────────
+function _pillPendenciaStatus(s){
+  var m={Aberta:'palerta',['Em Andamento']:'ppendente',Resolvida:'ppago',Cancelada:'patrasado'};
+  var ico={Aberta:'🔴',['Em Andamento']:'🟡',Resolvida:'✅',Cancelada:'✕'};
+  return '<span class="pill '+(m[s]||'pn')+'">'+(ico[s]||'')+' '+s+'</span>';
+}
+function _pillPendenciaPrioridade(p){
+  var m={Baixa:'pn',Média:'pprogramado',Alta:'ppendente',Urgente:'palerta'};
+  return '<span class="pill '+(m[p]||'pn')+'">'+p+'</span>';
+}
+
+function _tabelaPendencias(lista){
+  var h='<div class="panel"><div class="ts tw"><table><thead><tr><th>TÍTULO</th><th>PLATAFORMA</th><th>RESPONSÁVEL</th><th class="tr">VALOR ENVOLVIDO</th><th class="tc">PRAZO</th><th class="tc">PRIORIDADE</th><th class="tc">STATUS</th><th></th></tr></thead><tbody>';
+  lista.forEach(function(p){
+    var vencida=(p.status==='Aberta'||p.status==='Em Andamento')&&p.prazo&&_diasEmAberto(p.prazo)>=0;
+    var diasAtraso=vencida?_diasEmAberto(p.prazo):0;
+    h+='<tr>';
+    h+='<td style="min-width:200px"><div style="font-weight:600;color:var(--t);font-size:12px">'+p.titulo+'</div>'+(p.descricao?'<div style="font-size:10px;color:var(--t3);margin-top:1px">'+p.descricao+'</div>':'')+'</td>';
+    h+='<td class="tc">'+(p.plataforma?'<span class="pill pn">'+p.plataforma+'</span>':'<span style="color:var(--t3);font-size:11px">—</span>')+'</td>';
+    h+='<td style="font-size:12px">'+(p.responsavel||'<span style="color:var(--t3)">—</span>')+'</td>';
+    h+='<td class="tr tnw">'+(p.valor?R(p.valor):'<span style="color:var(--t3)">—</span>')+'</td>';
+    h+='<td class="tc tnw">'+(p.prazo||'<span style="color:var(--t3)">—</span>')+(diasAtraso>0?'<div style="font-size:10px;color:var(--red);font-weight:700">atrasado há '+diasAtraso+'d</div>':'')+'</td>';
+    h+='<td class="tc">'+_pillPendenciaPrioridade(p.prioridade)+'</td>';
+    h+='<td class="tc">'+_pillPendenciaStatus(p.status)+'</td>';
+    h+='<td class="tnw" onclick="event.stopPropagation()"><button class="btn bsm" onclick="editPendencia('+p.id+')" title="Editar">✏</button> <button class="btn bsm btnd" onclick="delPendencia('+p.id+')" title="Excluir">✕</button></td>';
+    h+='</tr>';
+  });
+  h+='</tbody></table></div></div>';
+  return h;
+}
+
+function pPendencias(busca,filtStatus,filtPrior){
+  if(!DB.pendencias)DB.pendencias=[];
+  busca=busca||'';filtStatus=filtStatus||'';filtPrior=filtPrior||'';
+  var todos=DB.pendencias;
+  var abertas=todos.filter(function(p){return p.status==='Aberta'||p.status==='Em Andamento';});
+  var vencidas=abertas.filter(function(p){return p.prazo&&_diasEmAberto(p.prazo)>=0;});
+  var urgentes=abertas.filter(function(p){return p.prioridade==='Urgente';});
+  var valorEnvolvido=abertas.reduce(function(a,p){return a+(Number(p.valor)||0);},0);
+
+  var h='<div class="g4">';
+  h+='<div class="card hl"><div class="lbl">Em Aberto</div><div class="val gld">'+abertas.length+'</div><div class="sub">de '+todos.length+' registrada'+(todos.length!==1?'s':'')+'</div></div>';
+  h+='<div class="card '+(vencidas.length>0?'danger':'')+'"><div class="lbl">Vencidas</div><div class="val '+(vencidas.length>0?'red':'grn')+'">'+vencidas.length+'</div><div class="sub">prazo já passou</div></div>';
+  h+='<div class="card '+(urgentes.length>0?'danger':'')+'"><div class="lbl">Urgentes</div><div class="val '+(urgentes.length>0?'red':'grn')+'">'+urgentes.length+'</div><div class="sub">prioridade máxima</div></div>';
+  h+='<div class="card"><div class="lbl">Valor Envolvido</div><div class="val">'+R(valorEnvolvido)+'</div><div class="sub">soma das em aberto</div></div>';
+  h+='</div>';
+
+  h+='<div class="brow">';
+  h+='<input class="inp" id="pend-s" style="width:240px" placeholder="Buscar por título ou responsável..." value="'+busca+'" oninput="_refPendencias()">';
+  h+='<select class="sel" id="pend-st" onchange="_refPendencias()"><option value="">Todos status</option>';
+  PENDENCIA_STATUS.forEach(function(s){h+='<option value="'+s+'"'+(filtStatus===s?' selected':'')+'>'+s+'</option>';});
+  h+='</select>';
+  h+='<select class="sel" id="pend-pr" onchange="_refPendencias()"><option value="">Todas prioridades</option>';
+  PENDENCIA_PRIORIDADE.forEach(function(p){h+='<option value="'+p+'"'+(filtPrior===p?' selected':'')+'>'+p+'</option>';});
+  h+='</select>';
+  if(busca||filtStatus||filtPrior)h+='<button class="btn bsm" onclick="pPendencias()">✕ Limpar</button>';
+  h+='<button class="btn btnp bsm" style="margin-left:auto" onclick="modalAddPendencia()">+ Nova Pendência</button>';
+  h+='</div>';
+
+  var lista=todos.slice();
+  if(busca){var b=busca.toLowerCase();lista=lista.filter(function(p){return (p.titulo||'').toLowerCase().indexOf(b)>=0||(p.responsavel||'').toLowerCase().indexOf(b)>=0;});}
+  if(filtStatus)lista=lista.filter(function(p){return p.status===filtStatus;});
+  if(filtPrior)lista=lista.filter(function(p){return p.prioridade===filtPrior;});
+  lista.sort(function(a,b){
+    var ordS={Aberta:0,['Em Andamento']:1,Resolvida:2,Cancelada:3};
+    if(ordS[a.status]!==ordS[b.status])return ordS[a.status]-ordS[b.status];
+    return (b.id||0)-(a.id||0);
+  });
+
+  if(lista.length===0&&todos.length===0){
+    h+='<div class="panel"><div class="empty" style="padding:56px 36px">';
+    h+='<div style="font-size:32px;margin-bottom:12px">📌</div>';
+    h+='<div style="font-size:14px;font-weight:600;color:var(--t2);margin-bottom:6px">Nenhuma pendência registrada</div>';
+    h+='<div style="font-size:12px;color:var(--t3);margin-bottom:16px">Anote aqui os problemas do site e das plataformas que precisam ser resolvidos</div>';
+    h+='<button class="btn btnp" onclick="modalAddPendencia()">+ Adicionar Primeira Pendência</button>';
+    h+='</div></div>';
+  } else {
+    h+=_tabelaPendencias(lista);
+  }
+
+  setPage(h);
+}
+
+function _refPendencias(){
+  var b=document.getElementById('pend-s');
+  var st=document.getElementById('pend-st');
+  var pr=document.getElementById('pend-pr');
+  pPendencias(b?b.value:'',st?st.value:'',pr?pr.value:'');
+}
+
+function _formPendencia(vals){
+  vals=vals||{};
+  var platOpts='<option value="">— Selecionar —</option>'+PENDENCIA_PLATAFORMAS.map(function(p){return '<option value="'+p+'"'+(vals.plataforma===p?' selected':'')+'>'+p+'</option>';}).join('');
+  var prOpts=PENDENCIA_PRIORIDADE.map(function(p){return '<option value="'+p+'"'+(vals.prioridade===p?' selected':'')+'>'+p+'</option>';}).join('');
+  var stOpts=PENDENCIA_STATUS.map(function(s){return '<option value="'+s+'"'+(vals.status===s?' selected':'')+'>'+s+'</option>';}).join('');
+  return '<div class="fg f2">'+
+    '<div style="grid-column:1/-1"><label>Título *</label><input id="np-titulo" value="'+(vals.titulo||'')+'" placeholder="Ex: Preço errado no anúncio da Shopee" autofocus></div>'+
+    '<div style="grid-column:1/-1"><label>Descrição</label><textarea id="np-desc" style="width:100%;resize:vertical;min-height:56px;padding:7px 9px;font-size:12px;font-family:Inter,sans-serif;border:1px solid var(--bdr2);border-radius:6px;background:var(--w2);color:var(--t);outline:none">'+(vals.descricao||'')+'</textarea></div>'+
+    '<div><label>Plataforma / Site</label><select id="np-plataforma">'+platOpts+'</select></div>'+
+    '<div><label>Responsável</label><input id="np-resp" value="'+(vals.responsavel||'')+'" placeholder="Quem vai resolver"></div>'+
+    '<div><label>Valor Envolvido (R$)</label><input id="np-valor" type="number" min="0" step="0.01" value="'+(vals.valor||'')+'" placeholder="0,00"></div>'+
+    '<div><label>Prazo</label><input id="np-prazo" value="'+(vals.prazo||'')+'" placeholder="DD/MM/AAAA"></div>'+
+    '<div><label>Prioridade</label><select id="np-prioridade">'+prOpts+'</select></div>'+
+    '<div><label>Status</label><select id="np-status">'+stOpts+'</select></div>'+
+    '</div>';
+}
+
+function _lerFormPendencia(){
+  return{
+    titulo:(document.getElementById('np-titulo').value||'').trim(),
+    descricao:(document.getElementById('np-desc').value||'').trim(),
+    plataforma:document.getElementById('np-plataforma').value,
+    responsavel:(document.getElementById('np-resp').value||'').trim(),
+    valor:Number(document.getElementById('np-valor').value)||0,
+    prazo:(document.getElementById('np-prazo').value||'').trim(),
+    prioridade:document.getElementById('np-prioridade').value,
+    status:document.getElementById('np-status').value
+  };
+}
+
+function modalAddPendencia(){
+  abrirM('Nova Pendência',_formPendencia({status:'Aberta',prioridade:'Média'}),function(){
+    var dados=_lerFormPendencia();
+    if(!dados.titulo){alert('Informe o título da pendência.');return;}
+    if(!DB.pendencias)DB.pendencias=[];
+    if(!DB.nPendencias)DB.nPendencias=1;
+    dados.data=hoje();
+    DB.pendencias.push(Object.assign({id:DB.nPendencias++},dados));
+    save();badges();fecharM();pPendencias();
+  });
+}
+
+function editPendencia(id){
+  if(!DB.pendencias)return;
+  var p=DB.pendencias.find(function(x){return x.id===id;});if(!p)return;
+  abrirM('Editar Pendência — '+p.titulo,_formPendencia(p),function(){
+    var dados=_lerFormPendencia();
+    if(!dados.titulo){alert('Informe o título da pendência.');return;}
+    Object.assign(p,dados);
+    save();badges();fecharM();pPendencias();
+  });
+}
+
+function delPendencia(id){
+  if(!DB.pendencias)return;
+  var p=DB.pendencias.find(function(x){return x.id===id;});if(!p)return;
+  if(!confirm('Excluir a pendência "'+p.titulo+'"?\n\nEsta ação não pode ser desfeita.'))return;
+  DB.pendencias=DB.pendencias.filter(function(x){return x.id!==id;});
+  save();badges();pPendencias();
 }
 
 function notifChecarG(){
