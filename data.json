@@ -2038,7 +2038,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1783621591034,
+  "_savedAt": 1783622142364,
   "fornecedores": [
     {
       "id": 6,
@@ -2196,22 +2196,6 @@
       "impostoPct": 37,
       "precoVenda": 429.99,
       "status": "Comprado",
-      "obs": "",
-      "data": "05/07/2026",
-      "dataCompra": "08/07/2026"
-    },
-    {
-      "id": 6,
-      "fornecedor": "",
-      "produto": "HEADSET GAMER LOGITECH G G321 - PRETO",
-      "cat": "Mouse",
-      "plataforma": "Mercado Livre",
-      "qtd": 1,
-      "valorCompra": 290,
-      "freteUnit": 0,
-      "impostoPct": 37,
-      "precoVenda": 463.79,
-      "status": "Pendente",
       "obs": "",
       "data": "05/07/2026",
       "dataCompra": "08/07/2026"
