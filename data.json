@@ -2038,7 +2038,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1783616534839,
+  "_savedAt": 1783621567061,
   "fornecedores": [
     {
       "id": 6,
@@ -2270,7 +2270,7 @@
       "produto": "GABINETE GAMER LIAN O11 VISION COMPACT - PRETO",
       "cat": "Outros",
       "plataforma": "Shopee",
-      "qtd": 3,
+      "qtd": 2,
       "valorCompra": 633,
       "freteUnit": 0,
       "impostoPct": 37,
