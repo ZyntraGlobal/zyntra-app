@@ -83,17 +83,16 @@ async function main() {
   const agora = hojeBRT();
   const hoje = hojeStr();
 
-  // O workflow roda a cada 15 min o dia inteiro — só segue se a hora atual
-  // for a hora-alvo, e só se esse horário ainda não foi enviado hoje (evita
-  // duplicar caso o workflow rode mais de uma vez dentro da mesma hora).
-  if (!HORAS_ALVO.includes(agora.hora)) {
-    console.log('Fora do horário-alvo (hora atual: ' + agora.hora + 'h BRT) — não é hora de notificar.');
-    return;
-  }
-  const slotAtual = hoje + '-' + agora.hora;
+  // O GitHub Actions não garante disparo exato a cada 15 min (pode atrasar horas
+  // em repos de baixa atividade) — em vez de exigir bater a hora exata, verifica
+  // se algum horário-alvo já passou e ainda não foi notificado hoje, e recupera
+  // no próximo run que rodar (evita perder o dia inteiro por causa do atraso).
+  const passados = HORAS_ALVO.filter(h => h <= agora.hora);
   const state = lerState();
-  if (state.ultimoSlot === slotAtual) {
-    console.log('Slot ' + slotAtual + ' já foi notificado hoje — pulando.');
+  const enviadosHoje = state.dia === hoje ? (state.enviados || []) : [];
+  const faltando = passados.filter(h => !enviadosHoje.includes(h));
+  if (faltando.length === 0) {
+    console.log('Nenhum horário-alvo pendente ainda (hora atual: ' + agora.hora + 'h BRT).');
     return;
   }
 
@@ -124,7 +123,7 @@ async function main() {
   try {
     await webpush.sendNotification(sub, payload);
     console.log('Push enviado com sucesso:', titulo);
-    salvarState({ ultimoSlot: slotAtual });
+    salvarState({ dia: hoje, enviados: passados });
   } catch (err) {
     console.log('Erro ao enviar push. statusCode:', err.statusCode, '| body:', err.body);
     process.exitCode = 1;
