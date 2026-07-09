@@ -1975,7 +1975,7 @@
         "desc": "FRETE TERCEIRIZADO",
         "cat": "Logística/Frete",
         "tipo": "Conta Variável",
-        "valor": 160,
+        "valor": 240,
         "forma": "Pix",
         "datavenc": "05/08/2026",
         "status": "Pendente",
@@ -2038,7 +2038,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1783545929311,
+  "_savedAt": 1783608056057,
   "fornecedores": [
     {
       "id": 6,
@@ -2314,51 +2314,51 @@
     },
     {
       "id": 13,
-      "produto": "MOUSE GAMER CORSAIR SCIMITAR - PRETO",
       "fornecedor": "",
+      "produto": "MOUSE GAMER CORSAIR SCIMITAR - PRETO",
       "cat": "Mouse",
       "plataforma": "Mercado Livre",
-      "dataCompra": "08/07/2026",
-      "status": "Pendente",
       "qtd": 1,
       "valorCompra": 175,
       "freteUnit": 0,
       "impostoPct": 0,
       "precoVenda": 399.99,
+      "status": "Pendente",
       "obs": "",
-      "data": "07/07/2026"
+      "data": "07/07/2026",
+      "dataCompra": "08/07/2026"
     },
     {
       "id": 14,
-      "produto": "GABINETE GAMER LIAN LI O11 VISION COMPACT - BRANCO",
       "fornecedor": "",
+      "produto": "GABINETE GAMER LIAN LI O11 VISION COMPACT - BRANCO",
       "cat": "Outros",
       "plataforma": "Shopee",
-      "dataCompra": "08/07/2026",
-      "status": "Pendente",
       "qtd": 1,
       "valorCompra": 590,
       "freteUnit": 0,
       "impostoPct": 0,
       "precoVenda": 1299.99,
+      "status": "Pendente",
       "obs": "",
-      "data": "07/07/2026"
+      "data": "07/07/2026",
+      "dataCompra": "08/07/2026"
     },
     {
       "id": 15,
-      "produto": "GABINETE GAMER LIAN LI O11 VISION COMPACT - PRETO",
       "fornecedor": "",
+      "produto": "GABINETE GAMER LIAN LI O11 VISION COMPACT - PRETO",
       "cat": "Outros",
       "plataforma": "",
-      "dataCompra": "09/07/2026",
-      "status": "Pendente",
       "qtd": 1,
       "valorCompra": 590,
       "freteUnit": 0,
       "impostoPct": 0,
       "precoVenda": 1299.99,
+      "status": "Pendente",
       "obs": "",
-      "data": "08/07/2026"
+      "data": "08/07/2026",
+      "dataCompra": "09/07/2026"
     }
   ],
   "nCompras": 16,
@@ -2367,14 +2367,14 @@
       "id": 1,
       "titulo": "REEMBOLSO AMAZON - 702-5098244-0339424",
       "descricao": "COBRAR REEMBOLSO PLATAFORMA",
+      "categoria": "Site/Plataforma",
       "plataforma": "Amazon",
       "responsavel": "",
       "valor": 507.99,
       "prazo": "22-08-26",
       "prioridade": "Alta",
       "status": "Aberta",
-      "data": "08/07/2026",
-      "categoria": "Site/Plataforma"
+      "data": "08/07/2026"
     },
     {
       "id": 2,
