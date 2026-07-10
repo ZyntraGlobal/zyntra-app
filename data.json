@@ -2038,7 +2038,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1783648220093,
+  "_savedAt": 1783648619385,
   "fornecedores": [
     {
       "id": 6,
@@ -2350,7 +2350,7 @@
       "fornecedor": "",
       "cat": "Mouse",
       "plataforma": "Amazon",
-      "dataCompra": "09/07/2026",
+      "dataCompra": "10/07/2026",
       "status": "Pendente",
       "qtd": 1,
       "valorCompra": 110,
