@@ -2038,7 +2038,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1783648619385,
+  "_savedAt": 1783648662309,
   "fornecedores": [
     {
       "id": 6,
@@ -2365,7 +2365,7 @@
       "produto": "GABINETE LIAN LI A3 MATX - Preto/Madeira",
       "fornecedor": "",
       "cat": "Outros",
-      "plataforma": "",
+      "plataforma": "Amazon",
       "dataCompra": "10/07/2026",
       "status": "Pendente",
       "qtd": 1,
