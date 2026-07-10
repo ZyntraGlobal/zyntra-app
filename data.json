@@ -2038,7 +2038,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1783648027686,
+  "_savedAt": 1783648220093,
   "fornecedores": [
     {
       "id": 6,
@@ -2375,9 +2375,25 @@
       "precoVenda": 799.99,
       "obs": "",
       "data": "09/07/2026"
+    },
+    {
+      "id": 18,
+      "produto": "GABINETE GAMER LIAN 011 VISION COMPACT - PRETO",
+      "fornecedor": "",
+      "cat": "Outros",
+      "plataforma": "Amazon",
+      "dataCompra": "13/07/2026",
+      "status": "Pendente",
+      "qtd": 1,
+      "valorCompra": 590,
+      "freteUnit": 0,
+      "impostoPct": 0,
+      "precoVenda": 1499.99,
+      "obs": "",
+      "data": "09/07/2026"
     }
   ],
-  "nCompras": 18,
+  "nCompras": 19,
   "pendencias": [
     {
       "id": 1,
