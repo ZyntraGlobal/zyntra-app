@@ -2038,7 +2038,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1783688898888,
+  "_savedAt": 1783708435570,
   "fornecedores": [
     {
       "id": 6,
@@ -2131,7 +2131,7 @@
       "freteUnit": 0,
       "impostoPct": 37,
       "precoVenda": 359.99,
-      "status": "Pendente",
+      "status": "Comprado",
       "obs": "",
       "data": "04/07/2026",
       "dataCompra": "10/07/2026"
@@ -2346,51 +2346,51 @@
     },
     {
       "id": 16,
-      "produto": "MOUSE GAMER REDRAGON M908 IMPACT - PRETO",
       "fornecedor": "",
+      "produto": "MOUSE GAMER REDRAGON M908 IMPACT - PRETO",
       "cat": "Mouse",
       "plataforma": "Amazon",
-      "dataCompra": "10/07/2026",
-      "status": "Pendente",
       "qtd": 1,
       "valorCompra": 110,
       "freteUnit": 0,
       "impostoPct": 0,
       "precoVenda": 399.99,
+      "status": "Pendente",
       "obs": "",
-      "data": "09/07/2026"
+      "data": "09/07/2026",
+      "dataCompra": "10/07/2026"
     },
     {
       "id": 17,
-      "produto": "GABINETE LIAN LI A3 MATX - Preto/Madeira",
       "fornecedor": "",
+      "produto": "GABINETE LIAN LI A3 MATX - Preto/Madeira",
       "cat": "Outros",
       "plataforma": "Amazon",
-      "dataCompra": "10/07/2026",
-      "status": "Pendente",
       "qtd": 1,
       "valorCompra": 455,
       "freteUnit": 0,
       "impostoPct": 0,
       "precoVenda": 799.99,
+      "status": "Pendente",
       "obs": "",
-      "data": "09/07/2026"
+      "data": "09/07/2026",
+      "dataCompra": "10/07/2026"
     },
     {
       "id": 18,
-      "produto": "GABINETE GAMER LIAN 011 VISION COMPACT - PRETO",
       "fornecedor": "",
+      "produto": "GABINETE GAMER LIAN 011 VISION COMPACT - PRETO",
       "cat": "Outros",
       "plataforma": "Amazon",
-      "dataCompra": "13/07/2026",
-      "status": "Pendente",
       "qtd": 1,
       "valorCompra": 590,
       "freteUnit": 0,
       "impostoPct": 0,
       "precoVenda": 1499.99,
+      "status": "Pendente",
       "obs": "",
-      "data": "09/07/2026"
+      "data": "09/07/2026",
+      "dataCompra": "13/07/2026"
     }
   ],
   "nCompras": 19,
