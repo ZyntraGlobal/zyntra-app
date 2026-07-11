@@ -103,18 +103,20 @@ async function main() {
   const pendentesVencidos = compras.filter(c => c.status === 'Pendente' && diasEmAberto(c.dataCompra || c.data) >= 0);
 
   console.log('Compras pendentes vencidas hoje:', pendentesVencidos.length);
-  if (pendentesVencidos.length === 0) {
-    console.log('Nada vencido hoje — não envia notificação.');
-    return;
-  }
 
-  const total = pendentesVencidos.reduce((a, c) => a + custoTotalCompra(c), 0);
-  const valorFmt = 'R$ ' + total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  const qtdFmt = pendentesVencidos.length + ' produto' + (pendentesVencidos.length > 1 ? 's' : '');
-  const frase = FRASES[Math.floor(Math.random() * FRASES.length)];
-  const titulo = frase.replace('{valor}', valorFmt);
-  const produtos = pendentesVencidos.slice(0, 5).map(c => '• ' + c.produto + ' (' + c.qtd + 'x)').join('\n');
-  const corpo = qtdFmt + ' pendente' + (pendentesVencidos.length > 1 ? 's' : '') + ':\n' + produtos + (pendentesVencidos.length > 5 ? '\n…+' + (pendentesVencidos.length - 5) + ' mais' : '');
+  let titulo, corpo;
+  if (pendentesVencidos.length === 0) {
+    titulo = '✅ Nada pra investir hoje';
+    corpo = 'Nenhuma compra pendente vencida no momento.';
+  } else {
+    const total = pendentesVencidos.reduce((a, c) => a + custoTotalCompra(c), 0);
+    const valorFmt = 'R$ ' + total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const qtdFmt = pendentesVencidos.length + ' produto' + (pendentesVencidos.length > 1 ? 's' : '');
+    const frase = FRASES[Math.floor(Math.random() * FRASES.length)];
+    titulo = frase.replace('{valor}', valorFmt);
+    const produtos = pendentesVencidos.slice(0, 5).map(c => '• ' + c.produto + ' (' + c.qtd + 'x)').join('\n');
+    corpo = qtdFmt + ' pendente' + (pendentesVencidos.length > 1 ? 's' : '') + ':\n' + produtos + (pendentesVencidos.length > 5 ? '\n…+' + (pendentesVencidos.length - 5) + ' mais' : '');
+  }
 
   webpush.setVapidDetails('mailto:contato@zyntraglobal.com.br', VAPID_PUBLIC, VAPID_PRIVATE);
 

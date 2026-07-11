@@ -87,18 +87,20 @@ async function main() {
   const investidasHoje = compras.filter(c => c.status === 'Comprado' && (c.dataCompra || c.data) === hoje);
 
   console.log('Compras investidas hoje:', investidasHoje.length);
-  if (investidasHoje.length === 0) {
-    console.log('Nada investido hoje — não envia notificação.');
-    return;
-  }
 
-  const total = investidasHoje.reduce((a, c) => a + custoTotalCompra(c), 0);
-  const valorFmt = 'R$ ' + total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  const qtdFmt = investidasHoje.length + ' produto' + (investidasHoje.length > 1 ? 's' : '');
-  const frase = FRASES[Math.floor(Math.random() * FRASES.length)];
-  const titulo = frase.replace('{valor}', valorFmt);
-  const produtos = investidasHoje.slice(0, 5).map(c => '• ' + c.produto + ' (' + c.qtd + 'x)').join('\n');
-  const corpo = qtdFmt + ' comprado' + (investidasHoje.length > 1 ? 's' : '') + ' hoje:\n' + produtos + (investidasHoje.length > 5 ? '\n…+' + (investidasHoje.length - 5) + ' mais' : '');
+  let titulo, corpo;
+  if (investidasHoje.length === 0) {
+    titulo = '📭 Nada investido hoje';
+    corpo = 'Nenhuma compra marcada como comprada hoje.';
+  } else {
+    const total = investidasHoje.reduce((a, c) => a + custoTotalCompra(c), 0);
+    const valorFmt = 'R$ ' + total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const qtdFmt = investidasHoje.length + ' produto' + (investidasHoje.length > 1 ? 's' : '');
+    const frase = FRASES[Math.floor(Math.random() * FRASES.length)];
+    titulo = frase.replace('{valor}', valorFmt);
+    const produtos = investidasHoje.slice(0, 5).map(c => '• ' + c.produto + ' (' + c.qtd + 'x)').join('\n');
+    corpo = qtdFmt + ' comprado' + (investidasHoje.length > 1 ? 's' : '') + ' hoje:\n' + produtos + (investidasHoje.length > 5 ? '\n…+' + (investidasHoje.length - 5) + ' mais' : '');
+  }
 
   webpush.setVapidDetails('mailto:contato@zyntraglobal.com.br', VAPID_PUBLIC, VAPID_PRIVATE);
 

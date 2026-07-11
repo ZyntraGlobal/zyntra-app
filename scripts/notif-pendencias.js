@@ -95,17 +95,21 @@ async function main() {
   const relevantes = abertas.filter(p => (p.prazo && diasEmAberto(p.prazo) >= 0) || p.prioridade === 'Urgente');
 
   console.log('Pendências vencidas/urgentes hoje:', relevantes.length);
-  if (relevantes.length === 0) {
-    console.log('Nada vencido/urgente — não envia notificação.');
-    return;
-  }
 
-  const valorTotal = relevantes.reduce((a, p) => a + (Number(p.valor) || 0), 0);
-  const frase = FRASES[Math.floor(Math.random() * FRASES.length)];
-  const titulo = frase.replace('{qtd}', relevantes.length);
-  const linhas = relevantes.slice(0, 5).map(p => '• ' + p.titulo + (p.prioridade === 'Urgente' ? ' 🔴' : ''));
-  const valorFmt = valorTotal > 0 ? '\n💰 R$ ' + valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' envolvidos' : '';
-  const corpo = linhas.join('\n') + (relevantes.length > 5 ? '\n…+' + (relevantes.length - 5) + ' mais' : '') + valorFmt;
+  let titulo, corpo;
+  if (relevantes.length === 0) {
+    titulo = '✅ Nenhuma pendência vencida/urgente';
+    corpo = abertas.length > 0
+      ? abertas.length + ' pendência' + (abertas.length > 1 ? 's' : '') + ' em aberto, mas nenhuma vencida ou urgente hoje.'
+      : 'Nenhuma pendência em aberto no momento.';
+  } else {
+    const valorTotal = relevantes.reduce((a, p) => a + (Number(p.valor) || 0), 0);
+    const frase = FRASES[Math.floor(Math.random() * FRASES.length)];
+    titulo = frase.replace('{qtd}', relevantes.length);
+    const linhas = relevantes.slice(0, 5).map(p => '• ' + p.titulo + (p.prioridade === 'Urgente' ? ' 🔴' : ''));
+    const valorFmt = valorTotal > 0 ? '\n💰 R$ ' + valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' envolvidos' : '';
+    corpo = linhas.join('\n') + (relevantes.length > 5 ? '\n…+' + (relevantes.length - 5) + ' mais' : '') + valorFmt;
+  }
 
   webpush.setVapidDetails('mailto:contato@zyntraglobal.com.br', VAPID_PUBLIC, VAPID_PRIVATE);
 
