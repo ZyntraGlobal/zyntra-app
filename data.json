@@ -2038,7 +2038,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1783788848381,
+  "_savedAt": 1783788872276,
   "fornecedores": [
     {
       "id": 6,
@@ -2439,9 +2439,25 @@
       "precoVenda": 359.99,
       "obs": "",
       "data": "11/07/2026"
+    },
+    {
+      "id": 23,
+      "produto": "MOUSEPAD GAMER REDRAGON SUZAKU - PRETO",
+      "fornecedor": "",
+      "cat": "Mousepad",
+      "plataforma": "Mercado Livre",
+      "dataCompra": "11/07/2026",
+      "status": "Pendente",
+      "qtd": 1,
+      "valorCompra": 50,
+      "freteUnit": 0,
+      "impostoPct": 0,
+      "precoVenda": 129.99,
+      "obs": "",
+      "data": "11/07/2026"
     }
   ],
-  "nCompras": 23,
+  "nCompras": 24,
   "pendencias": [
     {
       "id": 1,
