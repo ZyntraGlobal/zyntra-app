@@ -2038,7 +2038,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1783788508613,
+  "_savedAt": 1783788559088,
   "fornecedores": [
     {
       "id": 6,
@@ -2401,9 +2401,9 @@
       "dataCompra": "13/07/2026",
       "status": "Pendente",
       "qtd": 1,
-      "valorCompra": 0.07,
+      "valorCompra": 0.84,
       "freteUnit": 0,
-      "impostoPct": 0,
+      "impostoPct": 37,
       "precoVenda": 359.99,
       "obs": "",
       "data": "11/07/2026"
