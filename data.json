@@ -2038,7 +2038,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1783788917815,
+  "_savedAt": 1783788967498,
   "fornecedores": [
     {
       "id": 6,
@@ -2446,12 +2446,12 @@
       "fornecedor": "",
       "cat": "Mousepad",
       "plataforma": "Mercado Livre",
-      "dataCompra": "11/07/2026",
+      "dataCompra": "13/07/2026",
       "status": "Pendente",
       "qtd": 1,
       "valorCompra": 50,
       "freteUnit": 0,
-      "impostoPct": 0,
+      "impostoPct": 37,
       "precoVenda": 129.99,
       "obs": "",
       "data": "11/07/2026"
