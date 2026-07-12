@@ -2038,7 +2038,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1783867090603,
+  "_savedAt": 1783872653600,
   "fornecedores": [
     {
       "id": 6,
@@ -2513,7 +2513,20 @@
       "prioridade": "Média",
       "status": "Aberta",
       "data": "12/07/2026"
+    },
+    {
+      "id": 4,
+      "titulo": "ABRIR CONTA PF CRESOL",
+      "descricao": "",
+      "categoria": "Outro",
+      "plataforma": "",
+      "responsavel": "",
+      "valor": 0,
+      "prazo": "13/07/2026",
+      "prioridade": "Urgente",
+      "status": "Aberta",
+      "data": "12/07/2026"
     }
   ],
-  "nPendencias": 4
+  "nPendencias": 5
 }
