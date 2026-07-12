@@ -1892,7 +1892,7 @@
         "valor": 3793.12,
         "forma": "Dinheiro",
         "datavenc": "10/07/2026",
-        "status": "Pendente",
+        "status": "Pago",
         "datapag": "",
         "prior": "Alta",
         "resp": "",
@@ -2038,7 +2038,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1783900091266,
+  "_savedAt": 1783900109104,
   "fornecedores": [
     {
       "id": 6,
