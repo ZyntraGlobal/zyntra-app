@@ -2038,7 +2038,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1783789596286,
+  "_savedAt": 1783867090603,
   "fornecedores": [
     {
       "id": 6,
@@ -2394,83 +2394,83 @@
     },
     {
       "id": 20,
-      "produto": "MOUSE GAMER REDRAGON M913 IMPACT ELITE - PRETO",
       "fornecedor": "",
+      "produto": "MOUSE GAMER REDRAGON M913 IMPACT ELITE - PRETO",
       "cat": "Mouse",
       "plataforma": "Amazon",
-      "dataCompra": "13/07/2026",
-      "status": "Pendente",
       "qtd": 1,
       "valorCompra": 161,
       "freteUnit": 0,
       "impostoPct": 37,
       "precoVenda": 359.99,
+      "status": "Pendente",
       "obs": "",
-      "data": "11/07/2026"
+      "data": "11/07/2026",
+      "dataCompra": "13/07/2026"
     },
     {
       "id": 21,
-      "produto": "MOUSEPAD GAMER REDRAGON SUZAKU - PRETO",
       "fornecedor": "",
+      "produto": "MOUSEPAD GAMER REDRAGON SUZAKU - PRETO",
       "cat": "Mousepad",
       "plataforma": "Amazon",
-      "dataCompra": "13/07/2026",
-      "status": "Pendente",
       "qtd": 1,
       "valorCompra": 50,
       "freteUnit": 0,
       "impostoPct": 0,
       "precoVenda": 159.99,
+      "status": "Pendente",
       "obs": "",
-      "data": "11/07/2026"
+      "data": "11/07/2026",
+      "dataCompra": "13/07/2026"
     },
     {
       "id": 22,
-      "produto": "MOUSE GAMER REDRAGON M913 IMPACT ELITE - PRETO",
       "fornecedor": "",
+      "produto": "MOUSE GAMER REDRAGON M913 IMPACT ELITE - PRETO",
       "cat": "Mouse",
       "plataforma": "Mercado Livre",
-      "dataCompra": "13/07/2026",
-      "status": "Pendente",
       "qtd": 1,
       "valorCompra": 161,
       "freteUnit": 0,
       "impostoPct": 0,
       "precoVenda": 359.99,
+      "status": "Pendente",
       "obs": "",
-      "data": "11/07/2026"
+      "data": "11/07/2026",
+      "dataCompra": "13/07/2026"
     },
     {
       "id": 23,
-      "produto": "MOUSEPAD GAMER REDRAGON SUZAKU - PRETO",
       "fornecedor": "",
+      "produto": "MOUSEPAD GAMER REDRAGON SUZAKU - PRETO",
       "cat": "Mousepad",
       "plataforma": "Mercado Livre",
-      "dataCompra": "13/07/2026",
-      "status": "Pendente",
       "qtd": 1,
       "valorCompra": 50,
       "freteUnit": 0,
       "impostoPct": 37,
       "precoVenda": 129.99,
+      "status": "Pendente",
       "obs": "",
-      "data": "11/07/2026"
+      "data": "11/07/2026",
+      "dataCompra": "13/07/2026"
     },
     {
       "id": 24,
-      "produto": "MOUSE GAMER CORSAIR SCIMITAR - PRETO",
       "fornecedor": "",
+      "produto": "MOUSE GAMER CORSAIR SCIMITAR - PRETO",
       "cat": "Mouse",
       "plataforma": "Mercado Livre",
-      "dataCompra": "13/07/2026",
-      "status": "Pendente",
       "qtd": 1,
       "valorCompra": 145,
       "freteUnit": 0,
       "impostoPct": 0,
       "precoVenda": 399.99,
+      "status": "Pendente",
       "obs": "",
-      "data": "11/07/2026"
+      "data": "11/07/2026",
+      "dataCompra": "13/07/2026"
     }
   ],
   "nCompras": 25,
@@ -2500,7 +2500,20 @@
       "prioridade": "Alta",
       "status": "Resolvida",
       "data": "08/07/2026"
+    },
+    {
+      "id": 3,
+      "titulo": "ORÇAR ETIQUETA AZUL",
+      "descricao": "",
+      "categoria": "Site/Plataforma",
+      "plataforma": "Amazon",
+      "responsavel": "",
+      "valor": 0,
+      "prazo": "13/07/2026",
+      "prioridade": "Média",
+      "status": "Aberta",
+      "data": "12/07/2026"
     }
   ],
-  "nPendencias": 3
+  "nPendencias": 4
 }
