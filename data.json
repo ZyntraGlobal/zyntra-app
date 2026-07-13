@@ -2038,7 +2038,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1783900109104,
+  "_savedAt": 1783906088573,
   "fornecedores": [
     {
       "id": 6,
@@ -2206,7 +2206,7 @@
       "produto": "GABINETE GAMER LIAN LI 011 VISION COMPACT - PRETO",
       "cat": "Outros",
       "plataforma": "Site Zyntra",
-      "qtd": 3,
+      "qtd": 1,
       "valorCompra": 633,
       "freteUnit": 0,
       "impostoPct": 37,
