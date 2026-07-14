@@ -2038,7 +2038,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1784056665376,
+  "_savedAt": 1784058714691,
   "fornecedores": [
     {
       "id": 6,
@@ -2581,7 +2581,20 @@
       "prioridade": "Média",
       "status": "Aberta",
       "data": "14/07/2026"
+    },
+    {
+      "id": 8,
+      "titulo": "IR AGÊNCIA CRESOL",
+      "descricao": "",
+      "categoria": "Site/Plataforma",
+      "plataforma": "",
+      "responsavel": "",
+      "valor": 0,
+      "prazo": "150726",
+      "prioridade": "Urgente",
+      "status": "Aberta",
+      "data": "14/07/2026"
     }
   ],
-  "nPendencias": 8
+  "nPendencias": 9
 }
