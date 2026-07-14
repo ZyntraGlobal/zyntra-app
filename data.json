@@ -1975,7 +1975,7 @@
         "desc": "FRETE TERCEIRIZADO",
         "cat": "Logística/Frete",
         "tipo": "Conta Variável",
-        "valor": 240,
+        "valor": 320,
         "forma": "Pix",
         "datavenc": "05/08/2026",
         "status": "Pendente",
@@ -2038,7 +2038,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1783967730016,
+  "_savedAt": 1784050820935,
   "fornecedores": [
     {
       "id": 6,
