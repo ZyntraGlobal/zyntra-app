@@ -2052,7 +2052,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1784062432655,
+  "_savedAt": 1784062463425,
   "fornecedores": [
     {
       "id": 6,
@@ -2501,9 +2501,25 @@
       "obs": "",
       "data": "13/07/2026",
       "dataCompra": "14/07/2026"
+    },
+    {
+      "id": 26,
+      "produto": "MOUSE GAMER M908 IMPACT - PRETO",
+      "fornecedor": "",
+      "cat": "Mouse",
+      "plataforma": "Amazon",
+      "dataCompra": "15/07/2026",
+      "status": "Pendente",
+      "qtd": 1,
+      "valorCompra": 110,
+      "freteUnit": 0,
+      "impostoPct": 0,
+      "precoVenda": 259.99,
+      "obs": "",
+      "data": "14/07/2026"
     }
   ],
-  "nCompras": 26,
+  "nCompras": 27,
   "pendencias": [
     {
       "id": 1,
