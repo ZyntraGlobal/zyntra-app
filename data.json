@@ -2038,7 +2038,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1784051467172,
+  "_savedAt": 1784055449132,
   "fornecedores": [
     {
       "id": 6,
@@ -2568,7 +2568,20 @@
       "prioridade": "Média",
       "status": "Aberta",
       "data": "14/07/2026"
+    },
+    {
+      "id": 7,
+      "titulo": "ACOMPANHAR REEMBOLSO PEDIDO 702-3221832-5046654",
+      "descricao": "",
+      "categoria": "Site/Plataforma",
+      "plataforma": "Amazon",
+      "responsavel": "",
+      "valor": 0,
+      "prazo": "",
+      "prioridade": "Média",
+      "status": "Aberta",
+      "data": "14/07/2026"
     }
   ],
-  "nPendencias": 7
+  "nPendencias": 8
 }
