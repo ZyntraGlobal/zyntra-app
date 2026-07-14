@@ -2038,7 +2038,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1784050820935,
+  "_savedAt": 1784051438881,
   "fornecedores": [
     {
       "id": 6,
@@ -2474,19 +2474,19 @@
     },
     {
       "id": 25,
-      "produto": "GABINETE GAMER LIAN LI O11 VISION COMPACT - PRETO",
       "fornecedor": "",
+      "produto": "GABINETE GAMER LIAN LI O11 VISION COMPACT - PRETO",
       "cat": "Outros",
       "plataforma": "Shopee",
-      "dataCompra": "14/07/2026",
-      "status": "Pendente",
       "qtd": 1,
       "valorCompra": 590,
       "freteUnit": 0,
       "impostoPct": 0,
       "precoVenda": 1299.99,
+      "status": "Pendente",
       "obs": "",
-      "data": "13/07/2026"
+      "data": "13/07/2026",
+      "dataCompra": "14/07/2026"
     }
   ],
   "nCompras": 26,
@@ -2542,7 +2542,20 @@
       "prioridade": "Urgente",
       "status": "Resolvida",
       "data": "12/07/2026"
+    },
+    {
+      "id": 5,
+      "titulo": "BUSCAR GABINETE VISAO VIP",
+      "descricao": "",
+      "categoria": "Site/Plataforma",
+      "plataforma": "Outro",
+      "responsavel": "",
+      "valor": 0,
+      "prazo": "15/07/2026",
+      "prioridade": "Média",
+      "status": "Aberta",
+      "data": "14/07/2026"
     }
   ],
-  "nPendencias": 5
+  "nPendencias": 6
 }
