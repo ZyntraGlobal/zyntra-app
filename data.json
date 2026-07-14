@@ -2038,7 +2038,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1784051438881,
+  "_savedAt": 1784051467172,
   "fornecedores": [
     {
       "id": 6,
@@ -2555,7 +2555,20 @@
       "prioridade": "Média",
       "status": "Aberta",
       "data": "14/07/2026"
+    },
+    {
+      "id": 6,
+      "titulo": "BUSCAR GABINETE TOPDEK",
+      "descricao": "",
+      "categoria": "Site/Plataforma",
+      "plataforma": "",
+      "responsavel": "",
+      "valor": 0,
+      "prazo": "15/07/2026",
+      "prioridade": "Média",
+      "status": "Aberta",
+      "data": "14/07/2026"
     }
   ],
-  "nPendencias": 6
+  "nPendencias": 7
 }
