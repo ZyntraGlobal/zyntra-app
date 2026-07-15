@@ -1934,7 +1934,7 @@
         "valor": 328.72,
         "forma": "Boleto",
         "datavenc": "15/07/2026",
-        "status": "Pendente",
+        "status": "Pago",
         "datapag": "",
         "prior": "Alta",
         "resp": "",
@@ -2052,7 +2052,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1784139880077,
+  "_savedAt": 1784140263005,
   "fornecedores": [
     {
       "id": 6,
