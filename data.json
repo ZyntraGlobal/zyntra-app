@@ -2052,7 +2052,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1784140263005,
+  "_savedAt": 1784142801844,
   "fornecedores": [
     {
       "id": 6,
@@ -2373,22 +2373,6 @@
       "obs": "",
       "data": "09/07/2026",
       "dataCompra": "10/07/2026"
-    },
-    {
-      "id": 17,
-      "fornecedor": "",
-      "produto": "GABINETE LIAN LI A3 MATX - Preto/Madeira",
-      "cat": "Outros",
-      "plataforma": "Amazon",
-      "qtd": 2,
-      "valorCompra": 455,
-      "freteUnit": 0,
-      "impostoPct": 0,
-      "precoVenda": 799.99,
-      "status": "Pendente",
-      "obs": "",
-      "data": "09/07/2026",
-      "dataCompra": "14/07/2026"
     },
     {
       "id": 18,
