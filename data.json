@@ -1959,7 +1959,7 @@
         "desc": "TRANSPORTES GUIMA",
         "cat": "Logística/Frete",
         "tipo": "Conta Variável",
-        "valor": 40,
+        "valor": 60,
         "forma": "Pix",
         "datavenc": "20/07/2026",
         "status": "Pendente",
@@ -2052,7 +2052,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1784135082826,
+  "_savedAt": 1784137136965,
   "fornecedores": [
     {
       "id": 6,
@@ -2488,19 +2488,19 @@
     },
     {
       "id": 26,
-      "produto": "MOUSE GAMER M908 IMPACT - PRETO",
       "fornecedor": "",
+      "produto": "MOUSE GAMER M908 IMPACT - PRETO",
       "cat": "Mouse",
       "plataforma": "Amazon",
-      "dataCompra": "15/07/2026",
-      "status": "Pendente",
       "qtd": 1,
       "valorCompra": 110,
       "freteUnit": 0,
       "impostoPct": 0,
       "precoVenda": 259.99,
+      "status": "Pendente",
       "obs": "",
-      "data": "14/07/2026"
+      "data": "14/07/2026",
+      "dataCompra": "15/07/2026"
     }
   ],
   "nCompras": 27,
