@@ -2052,7 +2052,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1784135069280,
+  "_savedAt": 1784135076829,
   "fornecedores": [
     {
       "id": 6,
@@ -2580,7 +2580,7 @@
       "valor": 0,
       "prazo": "15/07/2026",
       "prioridade": "Média",
-      "status": "Aberta",
+      "status": "Resolvida",
       "data": "14/07/2026"
     },
     {
