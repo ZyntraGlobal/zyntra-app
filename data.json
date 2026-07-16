@@ -1959,7 +1959,7 @@
         "desc": "TRANSPORTES GUIMA",
         "cat": "Logística/Frete",
         "tipo": "Conta Variável",
-        "valor": 60,
+        "valor": 80,
         "forma": "Pix",
         "datavenc": "20/07/2026",
         "status": "Pendente",
@@ -2052,7 +2052,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1784223396937,
+  "_savedAt": 1784223418962,
   "fornecedores": [
     {
       "id": 6,
@@ -2417,7 +2417,7 @@
       "freteUnit": 0,
       "impostoPct": 0,
       "precoVenda": 159.99,
-      "status": "Pendente",
+      "status": "Comprado",
       "obs": "",
       "data": "11/07/2026",
       "dataCompra": "15/07/2026"
