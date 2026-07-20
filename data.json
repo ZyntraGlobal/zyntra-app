@@ -2052,7 +2052,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1784577133663,
+  "_savedAt": 1784577199373,
   "fornecedores": [
     {
       "id": 6,
@@ -2501,9 +2501,25 @@
       "precoVenda": 399.99,
       "obs": "",
       "data": "20/07/2026"
+    },
+    {
+      "id": 28,
+      "produto": "HEADSET GAMER LOGITECH G435 - ROXO",
+      "fornecedor": "",
+      "cat": "Headset",
+      "plataforma": "Site Zyntra",
+      "dataCompra": "21/07/2026",
+      "status": "Pendente",
+      "qtd": 1,
+      "valorCompra": 330,
+      "freteUnit": 0,
+      "impostoPct": 0,
+      "precoVenda": 522.99,
+      "obs": "",
+      "data": "20/07/2026"
     }
   ],
-  "nCompras": 28,
+  "nCompras": 29,
   "pendencias": [
     {
       "id": 1,
