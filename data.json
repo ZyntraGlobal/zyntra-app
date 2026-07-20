@@ -1836,7 +1836,7 @@
         "valor": 2500,
         "forma": "Dinheiro",
         "datavenc": "11/07/2026",
-        "status": "Pendente",
+        "status": "Atrasado",
         "datapag": "",
         "prior": "Alta",
         "resp": "",
@@ -2052,7 +2052,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1784568979714,
+  "_savedAt": 1784569020967,
   "fornecedores": [
     {
       "id": 6,
