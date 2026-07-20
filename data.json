@@ -1808,7 +1808,7 @@
         "valor": 857.18,
         "forma": "Boleto",
         "datavenc": "20/07/2026",
-        "status": "Pendente",
+        "status": "Pago",
         "datapag": "",
         "prior": "Alta",
         "resp": "",
@@ -2052,7 +2052,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1784579250960,
+  "_savedAt": 1784582367581,
   "fornecedores": [
     {
       "id": 6,
@@ -2488,35 +2488,35 @@
     },
     {
       "id": 27,
-      "produto": "MOUSE GAMER CORSAIR SCIMITAR - PRETO",
       "fornecedor": "",
+      "produto": "MOUSE GAMER CORSAIR SCIMITAR - PRETO",
       "cat": "Mouse",
       "plataforma": "Mercado Livre",
-      "dataCompra": "21/07/2026",
-      "status": "Pendente",
       "qtd": 1,
       "valorCompra": 170,
       "freteUnit": 0,
       "impostoPct": 0,
       "precoVenda": 399.99,
+      "status": "Pendente",
       "obs": "",
-      "data": "20/07/2026"
+      "data": "20/07/2026",
+      "dataCompra": "21/07/2026"
     },
     {
       "id": 28,
-      "produto": "HEADSET GAMER LOGITECH G435 - ROXO",
       "fornecedor": "",
+      "produto": "HEADSET GAMER LOGITECH G435 - ROXO",
       "cat": "Headset",
       "plataforma": "Site Zyntra",
-      "dataCompra": "21/07/2026",
-      "status": "Pendente",
       "qtd": 1,
       "valorCompra": 330,
       "freteUnit": 0,
       "impostoPct": 37,
       "precoVenda": 522.99,
+      "status": "Pendente",
       "obs": "",
-      "data": "20/07/2026"
+      "data": "20/07/2026",
+      "dataCompra": "21/07/2026"
     }
   ],
   "nCompras": 29,
