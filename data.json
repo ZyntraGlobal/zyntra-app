@@ -2052,7 +2052,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1784577674074,
+  "_savedAt": 1784577964632,
   "fornecedores": [
     {
       "id": 6,
@@ -2624,7 +2624,20 @@
       "prioridade": "Urgente",
       "status": "Resolvida",
       "data": "14/07/2026"
+    },
+    {
+      "id": 9,
+      "titulo": "BUSCAR DOIS GABINETES PAGOS NISSEI",
+      "descricao": "",
+      "categoria": "Site/Plataforma",
+      "plataforma": "",
+      "responsavel": "",
+      "valor": 0,
+      "prazo": "21/07/2026",
+      "prioridade": "Urgente",
+      "status": "Aberta",
+      "data": "20/07/2026"
     }
   ],
-  "nPendencias": 9
+  "nPendencias": 10
 }
