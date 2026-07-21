@@ -2052,7 +2052,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1784596517237,
+  "_savedAt": 1784596772952,
   "fornecedores": [
     {
       "id": 6,
@@ -2517,9 +2517,25 @@
       "obs": "",
       "data": "20/07/2026",
       "dataCompra": "21/07/2026"
+    },
+    {
+      "id": 29,
+      "produto": "GABINETE GAMER LIAN LI ATX A3 - PRETO",
+      "fornecedor": "",
+      "cat": "Outros",
+      "plataforma": "Shopee",
+      "dataCompra": "21/07/2026",
+      "status": "Pendente",
+      "qtd": 1,
+      "valorCompra": 430,
+      "freteUnit": 0,
+      "impostoPct": 0,
+      "precoVenda": 799.99,
+      "obs": "",
+      "data": "20/07/2026"
     }
   ],
-  "nCompras": 29,
+  "nCompras": 30,
   "pendencias": [
     {
       "id": 1,
