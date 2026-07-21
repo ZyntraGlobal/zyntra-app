@@ -1738,7 +1738,7 @@
         "valor": 109.9,
         "forma": "Boleto",
         "datavenc": "15/07/2026",
-        "status": "Atrasado",
+        "status": "Pago",
         "datapag": "",
         "prior": "Alta",
         "resp": "",
@@ -2052,7 +2052,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1784584309202,
+  "_savedAt": 1784595395685,
   "fornecedores": [
     {
       "id": 6,
