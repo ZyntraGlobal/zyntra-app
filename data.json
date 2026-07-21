@@ -1836,7 +1836,7 @@
         "valor": 2682.73,
         "forma": "Dinheiro",
         "datavenc": "11/07/2026",
-        "status": "Atrasado",
+        "status": "Pago",
         "datapag": "",
         "prior": "Alta",
         "resp": "",
@@ -2052,7 +2052,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1784664727179,
+  "_savedAt": 1784664733589,
   "fornecedores": [
     {
       "id": 6,
