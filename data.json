@@ -1982,6 +1982,20 @@
         "resp": "",
         "rec": "Única",
         "obs": ""
+      },
+      {
+        "desc": "FATURA AZUL",
+        "cat": "Logística/Frete",
+        "tipo": "Conta Variável",
+        "valor": 1001.04,
+        "forma": "Pix",
+        "datavenc": "30/07/2026",
+        "status": "Pendente",
+        "datapag": "",
+        "prior": "Média",
+        "resp": "",
+        "rec": "Única",
+        "obs": ""
       }
     ],
     [
@@ -2052,7 +2066,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1784664733589,
+  "_savedAt": 1784664939784,
   "fornecedores": [
     {
       "id": 6,
