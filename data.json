@@ -1833,7 +1833,7 @@
         "desc": "CARTÃO DE CRÉDITO SICOOB",
         "cat": "Cartão/Taxas",
         "tipo": "Conta Variável",
-        "valor": 2500,
+        "valor": 2682.73,
         "forma": "Dinheiro",
         "datavenc": "11/07/2026",
         "status": "Atrasado",
@@ -2052,7 +2052,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1784644513238,
+  "_savedAt": 1784664727179,
   "fornecedores": [
     {
       "id": 6,
