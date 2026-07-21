@@ -1920,7 +1920,7 @@
         "valor": 95.98,
         "forma": "Débito Automático",
         "datavenc": "29/07/2026",
-        "status": "Pendente",
+        "status": "Pago",
         "datapag": "",
         "prior": "Alta",
         "resp": "",
@@ -2052,7 +2052,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1784595395685,
+  "_savedAt": 1784596517237,
   "fornecedores": [
     {
       "id": 6,
