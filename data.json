@@ -2066,7 +2066,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1784743330804,
+  "_savedAt": 1784743377758,
   "fornecedores": [
     {
       "id": 6,
@@ -2693,7 +2693,20 @@
       "prioridade": "Alta",
       "status": "Aberta",
       "data": "22/07/2026"
+    },
+    {
+      "id": 12,
+      "titulo": "RETIRAR CORREIOS MARECHAL DEODORO - 701-3247246-0897807",
+      "descricao": "",
+      "categoria": "Site/Plataforma",
+      "plataforma": "Site Zyntra",
+      "responsavel": "",
+      "valor": 399.99,
+      "prazo": "",
+      "prioridade": "Alta",
+      "status": "Aberta",
+      "data": "22/07/2026"
     }
   ],
-  "nPendencias": 12
+  "nPendencias": 13
 }
