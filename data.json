@@ -2066,7 +2066,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1784744598604,
+  "_savedAt": 1784744751961,
   "fornecedores": [
     {
       "id": 6,
@@ -2563,9 +2563,25 @@
       "precoVenda": 209.99,
       "obs": "",
       "data": "22/07/2026"
+    },
+    {
+      "id": 31,
+      "produto": "MOUSE GAMER CORSAIR M75 - PRETO",
+      "fornecedor": "",
+      "cat": "Mouse",
+      "plataforma": "Amazon",
+      "dataCompra": "23/07/2026",
+      "status": "Pendente",
+      "qtd": 1,
+      "valorCompra": 160,
+      "freteUnit": 0,
+      "impostoPct": 0,
+      "precoVenda": 349.99,
+      "obs": "",
+      "data": "22/07/2026"
     }
   ],
-  "nCompras": 31,
+  "nCompras": 32,
   "pendencias": [
     {
       "id": 1,
