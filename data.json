@@ -2066,7 +2066,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1784743611055,
+  "_savedAt": 1784744298278,
   "fornecedores": [
     {
       "id": 6,
@@ -2706,7 +2706,20 @@
       "prioridade": "Alta",
       "status": "Aberta",
       "data": "22/07/2026"
+    },
+    {
+      "id": 13,
+      "titulo": "BUSCAR GABINETES TOPDEK",
+      "descricao": "",
+      "categoria": "Site/Plataforma",
+      "plataforma": "Amazon",
+      "responsavel": "",
+      "valor": 0,
+      "prazo": "23/07/2026",
+      "prioridade": "Alta",
+      "status": "Aberta",
+      "data": "22/07/2026"
     }
   ],
-  "nPendencias": 13
+  "nPendencias": 14
 }
