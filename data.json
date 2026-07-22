@@ -1864,7 +1864,7 @@
         "valor": 100,
         "forma": "Débito Automático",
         "datavenc": "10/07/2026",
-        "status": "Atrasado",
+        "status": "Pago",
         "datapag": "",
         "prior": "Alta",
         "resp": "",
@@ -2066,7 +2066,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1784743377758,
+  "_savedAt": 1784743611055,
   "fornecedores": [
     {
       "id": 6,
