@@ -2066,7 +2066,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1784833744064,
+  "_savedAt": 1784843205165,
   "fornecedores": [
     {
       "id": 6,
@@ -2550,35 +2550,35 @@
     },
     {
       "id": 30,
-      "produto": "MOUSE GAMER REDRAGON M724 - ROSA",
       "fornecedor": "",
+      "produto": "MOUSE GAMER REDRAGON M724 - ROSA",
       "cat": "Mouse",
       "plataforma": "Mercado Livre",
-      "dataCompra": "23/07/2026",
-      "status": "Pendente",
       "qtd": 1,
       "valorCompra": 74,
       "freteUnit": 0,
       "impostoPct": 37,
       "precoVenda": 209.99,
+      "status": "Comprado",
       "obs": "",
-      "data": "22/07/2026"
+      "data": "22/07/2026",
+      "dataCompra": "23/07/2026"
     },
     {
       "id": 31,
-      "produto": "MOUSE GAMER CORSAIR M75 - PRETO",
       "fornecedor": "",
+      "produto": "MOUSE GAMER CORSAIR M75 - PRETO",
       "cat": "Mouse",
       "plataforma": "Amazon",
-      "dataCompra": "23/07/2026",
-      "status": "Pendente",
       "qtd": 1,
       "valorCompra": 160,
       "freteUnit": 0,
       "impostoPct": 0,
       "precoVenda": 349.99,
+      "status": "Pendente",
       "obs": "",
-      "data": "22/07/2026"
+      "data": "22/07/2026",
+      "dataCompra": "23/07/2026"
     }
   ],
   "nCompras": 32,
