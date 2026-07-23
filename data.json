@@ -2066,7 +2066,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1784744751961,
+  "_savedAt": 1784833744064,
   "fornecedores": [
     {
       "id": 6,
@@ -2751,7 +2751,20 @@
       "prioridade": "Alta",
       "status": "Aberta",
       "data": "22/07/2026"
+    },
+    {
+      "id": 14,
+      "titulo": "PEGAR 1140,24 GUSTAVO MERCADO PAGO",
+      "descricao": "",
+      "categoria": "Site/Plataforma",
+      "plataforma": "",
+      "responsavel": "",
+      "valor": 1140.24,
+      "prazo": "30/07/2026",
+      "prioridade": "Média",
+      "status": "Aberta",
+      "data": "23/07/2026"
     }
   ],
-  "nPendencias": 14
+  "nPendencias": 15
 }
