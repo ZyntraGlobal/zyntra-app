@@ -1959,7 +1959,7 @@
         "desc": "TRANSPORTES GUIMA",
         "cat": "Logística/Frete",
         "tipo": "Conta Variável",
-        "valor": 40,
+        "valor": 80,
         "forma": "Pix",
         "datavenc": "27/07/2026",
         "status": "Pendente",
@@ -2066,7 +2066,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1784914505831,
+  "_savedAt": 1784914523342,
   "fornecedores": [
     {
       "id": 6,
