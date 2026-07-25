@@ -2080,7 +2080,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1784987655737,
+  "_savedAt": 1784989580413,
   "fornecedores": [
     {
       "id": 6,
@@ -2618,10 +2618,10 @@
       "plataforma": "Amazon",
       "dataCompra": "27/07/2026",
       "status": "Pendente",
-      "qtd": 1,
+      "qtd": 2,
       "valorCompra": 422,
       "freteUnit": 0,
-      "impostoPct": 0,
+      "impostoPct": 37,
       "precoVenda": 1099.99,
       "obs": "",
       "data": "25/07/2026"
