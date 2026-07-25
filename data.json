@@ -2066,7 +2066,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1784983531713,
+  "_savedAt": 1784983671974,
   "fornecedores": [
     {
       "id": 6,
@@ -2611,9 +2611,25 @@
       "precoVenda": 1099.99,
       "obs": "",
       "data": "25/07/2026"
+    },
+    {
+      "id": 34,
+      "produto": "GABINETE GAMER LIAN LI ATX A3 PRETO-MADEIRA",
+      "fornecedor": "Solid Power",
+      "cat": "Outros",
+      "plataforma": "",
+      "dataCompra": "27/07/2026",
+      "status": "Pendente",
+      "qtd": 1,
+      "valorCompra": 507,
+      "freteUnit": 0,
+      "impostoPct": 37,
+      "precoVenda": 799.99,
+      "obs": "",
+      "data": "25/07/2026"
     }
   ],
-  "nCompras": 34,
+  "nCompras": 35,
   "pendencias": [
     {
       "id": 1,
