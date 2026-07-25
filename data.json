@@ -1091,6 +1091,20 @@
       "vendas30": 0,
       "fornecedor": "",
       "leadTime": 7
+    },
+    {
+      "id": 79,
+      "nome": "MOUSE GAMER REDRAGON M908 IMPACT - PRETO",
+      "cod": 79,
+      "ncm": "84716053",
+      "cat": "Mouse",
+      "qty": 1,
+      "min": 1,
+      "cmv": 110,
+      "preco": 0,
+      "vendas30": 0,
+      "fornecedor": "",
+      "leadTime": 7
     }
   ],
   "mov": [
@@ -2066,7 +2080,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1784983671974,
+  "_savedAt": 1784987655737,
   "fornecedores": [
     {
       "id": 6,
