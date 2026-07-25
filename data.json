@@ -2066,7 +2066,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1784983081352,
+  "_savedAt": 1784983531713,
   "fornecedores": [
     {
       "id": 6,
@@ -2595,9 +2595,25 @@
       "precoVenda": 179.99,
       "obs": "",
       "data": "25/07/2026"
+    },
+    {
+      "id": 33,
+      "produto": "GABINETE GAMER LIAN LI 011 VISION - PRETO",
+      "fornecedor": "Solid Power",
+      "cat": "Mouse",
+      "plataforma": "Amazon",
+      "dataCompra": "27/07/2026",
+      "status": "Pendente",
+      "qtd": 1,
+      "valorCompra": 422,
+      "freteUnit": 0,
+      "impostoPct": 0,
+      "precoVenda": 1099.99,
+      "obs": "",
+      "data": "25/07/2026"
     }
   ],
-  "nCompras": 33,
+  "nCompras": 34,
   "pendencias": [
     {
       "id": 1,
