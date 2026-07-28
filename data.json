@@ -2094,7 +2094,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1785280313656,
+  "_savedAt": 1785280350449,
   "fornecedores": [
     {
       "id": 6,
@@ -2671,9 +2671,25 @@
       "precoVenda": 359.99,
       "obs": "",
       "data": "28/07/2026"
+    },
+    {
+      "id": 36,
+      "produto": "GABINETE GAMER LIAN LI O11 CRHOME",
+      "fornecedor": "",
+      "cat": "Outros",
+      "plataforma": "Shopee",
+      "dataCompra": "29/07/2026",
+      "status": "Pendente",
+      "qtd": 1,
+      "valorCompra": 515,
+      "freteUnit": 0,
+      "impostoPct": 0,
+      "precoVenda": 1299.99,
+      "obs": "",
+      "data": "28/07/2026"
     }
   ],
-  "nCompras": 36,
+  "nCompras": 37,
   "pendencias": [
     {
       "id": 1,
