@@ -2094,7 +2094,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1785280350449,
+  "_savedAt": 1785329351820,
   "fornecedores": [
     {
       "id": 6,
@@ -2679,7 +2679,7 @@
       "cat": "Outros",
       "plataforma": "Shopee",
       "dataCompra": "29/07/2026",
-      "status": "Pendente",
+      "status": "Comprado",
       "qtd": 1,
       "valorCompra": 515,
       "freteUnit": 0,
