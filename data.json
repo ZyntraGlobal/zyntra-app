@@ -2094,7 +2094,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 23,
-  "_savedAt": 1785329351820,
+  "_savedAt": 1785329389205,
   "fornecedores": [
     {
       "id": 6,
@@ -2872,7 +2872,20 @@
       "prioridade": "Média",
       "status": "Aberta",
       "data": "23/07/2026"
+    },
+    {
+      "id": 15,
+      "titulo": "RESOLVER AVALIAÇÃO NEGATIVA AMAZON",
+      "descricao": "",
+      "categoria": "Site/Plataforma",
+      "plataforma": "Amazon",
+      "responsavel": "",
+      "valor": 0,
+      "prazo": "29/07/2026",
+      "prioridade": "Urgente",
+      "status": "Aberta",
+      "data": "29/07/2026"
     }
   ],
-  "nPendencias": 15
+  "nPendencias": 16
 }
