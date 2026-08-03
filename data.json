@@ -2105,6 +2105,20 @@
         "resp": "",
         "rec": "Única",
         "obs": "ÚLTIMA PARCELA"
+      },
+      {
+        "desc": "PRO LABORE - INSS",
+        "cat": "Impostos",
+        "tipo": "Conta Variável",
+        "valor": 178.31,
+        "forma": "Pix",
+        "datavenc": "20/08/2026",
+        "status": "Pendente",
+        "datapag": "",
+        "prior": "Média",
+        "resp": "",
+        "rec": "Única",
+        "obs": ""
       }
     ],
     [
@@ -2174,7 +2188,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 24,
-  "_savedAt": 1785789752458,
+  "_savedAt": 1785789799716,
   "fornecedores": [
     {
       "id": 6,
