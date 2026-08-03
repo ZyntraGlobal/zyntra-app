@@ -2091,6 +2091,20 @@
         "resp": "",
         "rec": "Única",
         "obs": ""
+      },
+      {
+        "desc": "PARCELA 500 CONTADOR",
+        "cat": "Serviços Terceiros",
+        "tipo": "Conta Variável",
+        "valor": 100,
+        "forma": "Pix",
+        "datavenc": "10/08/2026",
+        "status": "Pendente",
+        "datapag": "",
+        "prior": "Média",
+        "resp": "",
+        "rec": "Única",
+        "obs": "ÚLTIMA PARCELA"
       }
     ],
     [
@@ -2160,7 +2174,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 24,
-  "_savedAt": 1785789726316,
+  "_savedAt": 1785789752458,
   "fornecedores": [
     {
       "id": 6,
