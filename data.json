@@ -2189,6 +2189,20 @@
         "resp": "",
         "rec": "Única",
         "obs": ""
+      },
+      {
+        "desc": "SIMPLES NACIONAL - IMPOSTO",
+        "cat": "Impostos",
+        "tipo": "Conta Variável",
+        "valor": 9,
+        "forma": "Pix",
+        "datavenc": "20/08/2026",
+        "status": "Pendente",
+        "datapag": "",
+        "prior": "Média",
+        "resp": "",
+        "rec": "Única",
+        "obs": ""
       }
     ],
     [
@@ -2258,7 +2272,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 24,
-  "_savedAt": 1785790789526,
+  "_savedAt": 1785790818351,
   "fornecedores": [
     {
       "id": 6,
