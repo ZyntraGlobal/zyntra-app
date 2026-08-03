@@ -2231,6 +2231,20 @@
         "resp": "",
         "rec": "Única",
         "obs": ""
+      },
+      {
+        "desc": "FATURA MERCADO LIVRE",
+        "cat": "Cartão/Taxas",
+        "tipo": "Conta Fixa",
+        "valor": 99,
+        "forma": "Pix",
+        "datavenc": "11/08/2026",
+        "status": "Pendente",
+        "datapag": "",
+        "prior": "Média",
+        "resp": "",
+        "rec": "Única",
+        "obs": ""
       }
     ],
     [
@@ -2300,7 +2314,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 24,
-  "_savedAt": 1785790932223,
+  "_savedAt": 1785790953491,
   "fornecedores": [
     {
       "id": 6,
