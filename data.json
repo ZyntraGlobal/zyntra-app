@@ -2273,6 +2273,20 @@
         "resp": "",
         "rec": "Única",
         "obs": ""
+      },
+      {
+        "desc": "CAPITAL DE GIRO CRESOL",
+        "cat": "Cartão/Taxas",
+        "tipo": "Conta Fixa",
+        "valor": 1779,
+        "forma": "Débito Automático",
+        "datavenc": "15/08/2026",
+        "status": "Pendente",
+        "datapag": "",
+        "prior": "Média",
+        "resp": "",
+        "rec": "Única",
+        "obs": ""
       }
     ],
     [
@@ -2342,7 +2356,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 24,
-  "_savedAt": 1785791021820,
+  "_savedAt": 1785791058576,
   "fornecedores": [
     {
       "id": 6,
