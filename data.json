@@ -2119,6 +2119,20 @@
         "resp": "",
         "rec": "Única",
         "obs": ""
+      },
+      {
+        "desc": "ALUGUEL SALA COMERCIAL",
+        "cat": "Aluguel",
+        "tipo": "Conta Fixa",
+        "valor": 800,
+        "forma": "Pix",
+        "datavenc": "10/08/2026",
+        "status": "Pendente",
+        "datapag": "",
+        "prior": "Média",
+        "resp": "",
+        "rec": "Única",
+        "obs": ""
       }
     ],
     [
@@ -2188,7 +2202,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 24,
-  "_savedAt": 1785789799716,
+  "_savedAt": 1785790691765,
   "fornecedores": [
     {
       "id": 6,
