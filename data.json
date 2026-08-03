@@ -2245,6 +2245,20 @@
         "resp": "",
         "rec": "Única",
         "obs": ""
+      },
+      {
+        "desc": "CAPITAL SOCIAL SICOOB",
+        "cat": "Cartão/Taxas",
+        "tipo": "Conta Fixa",
+        "valor": 100,
+        "forma": "Pix",
+        "datavenc": "10/08/2026",
+        "status": "Pendente",
+        "datapag": "",
+        "prior": "Média",
+        "resp": "",
+        "rec": "Única",
+        "obs": ""
       }
     ],
     [
@@ -2314,7 +2328,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 24,
-  "_savedAt": 1785790953491,
+  "_savedAt": 1785790975075,
   "fornecedores": [
     {
       "id": 6,
