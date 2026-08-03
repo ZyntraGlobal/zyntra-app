@@ -2324,6 +2324,20 @@
         "resp": "",
         "rec": "Única",
         "obs": ""
+      },
+      {
+        "desc": "TRÁFEGO PAGO",
+        "cat": "Serviços Terceiros",
+        "tipo": "Conta Fixa",
+        "valor": 800,
+        "forma": "Pix",
+        "datavenc": "10/08/2026",
+        "status": "Pendente",
+        "datapag": "",
+        "prior": "Média",
+        "resp": "",
+        "rec": "Única",
+        "obs": ""
       }
     ],
     [
@@ -2393,7 +2407,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 25,
-  "_savedAt": 1785791297472,
+  "_savedAt": 1785792553661,
   "fornecedores": [
     {
       "id": 6,
