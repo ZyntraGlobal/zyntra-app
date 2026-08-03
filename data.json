@@ -2259,6 +2259,20 @@
         "resp": "",
         "rec": "Única",
         "obs": ""
+      },
+      {
+        "desc": "CARTÃO DE CRÉDITO CRESOL",
+        "cat": "Cartão/Taxas",
+        "tipo": "Conta Variável",
+        "valor": 4387.13,
+        "forma": "Débito Automático",
+        "datavenc": "11/08/2026",
+        "status": "Pendente",
+        "datapag": "",
+        "prior": "Média",
+        "resp": "",
+        "rec": "Única",
+        "obs": ""
       }
     ],
     [
@@ -2328,7 +2342,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 24,
-  "_savedAt": 1785790975075,
+  "_savedAt": 1785791021820,
   "fornecedores": [
     {
       "id": 6,
