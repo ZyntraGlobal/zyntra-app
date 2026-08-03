@@ -2063,6 +2063,20 @@
         "resp": "",
         "rec": "Única",
         "obs": ""
+      },
+      {
+        "desc": "AZUL LOGÍSTICA",
+        "cat": "Logística/Frete",
+        "tipo": "Conta Variável",
+        "valor": 416.31,
+        "forma": "Pix",
+        "datavenc": "15/08/2026",
+        "status": "Pendente",
+        "datapag": "",
+        "prior": "Média",
+        "resp": "",
+        "rec": "Única",
+        "obs": ""
       }
     ],
     [
@@ -2132,7 +2146,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 24,
-  "_savedAt": 1785783893691,
+  "_savedAt": 1785784085604,
   "fornecedores": [
     {
       "id": 6,
