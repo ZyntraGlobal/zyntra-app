@@ -2077,6 +2077,20 @@
         "resp": "",
         "rec": "Única",
         "obs": ""
+      },
+      {
+        "desc": "CONTADOR",
+        "cat": "Serviços Terceiros",
+        "tipo": "Conta Variável",
+        "valor": 500,
+        "forma": "Pix",
+        "datavenc": "10/08/2026",
+        "status": "Pendente",
+        "datapag": "",
+        "prior": "Média",
+        "resp": "",
+        "rec": "Única",
+        "obs": ""
       }
     ],
     [
@@ -2146,7 +2160,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 24,
-  "_savedAt": 1785784149813,
+  "_savedAt": 1785789726316,
   "fornecedores": [
     {
       "id": 6,
