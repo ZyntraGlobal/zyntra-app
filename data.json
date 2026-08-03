@@ -2065,7 +2065,22 @@
         "obs": ""
       }
     ],
-    [],
+    [
+      {
+        "desc": "TRANSPORTES GUSTAVO",
+        "cat": "Fornecedor",
+        "tipo": "Conta Variável",
+        "valor": 80,
+        "forma": "Pix",
+        "datavenc": "05/09/2026",
+        "status": "Pendente",
+        "datapag": "",
+        "prior": "Média",
+        "resp": "",
+        "rec": "Única",
+        "obs": ""
+      }
+    ],
     [],
     [],
     []
@@ -2117,7 +2132,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 24,
-  "_savedAt": 1785771280546,
+  "_savedAt": 1785771332899,
   "fornecedores": [
     {
       "id": 6,
