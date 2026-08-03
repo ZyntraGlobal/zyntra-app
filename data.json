@@ -2287,6 +2287,20 @@
         "resp": "",
         "rec": "Única",
         "obs": ""
+      },
+      {
+        "desc": "LUZ",
+        "cat": "Energia",
+        "tipo": "Conta Fixa",
+        "valor": 9,
+        "forma": "Pix",
+        "datavenc": "10/08/2026",
+        "status": "Pendente",
+        "datapag": "",
+        "prior": "Média",
+        "resp": "",
+        "rec": "Única",
+        "obs": ""
       }
     ],
     [
@@ -2356,7 +2370,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 24,
-  "_savedAt": 1785791058576,
+  "_savedAt": 1785791110760,
   "fornecedores": [
     {
       "id": 6,
