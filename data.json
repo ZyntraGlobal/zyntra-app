@@ -2203,6 +2203,20 @@
         "resp": "",
         "rec": "Única",
         "obs": ""
+      },
+      {
+        "desc": "REGISTRO DE MARCA",
+        "cat": "Serviços Terceiros",
+        "tipo": "Conta Fixa",
+        "valor": 274.8,
+        "forma": "Pix",
+        "datavenc": "22/08/2026",
+        "status": "Pendente",
+        "datapag": "",
+        "prior": "Média",
+        "resp": "",
+        "rec": "Única",
+        "obs": ""
       }
     ],
     [
@@ -2272,7 +2286,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 24,
-  "_savedAt": 1785790827864,
+  "_savedAt": 1785790853710,
   "fornecedores": [
     {
       "id": 6,
