@@ -2161,6 +2161,20 @@
         "resp": "",
         "rec": "Única",
         "obs": ""
+      },
+      {
+        "desc": "INTERNET",
+        "cat": "Internet/Telefone",
+        "tipo": "Conta Fixa",
+        "valor": 109.9,
+        "forma": "Pix",
+        "datavenc": "15/08/2026",
+        "status": "Pendente",
+        "datapag": "",
+        "prior": "Média",
+        "resp": "",
+        "rec": "Única",
+        "obs": ""
       }
     ],
     [
@@ -2230,7 +2244,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 24,
-  "_savedAt": 1785790736543,
+  "_savedAt": 1785790757625,
   "fornecedores": [
     {
       "id": 6,
