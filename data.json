@@ -2175,6 +2175,20 @@
         "resp": "",
         "rec": "Única",
         "obs": ""
+      },
+      {
+        "desc": "TAXA DE LIXO",
+        "cat": "Outros",
+        "tipo": "Conta Fixa",
+        "valor": 122.18,
+        "forma": "Pix",
+        "datavenc": "15/08/2026",
+        "status": "Pendente",
+        "datapag": "",
+        "prior": "Média",
+        "resp": "",
+        "rec": "Única",
+        "obs": ""
       }
     ],
     [
@@ -2244,7 +2258,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 24,
-  "_savedAt": 1785790757625,
+  "_savedAt": 1785790789526,
   "fornecedores": [
     {
       "id": 6,
