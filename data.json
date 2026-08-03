@@ -2217,6 +2217,20 @@
         "resp": "",
         "rec": "Única",
         "obs": ""
+      },
+      {
+        "desc": "CARTÃO DE CRÉDITO SICOB",
+        "cat": "Cartão/Taxas",
+        "tipo": "Conta Variável",
+        "valor": 2111.42,
+        "forma": "Pix",
+        "datavenc": "11/08/2026",
+        "status": "Pendente",
+        "datapag": "",
+        "prior": "Média",
+        "resp": "",
+        "rec": "Única",
+        "obs": ""
       }
     ],
     [
@@ -2286,7 +2300,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 24,
-  "_savedAt": 1785790853710,
+  "_savedAt": 1785790932223,
   "fornecedores": [
     {
       "id": 6,
