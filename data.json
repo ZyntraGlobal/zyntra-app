@@ -2407,7 +2407,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 25,
-  "_savedAt": 1785849993948,
+  "_savedAt": 1785864341213,
   "fornecedores": [
     {
       "id": 6,
@@ -3128,7 +3128,7 @@
       "valor": 359.99,
       "prazo": "",
       "prioridade": "Alta",
-      "status": "Aberta",
+      "status": "Em Andamento",
       "data": "22/07/2026"
     },
     {
