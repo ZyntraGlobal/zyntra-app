@@ -2407,7 +2407,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 25,
-  "_savedAt": 1785792553661,
+  "_savedAt": 1785849993948,
   "fornecedores": [
     {
       "id": 6,
@@ -3076,7 +3076,7 @@
       "valor": 0,
       "prazo": "",
       "prioridade": "Média",
-      "status": "Em Andamento",
+      "status": "Resolvida",
       "data": "14/07/2026"
     },
     {
