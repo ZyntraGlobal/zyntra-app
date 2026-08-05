@@ -2042,10 +2042,10 @@
         "desc": "FATURA AZUL",
         "cat": "Logística/Frete",
         "tipo": "Conta Variável",
-        "valor": 1001.04,
+        "valor": 1023.39,
         "forma": "Pix",
         "datavenc": "30/07/2026",
-        "status": "Atrasado",
+        "status": "Pago",
         "datapag": "",
         "prior": "Média",
         "resp": "",
@@ -2416,7 +2416,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 26,
-  "_savedAt": 1785864792232,
+  "_savedAt": 1785936305465,
   "fornecedores": [
     {
       "id": 6,
