@@ -2363,6 +2363,20 @@
         "resp": "",
         "rec": "Única",
         "obs": ""
+      },
+      {
+        "desc": "CAPITAL DE GIRO MERCADO PAGO",
+        "cat": "Outros",
+        "tipo": "Conta Variável",
+        "valor": 9517.17,
+        "forma": "Pix",
+        "datavenc": "03/09/2026",
+        "status": "Pendente",
+        "datapag": "",
+        "prior": "Alta",
+        "resp": "",
+        "rec": "Única",
+        "obs": ""
       }
     ],
     [],
@@ -2416,7 +2430,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 26,
-  "_savedAt": 1786031755727,
+  "_savedAt": 1786032093316,
   "fornecedores": [
     {
       "id": 6,
