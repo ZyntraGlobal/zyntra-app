@@ -2430,7 +2430,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 26,
-  "_savedAt": 1786049461953,
+  "_savedAt": 1786049472017,
   "fornecedores": [
     {
       "id": 6,
@@ -3012,14 +3012,14 @@
       "id": 37,
       "produto": "GABINETE GAMER LIAN LI O11 EVO - PRETO",
       "fornecedor": "",
-      "cat": "Mouse",
+      "cat": "Outros",
       "plataforma": "Mercado Livre",
       "dataCompra": "07/08/2026",
       "status": "Pendente",
       "qtd": 1,
       "valorCompra": 827,
       "freteUnit": 0,
-      "impostoPct": 0,
+      "impostoPct": 37,
       "precoVenda": 1699.99,
       "obs": "",
       "data": "06/08/2026"
