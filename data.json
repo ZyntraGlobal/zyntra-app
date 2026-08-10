@@ -2430,7 +2430,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 26,
-  "_savedAt": 1786403522137,
+  "_savedAt": 1786406283488,
   "fornecedores": [
     {
       "id": 6,
@@ -3055,9 +3055,25 @@
       "obs": "",
       "data": "06/08/2026",
       "dataCompra": "07/08/2026"
+    },
+    {
+      "id": 40,
+      "produto": "Fan Lian Li Uni Fan TL Wireless LCD 120 Preto ARGB 12TLLCD1W1B BLACK",
+      "fornecedor": "",
+      "cat": "Outros",
+      "plataforma": "Amazon",
+      "dataCompra": "11/08/2026",
+      "status": "Pendente",
+      "qtd": 1,
+      "valorCompra": 252,
+      "freteUnit": 0,
+      "impostoPct": 0,
+      "precoVenda": 549.99,
+      "obs": "",
+      "data": "10/08/2026"
     }
   ],
-  "nCompras": 40,
+  "nCompras": 41,
   "pendencias": [
     {
       "id": 1,
