@@ -2430,7 +2430,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 26,
-  "_savedAt": 1786406283488,
+  "_savedAt": 1786406339493,
   "fornecedores": [
     {
       "id": 6,
@@ -3071,9 +3071,25 @@
       "precoVenda": 549.99,
       "obs": "",
       "data": "10/08/2026"
+    },
+    {
+      "id": 41,
+      "produto": "Memoria Corsair DDR5 16GB CMH16GX5M1E6000Z36",
+      "fornecedor": "",
+      "cat": "Outros",
+      "plataforma": "Amazon",
+      "dataCompra": "11/08/2026",
+      "status": "Pendente",
+      "qtd": 1,
+      "valorCompra": 1300,
+      "freteUnit": 0,
+      "impostoPct": 0,
+      "precoVenda": 1999.99,
+      "obs": "",
+      "data": "10/08/2026"
     }
   ],
-  "nCompras": 41,
+  "nCompras": 42,
   "pendencias": [
     {
       "id": 1,
