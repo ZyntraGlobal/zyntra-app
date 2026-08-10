@@ -2430,7 +2430,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 26,
-  "_savedAt": 1786406339493,
+  "_savedAt": 1786406384692,
   "fornecedores": [
     {
       "id": 6,
@@ -3087,9 +3087,25 @@
       "precoVenda": 1999.99,
       "obs": "",
       "data": "10/08/2026"
+    },
+    {
+      "id": 42,
+      "produto": "Memoria Corsair DDR5 16GB",
+      "fornecedor": "",
+      "cat": "Outros",
+      "plataforma": "Amazon",
+      "dataCompra": "11/08/2026",
+      "status": "Pendente",
+      "qtd": 2,
+      "valorCompra": 1252,
+      "freteUnit": 0,
+      "impostoPct": 0,
+      "precoVenda": 1999.99,
+      "obs": "",
+      "data": "10/08/2026"
     }
   ],
-  "nCompras": 42,
+  "nCompras": 43,
   "pendencias": [
     {
       "id": 1,
