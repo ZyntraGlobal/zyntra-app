@@ -2170,10 +2170,10 @@
         "desc": "ERP BLING",
         "cat": "Sistema/Software",
         "tipo": "Conta Fixa",
-        "valor": 55,
+        "valor": 60,
         "forma": "Pix",
         "datavenc": "10/08/2026",
-        "status": "Pendente",
+        "status": "Pago",
         "datapag": "",
         "prior": "Média",
         "resp": "",
@@ -2430,7 +2430,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 26,
-  "_savedAt": 1786388503205,
+  "_savedAt": 1786388683350,
   "fornecedores": [
     {
       "id": 6,
