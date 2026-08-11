@@ -2430,7 +2430,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 26,
-  "_savedAt": 1786406384692,
+  "_savedAt": 1786406430192,
   "fornecedores": [
     {
       "id": 6,
@@ -3103,9 +3103,25 @@
       "precoVenda": 1999.99,
       "obs": "",
       "data": "10/08/2026"
+    },
+    {
+      "id": 43,
+      "produto": "Mouse Gamer Redragon M913 Impact Elite - Branco",
+      "fornecedor": "",
+      "cat": "Mouse",
+      "plataforma": "Amazon",
+      "dataCompra": "10/08/2026",
+      "status": "Pendente",
+      "qtd": 1,
+      "valorCompra": 145,
+      "freteUnit": 0,
+      "impostoPct": 0,
+      "precoVenda": 389.99,
+      "obs": "",
+      "data": "10/08/2026"
     }
   ],
-  "nCompras": 43,
+  "nCompras": 44,
   "pendencias": [
     {
       "id": 1,
