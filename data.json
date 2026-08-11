@@ -1119,6 +1119,20 @@
       "vendas30": 0,
       "fornecedor": "",
       "leadTime": 7
+    },
+    {
+      "id": 81,
+      "nome": "GABINETE GAMER LIAN LI O11 DYNAMIC EVO - PRETO",
+      "cod": 81,
+      "ncm": "",
+      "cat": "Outros",
+      "qty": 0,
+      "min": 1,
+      "cmv": 827,
+      "preco": 0,
+      "vendas30": 0,
+      "fornecedor": "",
+      "leadTime": 7
     }
   ],
   "mov": [
@@ -2430,7 +2444,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 26,
-  "_savedAt": 1786483237397,
+  "_savedAt": 1786484991866,
   "fornecedores": [
     {
       "id": 6,
