@@ -2430,7 +2430,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 26,
-  "_savedAt": 1786474091364,
+  "_savedAt": 1786474095143,
   "fornecedores": [
     {
       "id": 6,
@@ -3063,7 +3063,7 @@
       "cat": "Outros",
       "plataforma": "Amazon",
       "dataCompra": "11/08/2026",
-      "status": "Pendente",
+      "status": "Comprado",
       "qtd": 1,
       "valorCompra": 252,
       "freteUnit": 0,
