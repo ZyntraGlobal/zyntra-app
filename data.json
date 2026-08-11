@@ -2430,7 +2430,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 26,
-  "_savedAt": 1786406570586,
+  "_savedAt": 1786406618332,
   "fornecedores": [
     {
       "id": 6,
@@ -3151,9 +3151,25 @@
       "precoVenda": 1999.99,
       "obs": "",
       "data": "10/08/2026"
+    },
+    {
+      "id": 46,
+      "produto": "Gamesir Kaleid Flux G7 Controle Preto/dourado Usb-c",
+      "fornecedor": "",
+      "cat": "Controle",
+      "plataforma": "Mercado Livre",
+      "dataCompra": "11/08/2026",
+      "status": "Pendente",
+      "qtd": 1,
+      "valorCompra": 200,
+      "freteUnit": 0,
+      "impostoPct": 0,
+      "precoVenda": 419.99,
+      "obs": "",
+      "data": "10/08/2026"
     }
   ],
-  "nCompras": 46,
+  "nCompras": 47,
   "pendencias": [
     {
       "id": 1,
