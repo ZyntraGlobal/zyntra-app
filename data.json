@@ -2430,7 +2430,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 26,
-  "_savedAt": 1786406930236,
+  "_savedAt": 1786474082811,
   "fornecedores": [
     {
       "id": 6,
@@ -3175,7 +3175,7 @@
       "cat": "Mouse",
       "plataforma": "Mercado Livre",
       "dataCompra": "11/08/2026",
-      "status": "Pendente",
+      "status": "Comprado",
       "qtd": 1,
       "valorCompra": 75,
       "freteUnit": 0,
