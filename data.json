@@ -2430,7 +2430,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 26,
-  "_savedAt": 1786406618332,
+  "_savedAt": 1786406654194,
   "fornecedores": [
     {
       "id": 6,
@@ -3167,9 +3167,25 @@
       "precoVenda": 419.99,
       "obs": "",
       "data": "10/08/2026"
+    },
+    {
+      "id": 47,
+      "produto": "Mouse para jogos Redragon K1ng Rgb rosa M724p-1k com fio de 12.400 Dpi, ultraleve, polling 1000 hz",
+      "fornecedor": "",
+      "cat": "Mouse",
+      "plataforma": "Mercado Livre",
+      "dataCompra": "11/08/2026",
+      "status": "Pendente",
+      "qtd": 1,
+      "valorCompra": 75,
+      "freteUnit": 0,
+      "impostoPct": 0,
+      "precoVenda": 209.99,
+      "obs": "",
+      "data": "10/08/2026"
     }
   ],
-  "nCompras": 47,
+  "nCompras": 48,
   "pendencias": [
     {
       "id": 1,
