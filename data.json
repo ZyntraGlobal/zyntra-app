@@ -2462,7 +2462,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 28,
-  "_savedAt": 1786559044119,
+  "_savedAt": 1786577684162,
   "fornecedores": [
     {
       "id": 6,
@@ -3445,7 +3445,20 @@
       "prioridade": "Urgente",
       "status": "Resolvida",
       "data": "29/07/2026"
+    },
+    {
+      "id": 16,
+      "titulo": "RETORNANDO A ZYNTRA - 701-6792971-9593035",
+      "descricao": "",
+      "categoria": "Site/Plataforma",
+      "plataforma": "Amazon",
+      "responsavel": "",
+      "valor": 389.99,
+      "prazo": "",
+      "prioridade": "Média",
+      "status": "Aberta",
+      "data": "12/08/2026"
     }
   ],
-  "nPendencias": 16
+  "nPendencias": 17
 }
