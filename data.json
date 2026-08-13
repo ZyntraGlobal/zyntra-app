@@ -2462,7 +2462,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 28,
-  "_savedAt": 1786641332773,
+  "_savedAt": 1786641340552,
   "fornecedores": [
     {
       "id": 6,
@@ -3271,7 +3271,7 @@
       "cat": "Outros",
       "plataforma": "Shopee",
       "dataCompra": "13/08/2026",
-      "status": "Pendente",
+      "status": "Comprado",
       "qtd": 1,
       "valorCompra": 399,
       "freteUnit": 0,
@@ -3287,7 +3287,7 @@
       "cat": "Mouse",
       "plataforma": "Mercado Livre",
       "dataCompra": "13/08/2026",
-      "status": "Pendente",
+      "status": "Comprado",
       "qtd": 1,
       "valorCompra": 145,
       "freteUnit": 0,
