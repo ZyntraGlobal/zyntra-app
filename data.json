@@ -2462,7 +2462,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 28,
-  "_savedAt": 1786581537398,
+  "_savedAt": 1786581589684,
   "fornecedores": [
     {
       "id": 6,
@@ -3295,9 +3295,25 @@
       "precoVenda": 359.99,
       "obs": "",
       "data": "12/08/2026"
+    },
+    {
+      "id": 53,
+      "produto": "Mouse Redragon M913 - Preto",
+      "fornecedor": "",
+      "cat": "Mouse",
+      "plataforma": "Amazon",
+      "dataCompra": "13/08/2026",
+      "status": "Pendente",
+      "qtd": 1,
+      "valorCompra": 161,
+      "freteUnit": 0,
+      "impostoPct": 0,
+      "precoVenda": 359.99,
+      "obs": "",
+      "data": "12/08/2026"
     }
   ],
-  "nCompras": 53,
+  "nCompras": 54,
   "pendencias": [
     {
       "id": 1,
