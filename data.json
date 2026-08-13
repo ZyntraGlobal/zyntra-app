@@ -2462,7 +2462,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 28,
-  "_savedAt": 1786577684162,
+  "_savedAt": 1786581370128,
   "fornecedores": [
     {
       "id": 6,
@@ -3247,9 +3247,25 @@
       "obs": "",
       "data": "11/08/2026",
       "dataCompra": "12/08/2026"
+    },
+    {
+      "id": 50,
+      "produto": "Memória Ram Corsair Vengeance RGB RS DDR4 16GB (2X8GB) 3200MHZ - Preto (CMG16GX4M2E3200C16)",
+      "fornecedor": "",
+      "cat": "Memória",
+      "plataforma": "TikTok Shop",
+      "dataCompra": "13/08/2026",
+      "status": "Pendente",
+      "qtd": 1,
+      "valorCompra": 865,
+      "freteUnit": 0,
+      "impostoPct": 0,
+      "precoVenda": 1594.89,
+      "obs": "",
+      "data": "12/08/2026"
     }
   ],
-  "nCompras": 50,
+  "nCompras": 51,
   "pendencias": [
     {
       "id": 1,
