@@ -2462,7 +2462,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 28,
-  "_savedAt": 1786581478447,
+  "_savedAt": 1786581537398,
   "fornecedores": [
     {
       "id": 6,
@@ -3279,9 +3279,25 @@
       "precoVenda": 899.99,
       "obs": "",
       "data": "12/08/2026"
+    },
+    {
+      "id": 52,
+      "produto": "Mouse Redragon M913 - Branco",
+      "fornecedor": "",
+      "cat": "Mouse",
+      "plataforma": "Mercado Livre",
+      "dataCompra": "13/08/2026",
+      "status": "Pendente",
+      "qtd": 1,
+      "valorCompra": 145,
+      "freteUnit": 0,
+      "impostoPct": 0,
+      "precoVenda": 359.99,
+      "obs": "",
+      "data": "12/08/2026"
     }
   ],
-  "nCompras": 52,
+  "nCompras": 53,
   "pendencias": [
     {
       "id": 1,
