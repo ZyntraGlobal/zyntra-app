@@ -2462,7 +2462,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 28,
-  "_savedAt": 1786581370128,
+  "_savedAt": 1786581478447,
   "fornecedores": [
     {
       "id": 6,
@@ -3263,9 +3263,25 @@
       "precoVenda": 1594.89,
       "obs": "",
       "data": "12/08/2026"
+    },
+    {
+      "id": 51,
+      "produto": "Gabinete Gamer Lian Li A3 mATX - Preto/Madeira com vidro lateral",
+      "fornecedor": "",
+      "cat": "Outros",
+      "plataforma": "Shopee",
+      "dataCompra": "13/08/2026",
+      "status": "Pendente",
+      "qtd": 1,
+      "valorCompra": 399,
+      "freteUnit": 0,
+      "impostoPct": 0,
+      "precoVenda": 899.99,
+      "obs": "",
+      "data": "12/08/2026"
     }
   ],
-  "nCompras": 51,
+  "nCompras": 52,
   "pendencias": [
     {
       "id": 1,
