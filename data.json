@@ -2462,7 +2462,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 28,
-  "_savedAt": 1786807566984,
+  "_savedAt": 1786809225655,
   "fornecedores": [
     {
       "id": 6,
@@ -3311,9 +3311,25 @@
       "precoVenda": 359.99,
       "obs": "",
       "data": "12/08/2026"
+    },
+    {
+      "id": 54,
+      "produto": "HEADSET CORSAIR VIRTUOSO MAX",
+      "fornecedor": "",
+      "cat": "Headset",
+      "plataforma": "Site Zyntra",
+      "dataCompra": "17/08/2026",
+      "status": "Pendente",
+      "qtd": 1,
+      "valorCompra": 1600,
+      "freteUnit": 0,
+      "impostoPct": 0,
+      "precoVenda": 2699.99,
+      "obs": "",
+      "data": "15/08/2026"
     }
   ],
-  "nCompras": 54,
+  "nCompras": 55,
   "pendencias": [
     {
       "id": 1,
