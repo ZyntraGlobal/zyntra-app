@@ -2462,7 +2462,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 28,
-  "_savedAt": 1786809315440,
+  "_savedAt": 1786810251248,
   "fornecedores": [
     {
       "id": 6,
@@ -3343,9 +3343,25 @@
       "precoVenda": 799.99,
       "obs": "",
       "data": "15/08/2026"
+    },
+    {
+      "id": 56,
+      "produto": "MOUSE GAMER REDRAGON M913 IMPACT ELITE - BRANCO",
+      "fornecedor": "",
+      "cat": "Mouse",
+      "plataforma": "Mercado Livre",
+      "dataCompra": "17/08/2026",
+      "status": "Pendente",
+      "qtd": 1,
+      "valorCompra": 145,
+      "freteUnit": 0,
+      "impostoPct": 0,
+      "precoVenda": 359.99,
+      "obs": "",
+      "data": "15/08/2026"
     }
   ],
-  "nCompras": 56,
+  "nCompras": 57,
   "pendencias": [
     {
       "id": 1,
