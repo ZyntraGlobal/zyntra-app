@@ -2462,7 +2462,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 28,
-  "_savedAt": 1786807428368,
+  "_savedAt": 1786807535366,
   "fornecedores": [
     {
       "id": 6,
@@ -3522,7 +3522,20 @@
       "prioridade": "Média",
       "status": "Aberta",
       "data": "12/08/2026"
+    },
+    {
+      "id": 17,
+      "titulo": "REATIVAR AMAZON",
+      "descricao": "",
+      "categoria": "Site/Plataforma",
+      "plataforma": "Amazon",
+      "responsavel": "",
+      "valor": 0,
+      "prazo": "",
+      "prioridade": "Urgente",
+      "status": "Aberta",
+      "data": "15/08/2026"
     }
   ],
-  "nPendencias": 17
+  "nPendencias": 18
 }
