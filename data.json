@@ -2244,7 +2244,7 @@
         "desc": "SIMPLES NACIONAL - IMPOSTO",
         "cat": "Impostos",
         "tipo": "Conta Variável",
-        "valor": 0,
+        "valor": 2381.48,
         "forma": "Pix",
         "datavenc": "20/08/2026",
         "status": "Pendente",
@@ -2462,7 +2462,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 28,
-  "_savedAt": 1786811282358,
+  "_savedAt": 1786811320941,
   "fornecedores": [
     {
       "id": 6,
