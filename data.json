@@ -2462,7 +2462,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 28,
-  "_savedAt": 1786810251248,
+  "_savedAt": 1786810276106,
   "fornecedores": [
     {
       "id": 6,
@@ -3359,9 +3359,25 @@
       "precoVenda": 359.99,
       "obs": "",
       "data": "15/08/2026"
+    },
+    {
+      "id": 57,
+      "produto": "MOUSE GAMER REDRAGON M724 - ROSA",
+      "fornecedor": "",
+      "cat": "Mouse",
+      "plataforma": "Mercado Livre",
+      "dataCompra": "17/08/2026",
+      "status": "Pendente",
+      "qtd": 1,
+      "valorCompra": 74,
+      "freteUnit": 0,
+      "impostoPct": 0,
+      "precoVenda": 209.99,
+      "obs": "",
+      "data": "15/08/2026"
     }
   ],
-  "nCompras": 57,
+  "nCompras": 58,
   "pendencias": [
     {
       "id": 1,
