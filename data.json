@@ -2093,7 +2093,7 @@
         "valor": 820,
         "forma": "Pix",
         "datavenc": "05/08/2026",
-        "status": "Pendente",
+        "status": "Atrasado",
         "datapag": "",
         "prior": "Média",
         "resp": "",
@@ -2462,7 +2462,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 28,
-  "_savedAt": 1786810561770,
+  "_savedAt": 1786811259591,
   "fornecedores": [
     {
       "id": 6,
