@@ -2317,7 +2317,7 @@
         "valor": 4387.13,
         "forma": "Débito Automático",
         "datavenc": "11/08/2026",
-        "status": "Pendente",
+        "status": "Atrasado",
         "datapag": "",
         "prior": "Média",
         "resp": "",
@@ -2462,7 +2462,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 28,
-  "_savedAt": 1786811271733,
+  "_savedAt": 1786811282358,
   "fornecedores": [
     {
       "id": 6,
