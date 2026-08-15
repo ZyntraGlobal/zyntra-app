@@ -2462,7 +2462,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 28,
-  "_savedAt": 1786807535366,
+  "_savedAt": 1786807566984,
   "fornecedores": [
     {
       "id": 6,
@@ -3535,7 +3535,20 @@
       "prioridade": "Urgente",
       "status": "Aberta",
       "data": "15/08/2026"
+    },
+    {
+      "id": 18,
+      "titulo": "REEMBOLSO CLIENTE MERCADO PAGO MEMÓRIA",
+      "descricao": "",
+      "categoria": "Site/Plataforma",
+      "plataforma": "Site Zyntra",
+      "responsavel": "",
+      "valor": 1749.99,
+      "prazo": "",
+      "prioridade": "Média",
+      "status": "Resolvida",
+      "data": "15/08/2026"
     }
   ],
-  "nPendencias": 18
+  "nPendencias": 19
 }
