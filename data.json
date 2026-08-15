@@ -2462,7 +2462,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 28,
-  "_savedAt": 1786809298247,
+  "_savedAt": 1786809315440,
   "fornecedores": [
     {
       "id": 6,
@@ -3593,7 +3593,20 @@
       "prioridade": "Urgente",
       "status": "Aberta",
       "data": "15/08/2026"
+    },
+    {
+      "id": 20,
+      "titulo": "REMOVER AVALIAÇÃO AMAZON 702-2388098-0721069",
+      "descricao": "",
+      "categoria": "Site/Plataforma",
+      "plataforma": "",
+      "responsavel": "",
+      "valor": 0,
+      "prazo": "",
+      "prioridade": "Urgente",
+      "status": "Aberta",
+      "data": "15/08/2026"
     }
   ],
-  "nPendencias": 20
+  "nPendencias": 21
 }
