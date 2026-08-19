@@ -2462,7 +2462,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 28,
-  "_savedAt": 1787153331306,
+  "_savedAt": 1787153448597,
   "fornecedores": [
     {
       "id": 6,
@@ -3311,9 +3311,25 @@
       "obs": "",
       "data": "15/08/2026",
       "dataCompra": "20/08/2026"
+    },
+    {
+      "id": 58,
+      "produto": "Headset Gamer Logitech G335 - Branco-Azul",
+      "fornecedor": "",
+      "cat": "Headset",
+      "plataforma": "Amazon",
+      "dataCompra": "20/08/2026",
+      "status": "Pendente",
+      "qtd": 1,
+      "valorCompra": 198,
+      "freteUnit": 0,
+      "impostoPct": 0,
+      "precoVenda": 419.99,
+      "obs": "",
+      "data": "19/08/2026"
     }
   ],
-  "nCompras": 58,
+  "nCompras": 59,
   "pendencias": [
     {
       "id": 1,
