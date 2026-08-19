@@ -2462,7 +2462,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 28,
-  "_savedAt": 1787153089342,
+  "_savedAt": 1787153116527,
   "fornecedores": [
     {
       "id": 6,
@@ -3342,7 +3342,7 @@
       "status": "Pendente",
       "obs": "",
       "data": "15/08/2026",
-      "dataCompra": "17/08/2026"
+      "dataCompra": "20/08/2026"
     },
     {
       "id": 57,
