@@ -593,7 +593,10 @@ function diasAte(dataStr){if(!dataStr)return null;var p=dataStr.split('/');var d
 
 var _mfn=null;
 function abrirM(t,b,fn,lg){document.getElementById('mtit').textContent=t;document.getElementById('mbody').innerHTML=b;_mfn=fn||null;document.getElementById('macts').style.display=fn?'flex':'none';document.getElementById('mbox').className='modal'+(lg?' lg':'');document.getElementById('mbg').classList.add('open');}
-function fecharM(){document.getElementById('mbg').classList.remove('open');}
+function fecharM(){
+  document.getElementById('mbg').classList.remove('open');_mfn=null;
+  if(window._pendingSyncApply){window._pendingSyncApply=false;if(typeof _atualizarTelaComDadosNovos==='function')_atualizarTelaComDadosNovos();}
+}
 function confirmarM(){if(_mfn)_mfn();}
 document.getElementById('mbg').addEventListener('click',function(e){if(e.target.id==='mbg')fecharM();});
 
@@ -790,8 +793,11 @@ function pDash(){
 }
 
 // ── ESTOQUE PRODUTOS ──────────────────────────────────
+var _filtroEstProd={busca:'',cat:'',st:''};
 function pEstProdutos(busca,filtCat,filtSt){
+  if(busca===undefined&&filtCat===undefined&&filtSt===undefined){busca=_filtroEstProd.busca;filtCat=_filtroEstProd.cat;filtSt=_filtroEstProd.st;}
   busca=busca||'';filtCat=filtCat||'';filtSt=filtSt||'';
+  _filtroEstProd.busca=busca;_filtroEstProd.cat=filtCat;_filtroEstProd.st=filtSt;
   var lista=DB.produtos.slice();
   if(busca)lista=lista.filter(function(p){return p.nome.toLowerCase().indexOf(busca.toLowerCase())>=0||String(p.cod).indexOf(busca)>=0||p.ncm.indexOf(busca)>=0;});
   if(filtCat)lista=lista.filter(function(p){return p.cat===filtCat;});
@@ -820,7 +826,7 @@ function pEstProdutos(busca,filtCat,filtSt){
   EST_CATS.forEach(function(c){h+='<option value="'+c+'"'+(filtCat===c?' selected':'')+'>'+c+'</option>';});
   h+='</select>';
   h+='<select class="sel" id="est-st" onchange="_refEst()"><option value="">Todos os status</option><option value="ok"'+(filtSt==='ok'?' selected':'')+'>OK</option><option value="baixo"'+(filtSt==='baixo'?' selected':'')+'>Baixo</option><option value="zero"'+(filtSt==='zero'?' selected':'')+'>Sem estoque</option></select>';
-  if(busca||filtCat||filtSt)h+='<button class="btn bsm" onclick="pEstProdutos()">✕ Limpar</button>';
+  if(busca||filtCat||filtSt)h+='<button class="btn bsm" onclick="pEstProdutos(\'\',\'\',\'\')">✕ Limpar</button>';
   h+='<button class="btn btnp" style="margin-left:auto" onclick="modalAddProduto()">+ Produto</button>';
   h+='<button class="btn" onclick="modalMovimento()">📦 Entrada/Saída</button>';
   h+='</div>';
@@ -996,7 +1002,7 @@ function pEstFinanceiro(){
 
   h+='<div class="sec">📦 Produtos — Capital Parado (maior para menor)</div>';
   h+='<div class="panel"><div class="ph"><div class="pt">Valor parado por SKU</div>';
-  h+='<button class="btn bsm" onclick="pEstProdutos()" style="font-size:11px">Ver catálogo completo →</button></div>';
+  h+='<button class="btn bsm" onclick="pEstProdutos(\'\',\'\',\'\')" style="font-size:11px">Ver catálogo completo →</button></div>';
   h+='<div class="ts tw"><table><thead><tr><th>CÓD.</th><th>PRODUTO</th><th>CAT.</th><th class="tc">ESTOQUE</th><th class="tr">CMV</th><th class="tr">PREÇO VENDA</th><th class="tr">CUSTO PARADO</th><th class="tr">VENDA PARADO</th><th class="tr">MARGEM</th><th>ABC</th></tr></thead><tbody>';
   lista.forEach(function(p){
     var pv=p.preco>0?p.preco:p.cmv;
@@ -1275,8 +1281,11 @@ function editPag(mes,idx){
 function delPag(mes,idx){if(!confirm('Excluir este pagamento?'))return;DB.pag[mes-1].splice(idx,1);save();badges();pPag(mes);}
 
 // ── RTU ───────────────────────────────────────────────
+var _filtroRtu={busca:'',mes:0};
 function pRtuLanc(busca,filtMes){
+  if(busca===undefined&&filtMes===undefined){busca=_filtroRtu.busca;filtMes=_filtroRtu.mes;}
   busca=busca||'';filtMes=filtMes||0;
+  _filtroRtu.busca=busca;_filtroRtu.mes=filtMes;
   var lista=DB.rtu.filter(function(r){return r.valor;});
   if(busca)lista=lista.filter(function(r){return r.produto.toLowerCase().indexOf(busca.toLowerCase())>=0;});
   if(filtMes)lista=lista.filter(function(r){return r.mes===filtMes;});
@@ -1296,7 +1305,7 @@ function pRtuLanc(busca,filtMes){
   h+='<select class="sel" id="rtu-m" onchange="_refRtu()"><option value="0">Todos os meses</option>';
   MFULL.forEach(function(m,i){h+='<option value="'+(i+1)+'"'+(filtMes===(i+1)?' selected':'')+'>'+m+'</option>';});
   h+='</select>';
-  if(busca||filtMes)h+='<button class="btn bsm" onclick="pRtuLanc()">✕ Limpar</button>';
+  if(busca||filtMes)h+='<button class="btn bsm" onclick="pRtuLanc(\'\',0)">✕ Limpar</button>';
   h+='<button class="btn btnp" style="margin-left:auto" onclick="modalAddRtu()">+ Novo Lançamento</button></div>';
 
   h+='<div class="panel"><div class="ph"><div class="pt">Lançamentos RTU 2026</div></div>';
@@ -1573,8 +1582,11 @@ function notifTestarG(){
 // ── FORNECEDORES ──────────────────────────────────────
 var FORN_CATS=['Importador','Distribuidor','Representante','Fabricante','Outros'];
 
+var _filtroForn={busca:'',cat:'',st:''};
 function pFornecedores(busca,filtCat,filtSt){
+  if(busca===undefined&&filtCat===undefined&&filtSt===undefined){busca=_filtroForn.busca;filtCat=_filtroForn.cat;filtSt=_filtroForn.st;}
   busca=busca||'';filtCat=filtCat||'';filtSt=filtSt||'';
+  _filtroForn.busca=busca;_filtroForn.cat=filtCat;_filtroForn.st=filtSt;
   if(!DB.fornecedores)DB.fornecedores=[];
   var todos=DB.fornecedores;
   var lista=todos.slice();
@@ -1604,7 +1616,7 @@ function pFornecedores(busca,filtCat,filtSt){
   FORN_CATS.forEach(function(c){h+='<option value="'+c+'"'+(filtCat===c?' selected':'')+'>'+c+'</option>';});
   h+='</select>';
   h+='<select class="sel" id="forn-st" onchange="_refForn()"><option value="">Todos</option><option value="ativo"'+(filtSt==='ativo'?' selected':'')+'>Ativos</option><option value="inativo"'+(filtSt==='inativo'?' selected':'')+'>Inativos</option></select>';
-  if(busca||filtCat||filtSt)h+='<button class="btn bsm" onclick="pFornecedores()">✕ Limpar</button>';
+  if(busca||filtCat||filtSt)h+='<button class="btn bsm" onclick="pFornecedores(\'\',\'\',\'\')">✕ Limpar</button>';
   h+='<button class="btn btnp" style="margin-left:auto" onclick="modalAddForn()">+ Novo Fornecedor</button>';
   h+='</div>';
 
@@ -1836,7 +1848,11 @@ function _tabelaCompras(lista,titulo){
   return h;
 }
 
+var _filtroCompras={busca:'',status:'',forn:''};
 function pCompras(busca,filtStatus,filtForn){
+  if(busca===undefined&&filtStatus===undefined&&filtForn===undefined){busca=_filtroCompras.busca;filtStatus=_filtroCompras.status;filtForn=_filtroCompras.forn;}
+  busca=busca||'';filtStatus=filtStatus||'';filtForn=filtForn||'';
+  _filtroCompras.busca=busca;_filtroCompras.status=filtStatus;_filtroCompras.forn=filtForn;
   if(!DB.compras)DB.compras=[];
 
   // Resumo fixo — aparece em qualquer aba, pra sempre saber os dois números principais
@@ -1905,7 +1921,7 @@ function _renderComprasGeral(busca,filtStatus,filtForn){
   h+='<select class="sel" id="compras-forn" onchange="_refCompras()"><option value="">Todos fornecedores</option>';
   fornsDistintos.forEach(function(f){h+='<option value="'+f+'"'+(filtForn===f?' selected':'')+'>'+f+'</option>';});
   h+='</select>';
-  if(busca||filtStatus||filtForn)h+='<button class="btn bsm" onclick="pCompras()">✕ Limpar</button>';
+  if(busca||filtStatus||filtForn)h+='<button class="btn bsm" onclick="pCompras(\'\',\'\',\'\')">✕ Limpar</button>';
   h+='</div>';
 
   if(lista.length===0&&todos.length===0){
@@ -2311,9 +2327,12 @@ function _pendTabBtn(view,label){
   return '<button class="btn bsm'+(on?' btnp':'')+'" onclick="pendIr(\''+view+'\')">'+label+'</button>';
 }
 
+var _filtroPend={busca:'',status:'',prior:'',cat:''};
 function pPendencias(busca,filtStatus,filtPrior,filtCat){
+  if(busca===undefined&&filtStatus===undefined&&filtPrior===undefined&&filtCat===undefined){busca=_filtroPend.busca;filtStatus=_filtroPend.status;filtPrior=_filtroPend.prior;filtCat=_filtroPend.cat;}
   if(!DB.pendencias)DB.pendencias=[];
   busca=busca||'';filtStatus=filtStatus||'';filtPrior=filtPrior||'';filtCat=filtCat||'';
+  _filtroPend.busca=busca;_filtroPend.status=filtStatus;_filtroPend.prior=filtPrior;_filtroPend.cat=filtCat;
   var todos=DB.pendencias;
   var abertas=todos.filter(function(p){return p.status==='Aberta'||p.status==='Em Andamento';});
   var vencidas=abertas.filter(function(p){return p.prazo&&_diasEmAberto(p.prazo)>=0;});
@@ -2354,7 +2373,7 @@ function _renderPendGeral(busca,filtStatus,filtPrior,filtCat){
   h+='<select class="sel" id="pend-cat" onchange="_refPendencias()"><option value="">Todas categorias</option>';
   PENDENCIA_CATEGORIA.forEach(function(c){h+='<option value="'+c+'"'+(filtCat===c?' selected':'')+'>'+c+'</option>';});
   h+='</select>';
-  if(busca||filtStatus||filtPrior||filtCat)h+='<button class="btn bsm" onclick="pPendencias()">✕ Limpar</button>';
+  if(busca||filtStatus||filtPrior||filtCat)h+='<button class="btn bsm" onclick="pPendencias(\'\',\'\',\'\',\'\')">✕ Limpar</button>';
   h+='</div>';
 
   var lista=todos.slice();
@@ -2717,8 +2736,15 @@ function _atualizarTelaComDadosNovos(){
   // Atualiza DB e redesenha em memória — NÃO usar location.reload() aqui:
   // no PWA instalado do iOS um reload é tratado como navegação e chega a
   // tirar o usuário do modo de app (volta pra tela de início do Safari).
+  // Se tiver um modal aberto (usuário no meio de um lançamento), a atualização
+  // fica em espera e só entra quando o modal fechar — evita perder o que a
+  // pessoa estava digitando ou trocar o DB debaixo dela no meio de um clique.
   try{
-    DB=loadDB();
+    var mbg=document.getElementById('mbg');
+    if(mbg&&mbg.classList.contains('open')){window._pendingSyncApply=true;return;}
+    var novo=loadDB();
+    if(DB&&DB._savedAt&&novo._savedAt&&novo._savedAt<=DB._savedAt)return;
+    DB=novo;
     if(typeof badges==='function')badges();
     if(_curPage && typeof ir==='function') ir(_curPage,_curMes);
   }catch(e){}
