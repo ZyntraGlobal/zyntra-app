@@ -2462,7 +2462,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 28,
-  "_savedAt": 1787162136431,
+  "_savedAt": 1787166609407,
   "fornecedores": [
     {
       "id": 6,
@@ -3343,9 +3343,25 @@
       "precoVenda": 1999.99,
       "obs": "",
       "data": "19/08/2026"
+    },
+    {
+      "id": 60,
+      "produto": "GABINETE GAMER LIAN LI O11 VISION COMPACT - PRETO",
+      "fornecedor": "Solid Power",
+      "cat": "Outros",
+      "plataforma": "Amazon",
+      "dataCompra": "22/08/2026",
+      "status": "Pendente",
+      "qtd": 1,
+      "valorCompra": 800,
+      "freteUnit": 0,
+      "impostoPct": 0,
+      "precoVenda": 1799.99,
+      "obs": "",
+      "data": "19/08/2026"
     }
   ],
-  "nCompras": 60,
+  "nCompras": 61,
   "pendencias": [
     {
       "id": 1,
