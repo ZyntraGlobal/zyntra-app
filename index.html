@@ -204,6 +204,8 @@ tfoot td{font-weight:700;border-top:2px solid var(--bdr2);border-bottom:none!imp
   <div class="ni" onclick="ir('fornecedores',this)"><span class="ico">🏭</span><span class="lbl">Fornecedores</span><span class="bdg" id="b-forn" style="display:none">0</span></div>
   <div class="sb-sec">Compras</div>
   <div class="ni" onclick="ir('compras',this)"><span class="ico">🛒</span><span class="lbl">Lista de Compras</span><span class="bdg" id="b-compras" style="display:none">0</span></div>
+  <div class="sb-sec">Marketplaces</div>
+  <div class="ni" onclick="ir('marketplaces',this)"><span class="ico">🏪</span><span class="lbl">Saldo & A Receber</span></div>
   <div class="sb-sec">Sistema</div>
   <div class="ni" onclick="fazerBackupG()" id="ni-backup"><span class="ico">💾</span><span class="lbl">Backup</span></div>
 </nav>
@@ -398,8 +400,14 @@ function _normPendencia(p){
     prioridade:p.prioridade||'Média', status:p.status||'Aberta', data:p.data||hoje()
   };
 }
+function _normMkt(m){
+  return {
+    id:m.id, plataforma:m.plataforma||'', saldo:Number(m.saldo)||0,
+    obs:m.obs||'', atualizadoEm:m.atualizadoEm||''
+  };
+}
 function loadDB(){
-  try{var s=localStorage.getItem('zyntra_gestao_v1');if(s){var d=JSON.parse(s);d.produtos=d.produtos.map(_normProd);if(!d.fornecedores)d.fornecedores=[];if(!d.nForn)d.nForn=1;if(!d.compras)d.compras=[];else d.compras=d.compras.map(_normCompra);if(!d.nCompras)d.nCompras=1;if(!d.pendencias)d.pendencias=[];else d.pendencias=d.pendencias.map(_normPendencia);if(!d.nPendencias)d.nPendencias=1;return d;}}catch(e){}
+  try{var s=localStorage.getItem('zyntra_gestao_v1');if(s){var d=JSON.parse(s);d.produtos=d.produtos.map(_normProd);if(!d.fornecedores)d.fornecedores=[];if(!d.nForn)d.nForn=1;if(!d.compras)d.compras=[];else d.compras=d.compras.map(_normCompra);if(!d.nCompras)d.nCompras=1;if(!d.pendencias)d.pendencias=[];else d.pendencias=d.pendencias.map(_normPendencia);if(!d.nPendencias)d.nPendencias=1;if(!d.marketplaces)d.marketplaces=[];else d.marketplaces=d.marketplaces.map(_normMkt);if(!d.nMkt)d.nMkt=1;return d;}}catch(e){}
   return{
     produtos:JSON.parse(JSON.stringify(PRODUTOS_BASE)).map(_normProd),
     mov:[],
@@ -408,7 +416,8 @@ function loadDB(){
     nRtu:10,nPag:100,nMov:100,
     fornecedores:[],nForn:1,
     compras:[],nCompras:1,
-    pendencias:[],nPendencias:1
+    pendencias:[],nPendencias:1,
+    marketplaces:[],nMkt:1
   };
 }
 var DB=loadDB();
@@ -618,7 +627,7 @@ function ir(tipo,arg,el){
   // Seções bloqueadas para funcionário
   var _bloq=['dash','est_fin','rtu_resumo','notif'];
   if(_isFuncionario()&&_bloq.indexOf(tipo)>=0){_bloqueadoFunc();document.getElementById('ptitle').textContent='Acesso Restrito';return;}
-  var titulos={dash:'Dashboard',est_produtos:'Estoque — Produtos',est_fin:'Estoque — Financeiro',est_mov:'Estoque — Movimentações',est_alertas:'Estoque — Alertas',rtu_lanc:'Controle RTU — Lançamentos',rtu_resumo:'Controle RTU — Resumo Anual',notif:'Alertas & Notificações',fornecedores:'Fornecedores',compras:'Compras — Lista de Compras',pendencias:'Avisos & Pendências'};
+  var titulos={dash:'Dashboard',est_produtos:'Estoque — Produtos',est_fin:'Estoque — Financeiro',est_mov:'Estoque — Movimentações',est_alertas:'Estoque — Alertas',rtu_lanc:'Controle RTU — Lançamentos',rtu_resumo:'Controle RTU — Resumo Anual',notif:'Alertas & Notificações',fornecedores:'Fornecedores',compras:'Compras — Lista de Compras',pendencias:'Avisos & Pendências',marketplaces:'Marketplaces — Saldo & A Receber'};
   document.getElementById('ptitle').textContent=titulos[tipo]||(tipo==='pag'?'Pagamentos — '+MFULL[(arg||1)-1]+' 2026':tipo);
   if(tipo==='dash')pDash();
   else if(tipo==='est_produtos')pEstProdutos();
@@ -632,6 +641,7 @@ function ir(tipo,arg,el){
   else if(tipo==='fornecedores')pFornecedores();
   else if(tipo==='compras')pCompras();
   else if(tipo==='pendencias')pPendencias();
+  else if(tipo==='marketplaces')pMarketplaces();
 }
 
 // ── DASHBOARD ─────────────────────────────────────────
@@ -697,6 +707,14 @@ function pDash(){
   var comprasStatus=comprasNaoVale>0?'red':comprasPendTotal>0?'amb':'grn';
   var comprasLabel=comprasNaoVale>0?comprasNaoVale+' sem viabilidade':comprasPendTotal>0?comprasPendTotal+' vencida'+(comprasPendTotal>1?'s':'')+(comprasAtrasados>0?' ('+comprasAtrasados+' atrasada'+(comprasAtrasados>1?'s':'')+')':''):'Nada vencido hoje';
 
+  // ── MARKETPLACES ──
+  var mktTodos=DB.marketplaces||[];
+  var mktTotal=mktTodos.reduce(function(a,m){return a+(Number(m.saldo)||0);},0);
+  var mktComSaldo=mktTodos.filter(function(m){return (Number(m.saldo)||0)>0;}).length;
+  var mktDesatualizados=mktTodos.filter(function(m){return (Number(m.saldo)||0)>0&&_diasEmAberto(m.atualizadoEm)>=7;}).length;
+  var mktStatus=mktDesatualizados>0?'amb':'grn';
+  var mktLabel=mktDesatualizados>0?mktDesatualizados+' desatualizado'+(mktDesatualizados>1?'s':''):mktComSaldo>0?'Tudo em dia':'Nenhum saldo lançado';
+
   // ── PENDÊNCIAS ──
   var pendTodos=DB.pendencias||[];
   var pendAbertas=pendTodos.filter(function(p){return p.status==='Aberta'||p.status==='Em Andamento';});
@@ -748,6 +766,15 @@ function pDash(){
     ['Urgentes',pendUrgentes.length,pendUrgentes.length>0?'var(--red)':'var(--t3)']
   ]);
   h+='</div>';
+  // Card Marketplaces — linha própria
+  h+='<div style="display:grid;grid-template-columns:1fr;gap:16px;margin-top:16px">';
+  h+=modCard('🏪','Marketplaces',R(mktTotal),'gold',mktComSaldo+' de '+COMPRA_PLATAFORMAS.length+' plataforma'+(COMPRA_PLATAFORMAS.length!==1?'s':'')+' com saldo lançado',mktStatus,mktLabel,"ir('marketplaces')",[
+    ['Parado / a receber',R(mktTotal),'var(--gold)'],
+    ['Com saldo',mktComSaldo,mktComSaldo>0?'var(--grn)':'var(--t3)'],
+    ['Desatualizados',mktDesatualizados,mktDesatualizados>0?'var(--amb)':'var(--t3)']
+  ]);
+  h+='</div>';
+
   h+='<div style="margin-top:16px;padding:12px 16px;background:var(--w);border:1px solid var(--bdr);border-radius:8px;display:flex;align-items:center;gap:8px;font-size:11px;color:var(--t3)">💡 Clique em qualquer módulo acima para abrir e gerenciar.</div>';
   setPage(h);
 }
@@ -2500,6 +2527,64 @@ function delPendencia(id){
   if(!confirm('Excluir a pendência "'+p.titulo+'"?\n\nEsta ação não pode ser desfeita.'))return;
   DB.pendencias=DB.pendencias.filter(function(x){return x.id!==id;});
   save();badges();pPendencias();
+}
+
+// ── MARKETPLACES — SALDO EM CONTA / A RECEBER ─────────
+function pMarketplaces(){
+  if(!DB.marketplaces)DB.marketplaces=[];
+  var mapa={};DB.marketplaces.forEach(function(m){mapa[m.plataforma]=m;});
+  var total=DB.marketplaces.reduce(function(a,m){return a+(Number(m.saldo)||0);},0);
+  var comSaldo=DB.marketplaces.filter(function(m){return (Number(m.saldo)||0)>0;}).length;
+  var desatualizados=DB.marketplaces.filter(function(m){return (Number(m.saldo)||0)>0&&_diasEmAberto(m.atualizadoEm)>=7;}).length;
+
+  var h='<div class="g3">';
+  h+='<div class="card hl"><div class="lbl">Total Parado / A Receber</div><div class="val gld">'+R(total)+'</div><div class="sub">soma de todas as plataformas</div></div>';
+  h+='<div class="card"><div class="lbl">Plataformas com Saldo</div><div class="val">'+comSaldo+'</div><div class="sub">de '+COMPRA_PLATAFORMAS.length+' cadastradas</div></div>';
+  h+='<div class="card '+(desatualizados>0?'warn':'')+'"><div class="lbl">Desatualizados</div><div class="val '+(desatualizados>0?'amb':'grn')+'">'+desatualizados+'</div><div class="sub">saldo não revisado há 7+ dias</div></div>';
+  h+='</div>';
+
+  h+='<div class="panel" style="margin-bottom:12px"><div style="padding:10px 16px;font-size:11px;color:var(--t3)">💰 Registre aqui quanto está parado (saldo disponível, ainda não sacado) em cada plataforma. Toque num card para atualizar o valor.</div></div>';
+
+  h+='<div class="g3">';
+  COMPRA_PLATAFORMAS.forEach(function(p){
+    var reg=mapa[p];
+    var saldo=reg?Number(reg.saldo)||0:0;
+    var dias=reg&&reg.atualizadoEm?_diasEmAberto(reg.atualizadoEm):null;
+    var desat=reg&&dias!==null&&dias>=7;
+    var statusTxt=!reg||!reg.atualizadoEm?'Nunca atualizado':(dias===0?'Atualizado hoje':'Atualizado há '+dias+' dia'+(dias!==1?'s':''));
+    var statusCor=desat?'var(--amb)':'var(--t3)';
+    h+='<div class="card'+(desat?' warn':'')+'" style="cursor:pointer" onclick="modalEditMkt(\''+p+'\')">';
+    h+='<div class="lbl">'+p+'</div>';
+    h+='<div class="val gld">'+R(saldo)+'</div>';
+    h+='<div class="sub" style="color:'+statusCor+'">'+statusTxt+'</div>';
+    if(reg&&reg.obs)h+='<div class="sub" style="margin-top:4px;font-style:italic">💬 '+reg.obs+'</div>';
+    h+='<button class="btn bsm" style="margin-top:10px" onclick="event.stopPropagation();modalEditMkt(\''+p+'\')">✏️ Atualizar Saldo</button>';
+    h+='</div>';
+  });
+  h+='</div>';
+  setPage(h);
+}
+
+function _formMkt(vals){
+  vals=vals||{};
+  return '<div class="fg f2">'+
+    '<div style="grid-column:1/-1"><label>Saldo em Conta (R$)</label><input id="mk-saldo" type="number" min="0" step="0.01" value="'+(vals.saldo||'')+'" placeholder="0,00" autofocus></div>'+
+    '<div style="grid-column:1/-1"><label>Observação</label><input id="mk-obs" value="'+(vals.obs||'')+'" placeholder="Ex: já solicitei saque, previsão dia 20"></div>'+
+    '</div>';
+}
+
+function modalEditMkt(plataforma){
+  if(!DB.marketplaces)DB.marketplaces=[];
+  var reg=DB.marketplaces.find(function(m){return m.plataforma===plataforma;})||{};
+  abrirM('Atualizar Saldo — '+plataforma,_formMkt(reg),function(){
+    var saldo=Number(document.getElementById('mk-saldo').value)||0;
+    var obs=(document.getElementById('mk-obs').value||'').trim();
+    if(!DB.nMkt)DB.nMkt=1;
+    var r=DB.marketplaces.find(function(m){return m.plataforma===plataforma;});
+    if(r){r.saldo=saldo;r.obs=obs;r.atualizadoEm=hoje();}
+    else{DB.marketplaces.push({id:DB.nMkt++,plataforma:plataforma,saldo:saldo,obs:obs,atualizadoEm:hoje()});}
+    save();fecharM();pMarketplaces();
+  });
 }
 
 function notifChecarG(){
