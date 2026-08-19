@@ -644,7 +644,10 @@ function ir(tipo,arg,el){
   _curPage=tipo;_curMes=arg||0;
   // 'usuarios' é sempre exclusivo do dono, nunca liberável por permissão
   if(tipo==='usuarios'&&_isFuncionario()){_bloqueadoFunc();document.getElementById('ptitle').textContent='Acesso Restrito';return;}
-  if(!_paginaPermitida(tipo)){_bloqueadoFunc();document.getElementById('ptitle').textContent='Acesso Restrito';return;}
+  if(!_paginaPermitida(tipo)){
+    if(tipo==='dash'&&_isFuncionario()){document.getElementById('ptitle').textContent='Início';pInicioFunc();return;}
+    _bloqueadoFunc();document.getElementById('ptitle').textContent='Acesso Restrito';return;
+  }
   var titulos={dash:'Dashboard',est_produtos:'Estoque — Produtos',est_fin:'Estoque — Financeiro',est_mov:'Estoque — Movimentações',est_alertas:'Estoque — Alertas',rtu_lanc:'Controle RTU — Lançamentos',rtu_resumo:'Controle RTU — Resumo Anual',notif:'Alertas & Notificações',fornecedores:'Fornecedores',compras:'Compras — Lista de Compras',pendencias:'Avisos & Pendências',marketplaces:'Marketplaces — Saldo & A Receber',usuarios:'Usuários & Acessos',inicio:'Início'};
   document.getElementById('ptitle').textContent=titulos[tipo]||(tipo==='pag'?'Pagamentos — '+MFULL[(arg||1)-1]+' 2026':tipo);
   if(tipo==='dash')pDash();
