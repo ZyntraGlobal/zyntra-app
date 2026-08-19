@@ -2462,7 +2462,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 28,
-  "_savedAt": 1787154547347,
+  "_savedAt": 1787154580170,
   "fornecedores": [
     {
       "id": 6,
@@ -3630,7 +3630,14 @@
       "saldo": 3392.72,
       "obs": "",
       "atualizadoEm": "19/08/2026"
+    },
+    {
+      "id": 4,
+      "plataforma": "TikTok Shop",
+      "saldo": 1714.48,
+      "obs": "",
+      "atualizadoEm": "19/08/2026"
     }
   ],
-  "nMkt": 4
+  "nMkt": 5
 }
