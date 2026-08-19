@@ -2462,7 +2462,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 28,
-  "_savedAt": 1787154525359,
+  "_savedAt": 1787154547347,
   "fornecedores": [
     {
       "id": 6,
@@ -3623,7 +3623,14 @@
       "saldo": 6301.49,
       "obs": "",
       "atualizadoEm": "19/08/2026"
+    },
+    {
+      "id": 3,
+      "plataforma": "Mercado Livre",
+      "saldo": 3392.72,
+      "obs": "",
+      "atualizadoEm": "19/08/2026"
     }
   ],
-  "nMkt": 3
+  "nMkt": 4
 }
