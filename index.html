@@ -207,6 +207,7 @@ tfoot td{font-weight:700;border-top:2px solid var(--bdr2);border-bottom:none!imp
   <div class="sb-sec">Marketplaces</div>
   <div class="ni" onclick="ir('marketplaces',this)"><span class="ico">🏪</span><span class="lbl">Saldo & A Receber</span></div>
   <div class="sb-sec">Sistema</div>
+  <div class="ni" id="ni-usuarios" onclick="ir('usuarios',this)"><span class="ico">👥</span><span class="lbl">Usuários</span></div>
   <div class="ni" onclick="fazerBackupG()" id="ni-backup"><span class="ico">💾</span><span class="lbl">Backup</span></div>
 </nav>
 
@@ -412,8 +413,14 @@ function _normSaque(s){
     data:s.data||hoje(), status:s.status||'Aguardando', dataCaiu:s.dataCaiu||''
   };
 }
+function _normUsuario(u){
+  return {
+    id:u.id, nome:u.nome||'', login:(u.login||'').toLowerCase().trim(),
+    senhaHash:u.senhaHash||'', ativo:u.ativo!==false, paginas:u.paginas||[]
+  };
+}
 function loadDB(){
-  try{var s=localStorage.getItem('zyntra_gestao_v1');if(s){var d=JSON.parse(s);d.produtos=d.produtos.map(_normProd);if(!d.fornecedores)d.fornecedores=[];if(!d.nForn)d.nForn=1;if(!d.compras)d.compras=[];else d.compras=d.compras.map(_normCompra);if(!d.nCompras)d.nCompras=1;if(!d.pendencias)d.pendencias=[];else d.pendencias=d.pendencias.map(_normPendencia);if(!d.nPendencias)d.nPendencias=1;if(!d.marketplaces)d.marketplaces=[];else d.marketplaces=d.marketplaces.map(_normMkt);if(!d.nMkt)d.nMkt=1;if(!d.saques)d.saques=[];else d.saques=d.saques.map(_normSaque);if(!d.nSaque)d.nSaque=1;return d;}}catch(e){}
+  try{var s=localStorage.getItem('zyntra_gestao_v1');if(s){var d=JSON.parse(s);d.produtos=d.produtos.map(_normProd);if(!d.fornecedores)d.fornecedores=[];if(!d.nForn)d.nForn=1;if(!d.compras)d.compras=[];else d.compras=d.compras.map(_normCompra);if(!d.nCompras)d.nCompras=1;if(!d.pendencias)d.pendencias=[];else d.pendencias=d.pendencias.map(_normPendencia);if(!d.nPendencias)d.nPendencias=1;if(!d.marketplaces)d.marketplaces=[];else d.marketplaces=d.marketplaces.map(_normMkt);if(!d.nMkt)d.nMkt=1;if(!d.saques)d.saques=[];else d.saques=d.saques.map(_normSaque);if(!d.nSaque)d.nSaque=1;if(!d.usuarios)d.usuarios=[];else d.usuarios=d.usuarios.map(_normUsuario);if(!d.nUsuarios)d.nUsuarios=1;return d;}}catch(e){}
   return{
     produtos:JSON.parse(JSON.stringify(PRODUTOS_BASE)).map(_normProd),
     mov:[],
@@ -424,7 +431,8 @@ function loadDB(){
     compras:[],nCompras:1,
     pendencias:[],nPendencias:1,
     marketplaces:[],nMkt:1,
-    saques:[],nSaque:1
+    saques:[],nSaque:1,
+    usuarios:[],nUsuarios:1
   };
 }
 var DB=loadDB();
@@ -634,10 +642,10 @@ function ir(tipo,arg,el){
   document.querySelectorAll('.ni').forEach(function(x){x.classList.remove('on');});
   if(el)el.classList.add('on');
   _curPage=tipo;_curMes=arg||0;
-  // Seções bloqueadas para funcionário
-  var _bloq=['dash','est_fin','rtu_resumo','notif'];
-  if(_isFuncionario()&&_bloq.indexOf(tipo)>=0){_bloqueadoFunc();document.getElementById('ptitle').textContent='Acesso Restrito';return;}
-  var titulos={dash:'Dashboard',est_produtos:'Estoque — Produtos',est_fin:'Estoque — Financeiro',est_mov:'Estoque — Movimentações',est_alertas:'Estoque — Alertas',rtu_lanc:'Controle RTU — Lançamentos',rtu_resumo:'Controle RTU — Resumo Anual',notif:'Alertas & Notificações',fornecedores:'Fornecedores',compras:'Compras — Lista de Compras',pendencias:'Avisos & Pendências',marketplaces:'Marketplaces — Saldo & A Receber'};
+  // 'usuarios' é sempre exclusivo do dono, nunca liberável por permissão
+  if(tipo==='usuarios'&&_isFuncionario()){_bloqueadoFunc();document.getElementById('ptitle').textContent='Acesso Restrito';return;}
+  if(!_paginaPermitida(tipo)){_bloqueadoFunc();document.getElementById('ptitle').textContent='Acesso Restrito';return;}
+  var titulos={dash:'Dashboard',est_produtos:'Estoque — Produtos',est_fin:'Estoque — Financeiro',est_mov:'Estoque — Movimentações',est_alertas:'Estoque — Alertas',rtu_lanc:'Controle RTU — Lançamentos',rtu_resumo:'Controle RTU — Resumo Anual',notif:'Alertas & Notificações',fornecedores:'Fornecedores',compras:'Compras — Lista de Compras',pendencias:'Avisos & Pendências',marketplaces:'Marketplaces — Saldo & A Receber',usuarios:'Usuários & Acessos'};
   document.getElementById('ptitle').textContent=titulos[tipo]||(tipo==='pag'?'Pagamentos — '+MFULL[(arg||1)-1]+' 2026':tipo);
   if(tipo==='dash')pDash();
   else if(tipo==='est_produtos')pEstProdutos();
@@ -652,11 +660,12 @@ function ir(tipo,arg,el){
   else if(tipo==='compras')pCompras();
   else if(tipo==='pendencias')pPendencias();
   else if(tipo==='marketplaces')pMarketplaces();
+  else if(tipo==='usuarios')pUsuarios();
 }
 
 // ── DASHBOARD ─────────────────────────────────────────
 function pDash(){
-  if(_isFuncionario()){_bloqueadoFunc();return;}
+  if(!_paginaPermitida('dash')){_bloqueadoFunc();return;}
   var mes=new Date().getMonth()+1;
   var nm=MFULL[mes-1];
 
@@ -942,7 +951,7 @@ function editProduto(id){
 
 // ── ESTOQUE FINANCEIRO ────────────────────────────────
 function pEstFinanceiro(){
-  if(_isFuncionario()){_bloqueadoFunc();return;}
+  if(!_paginaPermitida('est_fin')){_bloqueadoFunc();return;}
   var lista=DB.produtos.slice().sort(function(a,b){
     return (b.qty*(b.preco>0?b.preco:b.cmv))-(a.qty*(a.preco>0?a.preco:a.cmv));
   });
@@ -1398,7 +1407,7 @@ function delRtu(id){if(!confirm('Excluir lançamento?'))return;DB.rtu=DB.rtu.fil
 
 // ── RTU RESUMO ────────────────────────────────────────
 function pRtuResumo(){
-  if(_isFuncionario()){_bloqueadoFunc();return;}
+  if(!_paginaPermitida('rtu_resumo')){_bloqueadoFunc();return;}
   var totalAno=DB.rtu.reduce(function(a,r){return a+(r.valor||0);},0);
   var totalImpAno=DB.rtu.reduce(function(a,r){return a+(r.totalImp||0);},0);
   var saldo=RTU_CONFIG.limiteAnual-totalAno;
@@ -2766,6 +2775,27 @@ var _USERS={
 };
 var _ROLES={'felipe':'dono','colab':'funcionario'};
 function _isFuncionario(){try{var s=JSON.parse(localStorage.getItem('zg_sess')||'{}');return s.role==='funcionario';}catch(e){return false;}}
+// ── PERMISSÕES POR FUNCIONÁRIO ────────────────────────
+var PAGINAS_RESTRITAS=[
+  {tipo:'dash',label:'Dashboard'},
+  {tipo:'est_fin',label:'Estoque — Financeiro'},
+  {tipo:'rtu_resumo',label:'Controle RTU — Resumo Anual'},
+  {tipo:'notif',label:'Alertas & Notificações'}
+];
+function _usuarioAtual(){
+  try{
+    var s=JSON.parse(localStorage.getItem('zg_sess')||'{}');
+    if(!s.user)return null;
+    return (DB.usuarios||[]).find(function(u){return u.login===s.user;})||null;
+  }catch(e){return null;}
+}
+function _paginaPermitida(tipo){
+  if(!_isFuncionario())return true;
+  var restrita=PAGINAS_RESTRITAS.some(function(p){return p.tipo===tipo;});
+  if(!restrita)return true;
+  var u=_usuarioAtual();
+  return !!(u&&u.paginas&&u.paginas.indexOf(tipo)>=0);
+}
 function _bloqueadoFunc(){setPage('<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:60vh;gap:16px"><div style="font-size:48px">🔒</div><div style="font-size:16px;font-weight:700;color:var(--t)">Acesso Restrito</div><div style="font-size:13px;color:var(--t3);text-align:center">Esta seção é exclusiva do proprietário.</div></div>');}
 var _MAX_TENT=3,_LOCK_MS=2*60*1000;
 async function sha256h(s){var b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,'0');}).join('');}
@@ -2783,10 +2813,13 @@ async function doLogin(){
   btn.disabled=true;btn.textContent='Verificando...';
   try{
     var hash=await sha256h(user+':'+pass+':'+_SALT);
-    if(_USERS[user]&&_USERS[user]===hash){
+    var uReg=(DB.usuarios||[]).find(function(u){return u.login===user&&u.ativo!==false;});
+    var okDinamico=!!(uReg&&uReg.senhaHash===hash);
+    var okFixo=!!(_USERS[user]&&_USERS[user]===hash);
+    if(okDinamico||okFixo){
       btn.textContent='✓ Entrando...';
       await new Promise(function(r){setTimeout(r,350);});
-      var role=_ROLES[user]||'dono';
+      var role=okDinamico?'funcionario':(_ROLES[user]||'dono');
       localStorage.setItem('zg_sess',JSON.stringify({user:user,role:role,until:Date.now()+4*60*60*1000}));
       document.getElementById('login-bg').classList.add('hidden');
       try{badges();}catch(e){}
@@ -2829,10 +2862,109 @@ function _expirar(){localStorage.removeItem('zg_sess');document.getElementById('
 var _wt=null;function _iniciarWatch(){if(_wt)clearInterval(_wt);_wt=setInterval(function(){var raw=localStorage.getItem('zg_sess');if(!raw){_expirar();clearInterval(_wt);return;}try{var s=JSON.parse(raw);if(!s.until||Date.now()>=s.until){_expirar();clearInterval(_wt);}}catch(e){_expirar();clearInterval(_wt);}},60000);}
 function checkSessao(){localStorage.removeItem('zg_sess');var bg=document.getElementById('login-bg');if(bg)bg.classList.remove('hidden');setTimeout(function(){var u=document.getElementById('li-user');if(u)u.focus();_lgLock();},150);return false;}
 
+// ── USUÁRIOS & ACESSOS (dono-only) ────────────────────
+function _migrarUsuarioColab(){
+  if(!DB.usuarios)DB.usuarios=[];
+  if(!DB.nUsuarios)DB.nUsuarios=1;
+  var jaTem=DB.usuarios.some(function(u){return u.login==='colab';});
+  if(!jaTem&&_USERS['colab']){
+    DB.usuarios.push({id:DB.nUsuarios++,nome:'Colaborador',login:'colab',senhaHash:_USERS['colab'],ativo:true,paginas:[]});
+    try{save();}catch(e){}
+  }
+}
+
+function pUsuarios(){
+  if(_isFuncionario()){_bloqueadoFunc();return;}
+  if(!DB.usuarios)DB.usuarios=[];
+  var h='<div class="panel" style="margin-bottom:12px"><div style="padding:10px 16px;font-size:11px;color:var(--t3)">👥 Cada funcionário tem login e senha próprios. Por padrão, um funcionário só acessa as áreas operacionais — as páginas abaixo são liberadas individualmente por pessoa.</div></div>';
+  h+='<div class="brow" style="margin-bottom:10px"><button class="btn btnp bsm" onclick="modalAddUsuario()">+ Novo Usuário</button></div>';
+  var lista=DB.usuarios.slice().sort(function(a,b){return (a.nome||'').localeCompare(b.nome||'');});
+  if(lista.length===0){
+    h+='<div class="panel"><div class="empty" style="padding:56px 36px">';
+    h+='<div style="font-size:32px;margin-bottom:12px">👥</div>';
+    h+='<div style="font-size:14px;font-weight:600;color:var(--t2);margin-bottom:6px">Nenhum funcionário cadastrado</div>';
+    h+='<div style="font-size:12px;color:var(--t3);margin-bottom:16px">Crie um login pra cada pessoa que vai usar o sistema</div>';
+    h+='<button class="btn btnp" onclick="modalAddUsuario()">+ Adicionar Primeiro Usuário</button>';
+    h+='</div></div>';
+  } else {
+    h+='<div class="panel"><div class="ts tw"><table><thead><tr><th>NOME</th><th>LOGIN</th><th class="tc">STATUS</th><th>PÁGINAS EXTRAS LIBERADAS</th><th></th></tr></thead><tbody>';
+    lista.forEach(function(u){
+      var pagsLbl=(u.paginas||[]).map(function(t){var p=PAGINAS_RESTRITAS.find(function(x){return x.tipo===t;});return p?p.label:t;}).join(', ')||'<span style="color:var(--t3)">Nenhuma (só acesso operacional)</span>';
+      h+='<tr><td style="font-weight:600">'+u.nome+'</td><td><span class="mono">'+u.login+'</span></td>';
+      h+='<td class="tc">'+(u.ativo?'<span class="pill pok">Ativo</span>':'<span class="pill patrasado">Desativado</span>')+'</td>';
+      h+='<td style="font-size:11px">'+pagsLbl+'</td>';
+      h+='<td class="tnw"><button class="btn bsm" onclick="modalEditUsuario('+u.id+')" title="Editar">✏</button> <button class="btn bsm" onclick="toggleAtivoUsuario('+u.id+')" title="'+(u.ativo?'Desativar acesso':'Reativar acesso')+'">'+(u.ativo?'🚫':'✅')+'</button> <button class="btn bsm btnd" onclick="delUsuario('+u.id+')" title="Excluir">✕</button></td></tr>';
+    });
+    h+='</tbody></table></div></div>';
+  }
+  setPage(h);
+}
+
+function _formUsuario(vals,editando){
+  vals=vals||{};
+  var pagsHtml=PAGINAS_RESTRITAS.map(function(p){
+    var checked=(vals.paginas||[]).indexOf(p.tipo)>=0?' checked':'';
+    return '<label style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:400;margin-bottom:6px;color:var(--t2)"><input type="checkbox" class="up-pag" value="'+p.tipo+'"'+checked+'> '+p.label+'</label>';
+  }).join('');
+  return '<div class="fg f2">'+
+    '<div><label>Nome *</label><input id="up-nome" value="'+(vals.nome||'')+'" placeholder="Nome do funcionário" autofocus></div>'+
+    '<div><label>Login *</label><input id="up-login" value="'+(vals.login||'')+'" placeholder="ex: joao"'+(editando?' readonly style="opacity:.6"':'')+'></div>'+
+    '<div style="grid-column:1/-1"><label>'+(editando?'Nova Senha (deixe em branco pra manter a atual)':'Senha *')+'</label><input id="up-senha" type="password" placeholder="'+(editando?'••••••••':'Mínimo 6 caracteres')+'"></div>'+
+    '<div style="grid-column:1/-1"><label>Páginas extras liberadas pra este funcionário</label>'+pagsHtml+'</div>'+
+    '</div><div id="up-msg" style="font-size:11px;color:var(--red);margin-top:6px"></div>';
+}
+
+function modalAddUsuario(){
+  abrirM('Novo Usuário',_formUsuario({}),async function(){
+    var nome=(document.getElementById('up-nome').value||'').trim();
+    var login=(document.getElementById('up-login').value||'').trim().toLowerCase();
+    var senha=document.getElementById('up-senha').value;
+    var msg=document.getElementById('up-msg');
+    if(!nome||!login){msg.textContent='Informe nome e login.';return;}
+    if(!/^[a-z0-9._-]+$/.test(login)){msg.textContent='Login deve ter só letras, números, ponto, hífen ou underline.';return;}
+    if(login==='felipe'){msg.textContent='Esse login é reservado. Escolha outro.';return;}
+    if((DB.usuarios||[]).some(function(u){return u.login===login;})){msg.textContent='Já existe um usuário com esse login.';return;}
+    if(!senha||senha.length<6){msg.textContent='Informe uma senha com pelo menos 6 caracteres.';return;}
+    var paginas=Array.prototype.slice.call(document.querySelectorAll('.up-pag:checked')).map(function(c){return c.value;});
+    var senhaHash=await sha256h(login+':'+senha+':'+_SALT);
+    if(!DB.usuarios)DB.usuarios=[];
+    if(!DB.nUsuarios)DB.nUsuarios=1;
+    DB.usuarios.push({id:DB.nUsuarios++,nome:nome,login:login,senhaHash:senhaHash,ativo:true,paginas:paginas});
+    save();fecharM();pUsuarios();
+  });
+}
+
+function modalEditUsuario(id){
+  var u=(DB.usuarios||[]).find(function(x){return x.id===id;});if(!u)return;
+  abrirM('Editar Usuário — '+u.nome,_formUsuario(u,true),async function(){
+    var nome=(document.getElementById('up-nome').value||'').trim();
+    var senha=document.getElementById('up-senha').value;
+    var msg=document.getElementById('up-msg');
+    if(!nome){msg.textContent='Informe o nome.';return;}
+    if(senha&&senha.length<6){msg.textContent='A nova senha deve ter pelo menos 6 caracteres.';return;}
+    var paginas=Array.prototype.slice.call(document.querySelectorAll('.up-pag:checked')).map(function(c){return c.value;});
+    u.nome=nome;u.paginas=paginas;
+    if(senha){u.senhaHash=await sha256h(u.login+':'+senha+':'+_SALT);}
+    save();fecharM();pUsuarios();
+  });
+}
+
+function toggleAtivoUsuario(id){
+  var u=(DB.usuarios||[]).find(function(x){return x.id===id;});if(!u)return;
+  u.ativo=!u.ativo;save();pUsuarios();
+}
+function delUsuario(id){
+  var u=(DB.usuarios||[]).find(function(x){return x.id===id;});if(!u)return;
+  if(!confirm('Excluir o usuário "'+u.nome+'" ('+u.login+')?\n\nEsta ação não pode ser desfeita.'))return;
+  DB.usuarios=DB.usuarios.filter(function(x){return x.id!==id;});
+  save();pUsuarios();
+}
+
 // ── INIT ──────────────────────────────────────────────
 // Limpa lockout ao abrir o app (evita usuário ficar travado)
 document.getElementById('tdate').textContent=new Date().toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});
 initFrases();
+_migrarUsuarioColab();
 checkSessao();
 </script>
 
