@@ -2462,7 +2462,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 28,
-  "_savedAt": 1787153485011,
+  "_savedAt": 1787154498369,
   "fornecedores": [
     {
       "id": 6,
@@ -3608,5 +3608,15 @@
       "data": "15/08/2026"
     }
   ],
-  "nPendencias": 21
+  "nPendencias": 21,
+  "marketplaces": [
+    {
+      "id": 1,
+      "plataforma": "Amazon",
+      "saldo": 10059.14,
+      "obs": "",
+      "atualizadoEm": "19/08/2026"
+    }
+  ],
+  "nMkt": 2
 }
