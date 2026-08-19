@@ -403,12 +403,17 @@ function _normPendencia(p){
 function _normMkt(m){
   return {
     id:m.id, plataforma:m.plataforma||'', saldo:Number(m.saldo)||0,
-    valorSaque:Number(m.valorSaque)||0, previsaoSaque:m.previsaoSaque||'',
     obs:m.obs||'', atualizadoEm:m.atualizadoEm||''
   };
 }
+function _normSaque(s){
+  return {
+    id:s.id, plataforma:s.plataforma||'', valor:Number(s.valor)||0,
+    data:s.data||hoje(), status:s.status||'Aguardando', dataCaiu:s.dataCaiu||''
+  };
+}
 function loadDB(){
-  try{var s=localStorage.getItem('zyntra_gestao_v1');if(s){var d=JSON.parse(s);d.produtos=d.produtos.map(_normProd);if(!d.fornecedores)d.fornecedores=[];if(!d.nForn)d.nForn=1;if(!d.compras)d.compras=[];else d.compras=d.compras.map(_normCompra);if(!d.nCompras)d.nCompras=1;if(!d.pendencias)d.pendencias=[];else d.pendencias=d.pendencias.map(_normPendencia);if(!d.nPendencias)d.nPendencias=1;if(!d.marketplaces)d.marketplaces=[];else d.marketplaces=d.marketplaces.map(_normMkt);if(!d.nMkt)d.nMkt=1;return d;}}catch(e){}
+  try{var s=localStorage.getItem('zyntra_gestao_v1');if(s){var d=JSON.parse(s);d.produtos=d.produtos.map(_normProd);if(!d.fornecedores)d.fornecedores=[];if(!d.nForn)d.nForn=1;if(!d.compras)d.compras=[];else d.compras=d.compras.map(_normCompra);if(!d.nCompras)d.nCompras=1;if(!d.pendencias)d.pendencias=[];else d.pendencias=d.pendencias.map(_normPendencia);if(!d.nPendencias)d.nPendencias=1;if(!d.marketplaces)d.marketplaces=[];else d.marketplaces=d.marketplaces.map(_normMkt);if(!d.nMkt)d.nMkt=1;if(!d.saques)d.saques=[];else d.saques=d.saques.map(_normSaque);if(!d.nSaque)d.nSaque=1;return d;}}catch(e){}
   return{
     produtos:JSON.parse(JSON.stringify(PRODUTOS_BASE)).map(_normProd),
     mov:[],
@@ -418,7 +423,8 @@ function loadDB(){
     fornecedores:[],nForn:1,
     compras:[],nCompras:1,
     pendencias:[],nPendencias:1,
-    marketplaces:[],nMkt:1
+    marketplaces:[],nMkt:1,
+    saques:[],nSaque:1
   };
 }
 var DB=loadDB();
@@ -711,9 +717,10 @@ function pDash(){
   // ── MARKETPLACES ──
   var mktTodos=DB.marketplaces||[];
   var mktTotalSaldo=mktTodos.reduce(function(a,m){return a+(Number(m.saldo)||0);},0);
-  var mktTotalSaque=mktTodos.reduce(function(a,m){return a+(Number(m.valorSaque)||0);},0);
+  var saquesAguardando=(DB.saques||[]).filter(function(s){return s.status==='Aguardando';});
+  var mktTotalSaque=saquesAguardando.reduce(function(a,s){return a+(Number(s.valor)||0);},0);
   var mktTotal=mktTotalSaldo+mktTotalSaque;
-  var mktComSaldo=mktTodos.filter(function(m){return (Number(m.saldo)||0)>0||(Number(m.valorSaque)||0)>0;}).length;
+  var mktComSaldo=mktTodos.filter(function(m){return (Number(m.saldo)||0)>0;}).length;
   var mktDesatualizados=mktTodos.filter(function(m){return (Number(m.saldo)||0)>0&&_diasEmAberto(m.atualizadoEm)>=7;}).length;
   var mktStatus=mktDesatualizados>0?'amb':'grn';
   var mktLabel=mktDesatualizados>0?mktDesatualizados+' desatualizado'+(mktDesatualizados>1?'s':''):mktComSaldo>0?'Tudo em dia':'Nenhum saldo lançado';
@@ -773,7 +780,7 @@ function pDash(){
   h+='<div style="display:grid;grid-template-columns:1fr;gap:16px;margin-top:16px">';
   h+=modCard('🏪','Marketplaces',R(mktTotal),'gold',mktComSaldo+' de '+COMPRA_PLATAFORMAS.length+' plataforma'+(COMPRA_PLATAFORMAS.length!==1?'s':'')+' com saldo lançado',mktStatus,mktLabel,"ir('marketplaces')",[
     ['Saldo em conta',R(mktTotalSaldo),'var(--gold)'],
-    ['Saque a cair',R(mktTotalSaque),mktTotalSaque>0?'var(--grn)':'var(--t3)'],
+    ['Saques aguardando',R(mktTotalSaque),mktTotalSaque>0?'var(--grn)':'var(--t3)'],
     ['Desatualizados',mktDesatualizados,mktDesatualizados>0?'var(--amb)':'var(--t3)']
   ]);
   h+='</div>';
@@ -2532,29 +2539,43 @@ function delPendencia(id){
   save();badges();pPendencias();
 }
 
-// ── MARKETPLACES — SALDO EM CONTA / A RECEBER ─────────
+// ── MARKETPLACES — SALDO EM CONTA + SAQUES ────────────
+var _mktView='saldo';
+function mktIr(view){_mktView=view;pMarketplaces();}
+function _mktTabBtn(view,label){
+  var on=_mktView===view;
+  return '<button class="btn bsm'+(on?' btnp':'')+'" onclick="mktIr(\''+view+'\')">'+label+'</button>';
+}
+
 function pMarketplaces(){
   if(!DB.marketplaces)DB.marketplaces=[];
+  if(!DB.saques)DB.saques=[];
+  var h='<div class="brow" style="margin-bottom:12px">';
+  h+=_mktTabBtn('saldo','💰 Saldo em Conta');
+  h+=_mktTabBtn('saques','💸 Saques');
+  h+='</div>';
+  h+=(_mktView==='saques')?_renderSaques():_renderSaldoMkt();
+  setPage(h);
+}
+
+function _renderSaldoMkt(){
   var mapa={};DB.marketplaces.forEach(function(m){mapa[m.plataforma]=m;});
   var totalSaldo=DB.marketplaces.reduce(function(a,m){return a+(Number(m.saldo)||0);},0);
-  var totalSaque=DB.marketplaces.reduce(function(a,m){return a+(Number(m.valorSaque)||0);},0);
-  var comSaldo=DB.marketplaces.filter(function(m){return (Number(m.saldo)||0)>0||(Number(m.valorSaque)||0)>0;}).length;
+  var comSaldo=DB.marketplaces.filter(function(m){return (Number(m.saldo)||0)>0;}).length;
   var desatualizados=DB.marketplaces.filter(function(m){return (Number(m.saldo)||0)>0&&_diasEmAberto(m.atualizadoEm)>=7;}).length;
 
-  var h='<div class="g4">';
-  h+='<div class="card hl"><div class="lbl">Total Geral</div><div class="val gld">'+R(totalSaldo+totalSaque)+'</div><div class="sub">parado + em saque</div></div>';
-  h+='<div class="card"><div class="lbl">Saldo em Conta</div><div class="val">'+R(totalSaldo)+'</div><div class="sub">ainda não solicitado</div></div>';
-  h+='<div class="card"><div class="lbl">Saque a Cair</div><div class="val">'+R(totalSaque)+'</div><div class="sub">já solicitado ao marketplace</div></div>';
+  var h='<div class="g3">';
+  h+='<div class="card hl"><div class="lbl">Total Parado</div><div class="val gld">'+R(totalSaldo)+'</div><div class="sub">soma de todas as plataformas</div></div>';
+  h+='<div class="card"><div class="lbl">Plataformas com Saldo</div><div class="val">'+comSaldo+'</div><div class="sub">de '+COMPRA_PLATAFORMAS.length+' cadastradas</div></div>';
   h+='<div class="card '+(desatualizados>0?'warn':'')+'"><div class="lbl">Desatualizados</div><div class="val '+(desatualizados>0?'amb':'grn')+'">'+desatualizados+'</div><div class="sub">saldo não revisado há 7+ dias</div></div>';
   h+='</div>';
 
-  h+='<div class="panel" style="margin-bottom:12px"><div style="padding:10px 16px;font-size:11px;color:var(--t3)">💰 Saldo em Conta = dinheiro parado no marketplace, ainda não solicitado. Saque a Cair = já foi pedido o saque e está a caminho do banco. Toque num card para atualizar.</div></div>';
+  h+='<div class="panel" style="margin-bottom:12px"><div style="padding:10px 16px;font-size:11px;color:var(--t3)">💰 Dinheiro parado no marketplace, ainda não solicitado o saque. Toque num card para atualizar. Depois de pedir o saque, registre na aba "💸 Saques".</div></div>';
 
   h+='<div class="g3">';
   COMPRA_PLATAFORMAS.forEach(function(p){
     var reg=mapa[p];
     var saldo=reg?Number(reg.saldo)||0:0;
-    var saque=reg?Number(reg.valorSaque)||0:0;
     var dias=reg&&reg.atualizadoEm?_diasEmAberto(reg.atualizadoEm):null;
     var desat=reg&&saldo>0&&dias!==null&&dias>=7;
     var statusTxt=!reg||!reg.atualizadoEm?'Nunca atualizado':(dias===0?'Atualizado hoje':'Atualizado há '+dias+' dia'+(dias!==1?'s':''));
@@ -2563,24 +2584,19 @@ function pMarketplaces(){
     h+='<div class="lbl">'+p+'</div>';
     h+='<div class="val gld">'+R(saldo)+'</div>';
     h+='<div class="sub" style="color:'+statusCor+'">'+statusTxt+'</div>';
-    if(saque>0){
-      h+='<div class="sub" style="margin-top:6px;color:var(--grn)">💸 Saque a cair: <b>'+R(saque)+'</b>'+(reg.previsaoSaque?' · previsão '+reg.previsaoSaque:'')+'</div>';
-    }
     if(reg&&reg.obs)h+='<div class="sub" style="margin-top:4px;font-style:italic">💬 '+reg.obs+'</div>';
-    h+='<button class="btn bsm" style="margin-top:10px" onclick="event.stopPropagation();modalEditMkt(\''+p+'\')">✏️ Atualizar</button>';
+    h+='<button class="btn bsm" style="margin-top:10px" onclick="event.stopPropagation();modalEditMkt(\''+p+'\')">✏️ Atualizar Saldo</button>';
     h+='</div>';
   });
   h+='</div>';
-  setPage(h);
+  return h;
 }
 
 function _formMkt(vals){
   vals=vals||{};
   return '<div class="fg f2">'+
-    '<div><label>Saldo em Conta (R$)</label><input id="mk-saldo" type="number" min="0" step="0.01" value="'+(vals.saldo||'')+'" placeholder="0,00" autofocus></div>'+
-    '<div><label>Saque Solicitado — a Cair (R$)</label><input id="mk-saque" type="number" min="0" step="0.01" value="'+(vals.valorSaque||'')+'" placeholder="0,00"></div>'+
-    '<div style="grid-column:1/-1"><label>Previsão de Queda do Saque</label><input id="mk-previsao" value="'+(vals.previsaoSaque||'')+'" placeholder="DD/MM/AAAA (opcional)"></div>'+
-    '<div style="grid-column:1/-1"><label>Observação</label><input id="mk-obs" value="'+(vals.obs||'')+'" placeholder="Ex: já solicitei saque, previsão dia 20"></div>'+
+    '<div style="grid-column:1/-1"><label>Saldo em Conta (R$)</label><input id="mk-saldo" type="number" min="0" step="0.01" value="'+(vals.saldo||'')+'" placeholder="0,00" autofocus></div>'+
+    '<div style="grid-column:1/-1"><label>Observação</label><input id="mk-obs" value="'+(vals.obs||'')+'" placeholder="Ex: aguardando estorno, saldo bloqueado, etc"></div>'+
     '</div>';
 }
 
@@ -2589,15 +2605,99 @@ function modalEditMkt(plataforma){
   var reg=DB.marketplaces.find(function(m){return m.plataforma===plataforma;})||{};
   abrirM('Atualizar Saldo — '+plataforma,_formMkt(reg),function(){
     var saldo=Number(document.getElementById('mk-saldo').value)||0;
-    var valorSaque=Number(document.getElementById('mk-saque').value)||0;
-    var previsaoSaque=_normalizarData((document.getElementById('mk-previsao').value||'').trim());
     var obs=(document.getElementById('mk-obs').value||'').trim();
     if(!DB.nMkt)DB.nMkt=1;
     var r=DB.marketplaces.find(function(m){return m.plataforma===plataforma;});
-    if(r){r.saldo=saldo;r.valorSaque=valorSaque;r.previsaoSaque=previsaoSaque;r.obs=obs;r.atualizadoEm=hoje();}
-    else{DB.marketplaces.push({id:DB.nMkt++,plataforma:plataforma,saldo:saldo,valorSaque:valorSaque,previsaoSaque:previsaoSaque,obs:obs,atualizadoEm:hoje()});}
+    if(r){r.saldo=saldo;r.obs=obs;r.atualizadoEm=hoje();}
+    else{DB.marketplaces.push({id:DB.nMkt++,plataforma:plataforma,saldo:saldo,obs:obs,atualizadoEm:hoje()});}
     save();fecharM();pMarketplaces();
   });
+}
+
+// ── SAQUES — lançamentos diários de saque solicitado até confirmar queda ──
+function _pillSaqueStatus(s){
+  return s==='Caiu'?'<span class="pill ppago">✅ Caiu na conta</span>':'<span class="pill ppendente">⏳ Aguardando</span>';
+}
+
+function _renderSaques(){
+  var todos=(DB.saques||[]).slice().sort(function(a,b){return (b.id||0)-(a.id||0);});
+  var aguardando=todos.filter(function(s){return s.status==='Aguardando';});
+  var totalAguardando=aguardando.reduce(function(a,s){return a+(Number(s.valor)||0);},0);
+  var hj=hoje();
+  var confirmadosHoje=todos.filter(function(s){return s.status==='Caiu'&&s.dataCaiu===hj;});
+  var totalConfirmadoHoje=confirmadosHoje.reduce(function(a,s){return a+(Number(s.valor)||0);},0);
+
+  var h='<div class="g3">';
+  h+='<div class="card hl"><div class="lbl">Aguardando Cair</div><div class="val gld">'+R(totalAguardando)+'</div><div class="sub">'+aguardando.length+' saque'+(aguardando.length!==1?'s':'')+' pendente'+(aguardando.length!==1?'s':'')+'</div></div>';
+  h+='<div class="card"><div class="lbl">Confirmado Hoje</div><div class="val grn">'+R(totalConfirmadoHoje)+'</div><div class="sub">'+confirmadosHoje.length+' saque'+(confirmadosHoje.length!==1?'s':'')+' caíram hoje</div></div>';
+  h+='<div class="card"><div class="lbl">Total de Lançamentos</div><div class="val">'+todos.length+'</div><div class="sub">histórico completo</div></div>';
+  h+='</div>';
+
+  h+='<div class="brow" style="margin-bottom:10px"><button class="btn btnp bsm" onclick="modalAddSaque()">+ Novo Saque</button></div>';
+
+  if(todos.length===0){
+    h+='<div class="panel"><div class="empty" style="padding:56px 36px">';
+    h+='<div style="font-size:32px;margin-bottom:12px">💸</div>';
+    h+='<div style="font-size:14px;font-weight:600;color:var(--t2);margin-bottom:6px">Nenhum saque lançado ainda</div>';
+    h+='<div style="font-size:12px;color:var(--t3);margin-bottom:16px">Toda vez que pedir um saque num marketplace, lance aqui — e confirme quando cair na conta</div>';
+    h+='<button class="btn btnp" onclick="modalAddSaque()">+ Lançar Primeiro Saque</button>';
+    h+='</div></div>';
+  } else {
+    h+='<div class="panel"><div class="ts tw"><table><thead><tr><th>PLATAFORMA</th><th class="tr">VALOR</th><th class="tc">SOLICITADO EM</th><th class="tc">STATUS</th><th></th></tr></thead><tbody>';
+    todos.forEach(function(s){
+      h+='<tr>';
+      h+='<td style="font-weight:600;font-size:12px">'+s.plataforma+'</td>';
+      h+='<td class="tr tnw">'+R(s.valor)+'</td>';
+      h+='<td class="tc tnw">'+s.data+'</td>';
+      h+='<td class="tc">'+_pillSaqueStatus(s.status)+(s.status==='Caiu'&&s.dataCaiu?'<div style="font-size:10px;color:var(--t3);margin-top:2px">em '+s.dataCaiu+'</div>':'')+'</td>';
+      h+='<td class="tnw">';
+      if(s.status==='Aguardando')h+='<button class="btn bsm btnp" onclick="confirmarSaque('+s.id+')">✅ Confirmar Queda</button> ';
+      h+='<button class="btn bsm btnd" onclick="delSaque('+s.id+')" title="Excluir">✕</button>';
+      h+='</td>';
+      h+='</tr>';
+    });
+    h+='</tbody></table></div></div>';
+  }
+  return h;
+}
+
+function _formSaque(vals){
+  vals=vals||{};
+  var opts=COMPRA_PLATAFORMAS.map(function(p){return '<option value="'+p+'"'+(vals.plataforma===p?' selected':'')+'>'+p+'</option>';}).join('');
+  return '<div class="fg f2">'+
+    '<div><label>Plataforma</label><select id="sq-plataforma">'+opts+'</select></div>'+
+    '<div><label>Valor do Saque (R$)</label><input id="sq-valor" type="number" min="0" step="0.01" value="'+(vals.valor||'')+'" placeholder="0,00" autofocus></div>'+
+    '<div style="grid-column:1/-1"><label>Solicitado em</label><input id="sq-data" value="'+(vals.data||hoje())+'" placeholder="DD/MM/AAAA"></div>'+
+    '</div>';
+}
+
+function modalAddSaque(){
+  abrirM('Novo Saque',_formSaque({}),function(){
+    var plataforma=document.getElementById('sq-plataforma').value;
+    var valor=Number(document.getElementById('sq-valor').value)||0;
+    var data=_normalizarData((document.getElementById('sq-data').value||'').trim())||hoje();
+    if(!valor){alert('Informe o valor do saque.');return;}
+    if(!DB.saques)DB.saques=[];
+    if(!DB.nSaque)DB.nSaque=1;
+    DB.saques.push({id:DB.nSaque++,plataforma:plataforma,valor:valor,data:data,status:'Aguardando',dataCaiu:''});
+    save();fecharM();pMarketplaces();
+  });
+}
+
+function confirmarSaque(id){
+  if(!DB.saques)return;
+  var s=DB.saques.find(function(x){return x.id===id;});if(!s)return;
+  if(!confirm('Confirmar que o saque de '+R(s.valor)+' ('+s.plataforma+') já caiu na conta bancária?'))return;
+  s.status='Caiu';s.dataCaiu=hoje();
+  save();pMarketplaces();
+}
+
+function delSaque(id){
+  if(!DB.saques)return;
+  var s=DB.saques.find(function(x){return x.id===id;});if(!s)return;
+  if(!confirm('Excluir o lançamento de saque de '+R(s.valor)+' ('+s.plataforma+')?\n\nEsta ação não pode ser desfeita.'))return;
+  DB.saques=DB.saques.filter(function(x){return x.id!==id;});
+  save();pMarketplaces();
 }
 
 function notifChecarG(){
