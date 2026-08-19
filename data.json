@@ -2462,7 +2462,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 28,
-  "_savedAt": 1787153448597,
+  "_savedAt": 1787153485011,
   "fornecedores": [
     {
       "id": 6,
@@ -3327,9 +3327,25 @@
       "precoVenda": 419.99,
       "obs": "",
       "data": "19/08/2026"
+    },
+    {
+      "id": 59,
+      "produto": "CORSAIR Memória de computador desktop Vengeance RGB DDR5 RAM 16GB (1x16GB) 6000MHz CL36-44-44-96 1,35V AMD Expo Intel XMP 3.0 - Cinza (CMH16GX5M1E6000Z36)",
+      "fornecedor": "",
+      "cat": "Memória",
+      "plataforma": "Amazon",
+      "dataCompra": "20/08/2026",
+      "status": "Pendente",
+      "qtd": 1,
+      "valorCompra": 1300,
+      "freteUnit": 0,
+      "impostoPct": 0,
+      "precoVenda": 1999.99,
+      "obs": "",
+      "data": "19/08/2026"
     }
   ],
-  "nCompras": 59,
+  "nCompras": 60,
   "pendencias": [
     {
       "id": 1,
