@@ -2462,7 +2462,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 28,
-  "_savedAt": 1787153064893,
+  "_savedAt": 1787153074929,
   "fornecedores": [
     {
       "id": 6,
@@ -3324,22 +3324,6 @@
       "impostoPct": 0,
       "precoVenda": 2699.99,
       "status": "Comprado",
-      "obs": "",
-      "data": "15/08/2026",
-      "dataCompra": "17/08/2026"
-    },
-    {
-      "id": 55,
-      "fornecedor": "",
-      "produto": "GABINETE LIAN LI VIDRO LATERAL AMADEIRADO-PRETO",
-      "cat": "Outros",
-      "plataforma": "Shopee",
-      "qtd": 1,
-      "valorCompra": 445,
-      "freteUnit": 0,
-      "impostoPct": 0,
-      "precoVenda": 799.99,
-      "status": "Pendente",
       "obs": "",
       "data": "15/08/2026",
       "dataCompra": "17/08/2026"
