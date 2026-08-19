@@ -645,7 +645,7 @@ function ir(tipo,arg,el){
   // 'usuarios' é sempre exclusivo do dono, nunca liberável por permissão
   if(tipo==='usuarios'&&_isFuncionario()){_bloqueadoFunc();document.getElementById('ptitle').textContent='Acesso Restrito';return;}
   if(!_paginaPermitida(tipo)){_bloqueadoFunc();document.getElementById('ptitle').textContent='Acesso Restrito';return;}
-  var titulos={dash:'Dashboard',est_produtos:'Estoque — Produtos',est_fin:'Estoque — Financeiro',est_mov:'Estoque — Movimentações',est_alertas:'Estoque — Alertas',rtu_lanc:'Controle RTU — Lançamentos',rtu_resumo:'Controle RTU — Resumo Anual',notif:'Alertas & Notificações',fornecedores:'Fornecedores',compras:'Compras — Lista de Compras',pendencias:'Avisos & Pendências',marketplaces:'Marketplaces — Saldo & A Receber',usuarios:'Usuários & Acessos'};
+  var titulos={dash:'Dashboard',est_produtos:'Estoque — Produtos',est_fin:'Estoque — Financeiro',est_mov:'Estoque — Movimentações',est_alertas:'Estoque — Alertas',rtu_lanc:'Controle RTU — Lançamentos',rtu_resumo:'Controle RTU — Resumo Anual',notif:'Alertas & Notificações',fornecedores:'Fornecedores',compras:'Compras — Lista de Compras',pendencias:'Avisos & Pendências',marketplaces:'Marketplaces — Saldo & A Receber',usuarios:'Usuários & Acessos',inicio:'Início'};
   document.getElementById('ptitle').textContent=titulos[tipo]||(tipo==='pag'?'Pagamentos — '+MFULL[(arg||1)-1]+' 2026':tipo);
   if(tipo==='dash')pDash();
   else if(tipo==='est_produtos')pEstProdutos();
@@ -661,6 +661,36 @@ function ir(tipo,arg,el){
   else if(tipo==='pendencias')pPendencias();
   else if(tipo==='marketplaces')pMarketplaces();
   else if(tipo==='usuarios')pUsuarios();
+  else if(tipo==='inicio')pInicioFunc();
+}
+
+// ── INÍCIO DO FUNCIONÁRIO — atalhos pro que ele tem liberado ──
+function pInicioFunc(){
+  var u=_usuarioAtual();
+  var nome=(u&&u.nome)||'Colaborador';
+  var basicos=[
+    {tipo:'est_produtos',label:'Estoque',ico:'📦'},
+    {tipo:'rtu_lanc',label:'Controle RTU',ico:'🏦'},
+    {tipo:'compras',label:'Lista de Compras',ico:'🛒'},
+    {tipo:'fornecedores',label:'Fornecedores',ico:'🏭'},
+    {tipo:'pendencias',label:'Avisos & Pendências',ico:'📌'}
+  ];
+  var extras=((u&&u.paginas)||[]).map(function(t){
+    var p=PAGINAS_RESTRITAS.find(function(x){return x.tipo===t;});
+    return p?{tipo:p.tipo,label:p.label,ico:'🔓'}:null;
+  }).filter(Boolean);
+  var todos=basicos.concat(extras);
+  var h='<div class="sec">👋 Bem-vindo(a), '+nome+'</div>';
+  h+='<div class="panel" style="margin-bottom:14px"><div style="padding:10px 16px;font-size:11px;color:var(--t3)">Escolha uma área abaixo pra começar. Se precisar de acesso a algo que não está aqui, fale com o responsável.</div></div>';
+  h+='<div class="g3">';
+  todos.forEach(function(m){
+    h+='<div class="card hl" style="cursor:pointer;text-align:center;padding:26px 14px" onclick="ir(\''+m.tipo+'\')">';
+    h+='<div style="font-size:30px;margin-bottom:10px">'+m.ico+'</div>';
+    h+='<div style="font-weight:700;color:var(--t)">'+m.label+'</div>';
+    h+='</div>';
+  });
+  h+='</div>';
+  setPage(h);
 }
 
 // ── DASHBOARD ─────────────────────────────────────────
@@ -1200,6 +1230,7 @@ function pEstAlertas(){
 
 // ── PAGAMENTOS ────────────────────────────────────────
 function pPag(mes){
+  if(!_paginaPermitida('pag')){_bloqueadoFunc();return;}
   var lista=DB.pag[mes-1]||[];
   var total=lista.reduce(function(a,p){return a+p.valor;},0);
   var pago=lista.filter(function(p){return p.status==='Pago';}).reduce(function(a,p){return a+p.valor;},0);
@@ -2576,6 +2607,7 @@ function _mktTabBtn(view,label){
 }
 
 function pMarketplaces(){
+  if(!_paginaPermitida('marketplaces')){_bloqueadoFunc();return;}
   if(!DB.marketplaces)DB.marketplaces=[];
   if(!DB.saques)DB.saques=[];
   var h='<div class="brow" style="margin-bottom:12px">';
@@ -2780,7 +2812,9 @@ var PAGINAS_RESTRITAS=[
   {tipo:'dash',label:'Dashboard'},
   {tipo:'est_fin',label:'Estoque — Financeiro'},
   {tipo:'rtu_resumo',label:'Controle RTU — Resumo Anual'},
-  {tipo:'notif',label:'Alertas & Notificações'}
+  {tipo:'notif',label:'Alertas & Notificações'},
+  {tipo:'marketplaces',label:'Marketplaces — Saldo & A Receber'},
+  {tipo:'pag',label:'Pagamentos Empresa'}
 ];
 function _usuarioAtual(){
   try{
@@ -2823,7 +2857,7 @@ async function doLogin(){
       localStorage.setItem('zg_sess',JSON.stringify({user:user,role:role,until:Date.now()+4*60*60*1000}));
       document.getElementById('login-bg').classList.add('hidden');
       try{badges();}catch(e){}
-      try{if(role==='funcionario'){ir('est_produtos');}else{pDash();}}catch(e){console.error('pDash error',e);}
+      try{if(role==='funcionario'){ir('inicio');}else{pDash();}}catch(e){console.error('pDash error',e);}
       _iniciarWatch();
       // Renova push subscription ao fazer login
       try{_assinarPushG();}catch(e){}
