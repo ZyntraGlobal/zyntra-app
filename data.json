@@ -2462,7 +2462,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 28,
-  "_savedAt": 1787168246837,
+  "_savedAt": 1787172472273,
   "fornecedores": [
     {
       "id": 6,
@@ -3314,51 +3314,51 @@
     },
     {
       "id": 58,
-      "produto": "Headset Gamer Logitech G335 - Branco-Azul",
       "fornecedor": "",
+      "produto": "Headset Gamer Logitech G335 - Branco-Azul",
       "cat": "Headset",
       "plataforma": "Amazon",
-      "dataCompra": "20/08/2026",
-      "status": "Pendente",
       "qtd": 1,
       "valorCompra": 198,
       "freteUnit": 0,
       "impostoPct": 0,
       "precoVenda": 419.99,
+      "status": "Pendente",
       "obs": "",
-      "data": "19/08/2026"
+      "data": "19/08/2026",
+      "dataCompra": "20/08/2026"
     },
     {
       "id": 59,
-      "produto": "CORSAIR Memória de computador desktop Vengeance RGB DDR5 RAM 16GB (1x16GB) 6000MHz CL36-44-44-96 1,35V AMD Expo Intel XMP 3.0 - Cinza (CMH16GX5M1E6000Z36)",
       "fornecedor": "",
+      "produto": "CORSAIR Memória de computador desktop Vengeance RGB DDR5 RAM 16GB (1x16GB) 6000MHz CL36-44-44-96 1,35V AMD Expo Intel XMP 3.0 - Cinza (CMH16GX5M1E6000Z36)",
       "cat": "Memória",
       "plataforma": "Amazon",
-      "dataCompra": "20/08/2026",
-      "status": "Pendente",
       "qtd": 1,
       "valorCompra": 1300,
       "freteUnit": 0,
       "impostoPct": 0,
       "precoVenda": 1999.99,
+      "status": "Pendente",
       "obs": "",
-      "data": "19/08/2026"
+      "data": "19/08/2026",
+      "dataCompra": "20/08/2026"
     },
     {
       "id": 60,
-      "produto": "GABINETE GAMER LIAN LI O11 VISION COMPACT - PRETO",
       "fornecedor": "Solid Power",
+      "produto": "GABINETE GAMER LIAN LI O11 VISION COMPACT - PRETO",
       "cat": "Outros",
       "plataforma": "Amazon",
-      "dataCompra": "22/08/2026",
-      "status": "Pendente",
       "qtd": 1,
       "valorCompra": 800,
       "freteUnit": 0,
       "impostoPct": 0,
       "precoVenda": 1799.99,
+      "status": "Pendente",
       "obs": "",
-      "data": "19/08/2026"
+      "data": "19/08/2026",
+      "dataCompra": "22/08/2026"
     }
   ],
   "nCompras": 61,
@@ -3674,5 +3674,16 @@
       "dataCaiu": ""
     }
   ],
-  "nSaque": 3
+  "nSaque": 3,
+  "usuarios": [
+    {
+      "id": 1,
+      "nome": "Colaborador",
+      "login": "colab",
+      "senhaHash": "4d34d096f77b962e35c979af0a7e5f74c26df5e439321e3764b3422f828faad0",
+      "ativo": true,
+      "paginas": []
+    }
+  ],
+  "nUsuarios": 2
 }
