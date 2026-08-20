@@ -2462,7 +2462,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 28,
-  "_savedAt": 1787231179974,
+  "_savedAt": 1787247586939,
   "fornecedores": [
     {
       "id": 6,
@@ -3127,7 +3127,7 @@
       "cat": "Outros",
       "plataforma": "Shopee",
       "qtd": 1,
-      "valorCompra": 1252,
+      "valorCompra": 1332,
       "freteUnit": 0,
       "impostoPct": 0,
       "precoVenda": 2049.99,
