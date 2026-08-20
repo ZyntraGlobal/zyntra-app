@@ -2462,7 +2462,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 28,
-  "_savedAt": 1787247605508,
+  "_savedAt": 1787247619351,
   "fornecedores": [
     {
       "id": 6,
@@ -3302,7 +3302,7 @@
       "produto": "MOUSE GAMER REDRAGON M724 - ROSA",
       "cat": "Mouse",
       "plataforma": "Mercado Livre",
-      "qtd": 2,
+      "qtd": 1,
       "valorCompra": 74,
       "freteUnit": 0,
       "impostoPct": 0,
