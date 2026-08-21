@@ -2462,7 +2462,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 28,
-  "_savedAt": 1787334785268,
+  "_savedAt": 1787334820750,
   "fornecedores": [
     {
       "id": 6,
@@ -3694,8 +3694,8 @@
       "plataforma": "Shopee",
       "valor": 1736.5,
       "data": "21/08/2026",
-      "status": "Aguardando",
-      "dataCaiu": ""
+      "status": "Caiu",
+      "dataCaiu": "21/08/2026"
     },
     {
       "id": 9,
