@@ -175,7 +175,11 @@
             }
           } catch(e) { lista = []; }
           lista = lista.filter(function(s) { return s.deviceId !== deviceId; });
-          lista.push({ deviceId: deviceId, endpoint: sub.endpoint, keys: sub.keys, ua: (navigator.userAgent || '').slice(0, 80), updatedAt: Date.now() });
+          // sub é um PushSubscription nativo — .keys não existe como propriedade direta
+          // (só endpoint tem getter), as chaves só saem via .toJSON(). Sem isso, a
+          // subscription salva ficava sem "keys" e o push falhava silenciosamente.
+          var subJson = sub.toJSON ? sub.toJSON() : sub;
+          lista.push({ deviceId: deviceId, endpoint: sub.endpoint, keys: subJson.keys, ua: (navigator.userAgent || '').slice(0, 80), updatedAt: Date.now() });
           var b64 = btoa(unescape(encodeURIComponent(JSON.stringify(lista))));
           var payload = { message: 'update push subscription', content: b64 };
           if (info && info.sha) payload.sha = info.sha;
