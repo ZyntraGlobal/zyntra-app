@@ -2462,7 +2462,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 28,
-  "_savedAt": 1787334753137,
+  "_savedAt": 1787334780738,
   "fornecedores": [
     {
       "id": 6,
@@ -3335,7 +3335,7 @@
       "cat": "Memória",
       "plataforma": "Amazon",
       "qtd": 1,
-      "valorCompra": 1300,
+      "valorCompra": 1370.05,
       "freteUnit": 0,
       "impostoPct": 0,
       "precoVenda": 1999.99,
