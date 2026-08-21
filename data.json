@@ -2462,7 +2462,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 28,
-  "_savedAt": 1787320695975,
+  "_savedAt": 1787320715083,
   "fornecedores": [
     {
       "id": 6,
@@ -3636,9 +3636,9 @@
     {
       "id": 2,
       "plataforma": "Shopee",
-      "saldo": 5553.5,
+      "saldo": 3817,
       "obs": "",
-      "atualizadoEm": "20/08/2026"
+      "atualizadoEm": "21/08/2026"
     },
     {
       "id": 3,
