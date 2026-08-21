@@ -88,7 +88,10 @@ async function main() {
   }
 
   const dados = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
-  const sub = JSON.parse(fs.readFileSync(subPath, 'utf8'));
+  // push-sub.json agora é uma lista (um app pode estar em vários aparelhos) — compatível
+  // com o formato antigo (objeto único) tratando como lista de 1 item.
+  const subRaw = JSON.parse(fs.readFileSync(subPath, 'utf8'));
+  const subs = Array.isArray(subRaw) ? subRaw : (subRaw && subRaw.endpoint ? [subRaw] : []);
 
   const pendencias = dados.pendencias || [];
   const abertas = pendencias.filter(p => p.status === 'Aberta' || p.status === 'Em Andamento');
@@ -115,12 +118,24 @@ async function main() {
 
   const payload = JSON.stringify({ title: titulo, body: corpo, icon: '/zyntra-app/icon-192.png', badge: '/zyntra-app/icon-192.png', tag: 'zyntra-gestao-pendencias-' + Date.now() });
 
-  try {
-    await webpush.sendNotification(sub, payload);
-    console.log('Push enviado com sucesso:', titulo);
+  if (subs.length === 0) {
+    console.log('Nenhum aparelho inscrito em push-sub.json.');
+    process.exitCode = 1;
+    return;
+  }
+  let okCount = 0;
+  for (const s of subs) {
+    try {
+      await webpush.sendNotification({ endpoint: s.endpoint, keys: s.keys }, payload);
+      okCount++;
+    } catch (err) {
+      console.log('Erro ao enviar push [' + (s.deviceId || '?') + ']. statusCode:', err.statusCode, '| body:', err.body);
+    }
+  }
+  if (okCount > 0) {
+    console.log('Push enviado com sucesso (' + okCount + '/' + subs.length + ' aparelhos):', titulo);
     salvarState({ dia: hoje, enviados: passados });
-  } catch (err) {
-    console.log('Erro ao enviar push. statusCode:', err.statusCode, '| body:', err.body);
+  } else {
     process.exitCode = 1;
   }
 }

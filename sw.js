@@ -1,4 +1,4 @@
-const CACHE = 'zyntra-app-v43';
+const CACHE = 'zyntra-app-v44';
 // index.html e web-sync.js FORA do cache — sempre baixa o mais recente da internet
 const ASSETS = [
   '/zyntra-app/mobile.css',
@@ -96,12 +96,28 @@ function _urlB64ToUint8SW(b) {
   return o;
 }
 
+// Igual _salvarSubGitHubG do web-sync.js, mas rodando dentro do Service Worker (sem
+// acesso a localStorage, então identifica "qual entrada é minha" pelo endpoint em vez
+// de um deviceId persistido). Mantém a mesma lista/array — nunca sobrescreve com objeto
+// único, senão apaga o registro dos outros aparelhos toda vez que uma notificação chega.
 function _publicarSubGitHubSW(sub) {
-  const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(sub))));
+  const subJson = sub.toJSON ? sub.toJSON() : sub; // .keys só existe via toJSON()
   const hh = { 'Authorization': 'Bearer ' + GH_TOKEN_SW, 'Accept': 'application/vnd.github+json', 'User-Agent': 'ZyntraG-PWA', 'Content-Type': 'application/json' };
   return fetch(PUSH_SUB_API_SW, { headers: hh, cache: 'no-store' })
     .then(r => r.status === 404 ? null : r.json())
     .then(info => {
+      let lista = [];
+      try {
+        if (info && info.content) {
+          const atual = JSON.parse(decodeURIComponent(escape(atob(info.content.replace(/\n/g, '')))));
+          lista = Array.isArray(atual) ? atual : (atual && atual.endpoint ? [Object.assign({ deviceId: 'legacy' }, atual)] : []);
+        }
+      } catch(e) { lista = []; }
+      const existente = lista.find(s => s.endpoint === subJson.endpoint);
+      const deviceId = existente ? existente.deviceId : ('sw-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8));
+      lista = lista.filter(s => s.endpoint !== subJson.endpoint);
+      lista.push({ deviceId: deviceId, endpoint: subJson.endpoint, keys: subJson.keys, ua: 'sw-self-heal', updatedAt: Date.now() });
+      const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(lista))));
       const payload = { message: 'update push subscription (sw)', content: b64 };
       if (info && info.sha) payload.sha = info.sha;
       return fetch(PUSH_SUB_API_SW, { method: 'PUT', headers: hh, cache: 'no-store', body: JSON.stringify(payload) });
