@@ -144,9 +144,17 @@
   };
 
   // Renova subscription push, republica no relay ntfy (instantâneo, mas expira em 12h)
-  // e persiste no GitHub (push-sub.json — não expira, é a fonte confiável pro desktop)
+  // e persiste no GitHub (push-sub.json — não expira, é a fonte confiável pro desktop).
+  // push-sub.json é uma LISTA de aparelhos (não um só) — o mesmo app pode estar
+  // instalado em vários iPhones ao mesmo tempo (ex: pessoal + da empresa), cada um
+  // identificado por um deviceId próprio e aleatório gerado uma vez e guardado local.
   var _lastPushRenew = 0;
   var PUSH_SUB_API_G = 'https://api.github.com/repos/ZyntraGlobal/zyntra-app/contents/push-sub.json';
+  function _getDeviceIdG() {
+    var id = localStorage.getItem('zg_device_id');
+    if (!id) { id = 'dev-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8); localStorage.setItem('zg_device_id', id); }
+    return id;
+  }
   function _salvarSubGitHubG(sub, forcar) {
     try {
       var mudou = localStorage.getItem('zg_push_ep') !== sub.endpoint;
@@ -154,11 +162,21 @@
       // Sem mudança de endpoint, republica mesmo assim 1x/dia — autocorreção caso o
       // arquivo remoto tenha ficado dessincronizado sem o endpoint em si ter mudado.
       if (!mudou && !forcar && (Date.now() - ultimaPub) < 86400000) return;
-      var b64 = btoa(unescape(encodeURIComponent(JSON.stringify(sub))));
+      var deviceId = _getDeviceIdG();
       var hh = { 'Authorization': 'Bearer ' + GH_TOKEN, 'Accept': 'application/vnd.github+json', 'User-Agent': 'ZyntraG-PWA', 'Content-Type': 'application/json' };
       fetch(PUSH_SUB_API_G, { headers: hh, cache: 'no-store' })
         .then(function(r) { return r.status === 404 ? null : r.json(); })
         .then(function(info) {
+          var lista = [];
+          try {
+            if (info && info.content) {
+              var atual = JSON.parse(decodeURIComponent(escape(atob(info.content.replace(/\n/g, '')))));
+              lista = Array.isArray(atual) ? atual : (atual && atual.endpoint ? [Object.assign({ deviceId: 'legacy' }, atual)] : []);
+            }
+          } catch(e) { lista = []; }
+          lista = lista.filter(function(s) { return s.deviceId !== deviceId; });
+          lista.push({ deviceId: deviceId, endpoint: sub.endpoint, keys: sub.keys, ua: (navigator.userAgent || '').slice(0, 80), updatedAt: Date.now() });
+          var b64 = btoa(unescape(encodeURIComponent(JSON.stringify(lista))));
           var payload = { message: 'update push subscription', content: b64 };
           if (info && info.sha) payload.sha = info.sha;
           return fetch(PUSH_SUB_API_G, { method: 'PUT', headers: hh, cache: 'no-store', body: JSON.stringify(payload) });
@@ -168,7 +186,8 @@
             localStorage.setItem('zg_push_ep', sub.endpoint);
             localStorage.setItem('zg_push_pub_ts', String(Date.now()));
           } else {
-            // Falha no PUT — tenta de novo em 30s em vez de esperar o próximo ciclo de 20min
+            // Falha no PUT (ex: SHA desatualizado por outro aparelho salvando ao mesmo
+            // tempo) — tenta de novo em 30s, refazendo o merge com o estado mais recente
             setTimeout(function() { _salvarSubGitHubG(sub, true); }, 30000);
           }
         })
