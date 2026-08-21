@@ -1522,6 +1522,19 @@ function _assinarPushG(){
     });
   });
 }
+// Botão "🔄 Renovar Push": além do relay ntfy (_assinarPushG, instantâneo mas expira em
+// 12h), publica de verdade no push-sub.json do GitHub via window._forcarRenovarPushG
+// (exposta pelo web-sync.js) — é essa parte que o desktop realmente lê pra mandar push.
+function _renovarPushBtnG(){
+  _assinarPushG();
+  if(window._forcarRenovarPushG){
+    window._forcarRenovarPushG().then(function(ok){
+      _notif(ok?'🔄 Push renovado':'⚠️ Falha ao renovar',ok?'Assinatura publicada no GitHub e no relay':'Verifique se as notificações estão permitidas',ok?'grn':'red');
+    });
+  }else{
+    _notif('🔄 Push renovado','Assinatura atualizada no relay','grn');
+  }
+}
 
 function pNotifG(){
   var tem=('Notification' in window);
@@ -1541,7 +1554,7 @@ function pNotifG(){
     } else {
       // Já ativado — assina push automaticamente em background
       _assinarPushG();
-      h+='<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn" onclick="notifTestarG()">📤 Enviar teste</button><button class="btn" onclick="notifChecarG()">🔍 Verificar alertas</button><button class="btn" onclick="_assinarPushG();_notif(\'🔄 Push renovado\',\'Assinatura atualizada no relay\',\'grn\')">🔄 Renovar push</button></div>';
+      h+='<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn" onclick="notifTestarG()">📤 Enviar teste</button><button class="btn" onclick="notifChecarG()">🔍 Verificar alertas</button><button class="btn" onclick="_renovarPushBtnG()">🔄 Renovar push</button></div>';
     }
     h+='</div>';
   }
