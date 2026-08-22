@@ -2462,7 +2462,7 @@
   "nRtu": 13,
   "nPag": 100,
   "nMov": 28,
-  "_savedAt": 1787395214038,
+  "_savedAt": 1787397780666,
   "fornecedores": [
     {
       "id": 6,
@@ -3712,9 +3712,17 @@
       "data": "22/08/2026",
       "status": "Aguardando",
       "dataCaiu": ""
+    },
+    {
+      "id": 11,
+      "plataforma": "Amazon",
+      "valor": 2604.99,
+      "data": "22/08/2026",
+      "status": "Aguardando",
+      "dataCaiu": ""
     }
   ],
-  "nSaque": 11,
+  "nSaque": 12,
   "usuarios": [
     {
       "id": 1,
