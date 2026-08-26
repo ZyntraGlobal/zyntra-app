@@ -1,11 +1,34 @@
 // Roda via GitHub Actions (agendado) — manda notificação push avisando sobre
 // pendências vencidas ou urgentes, independente do desktop ou iPhone estarem ligados.
-const fs = require('fs');
-const path = require('path');
 const webpush = require('web-push');
 
 const VAPID_PUBLIC = process.env.VAPID_PUBLIC_KEY;
 const VAPID_PRIVATE = process.env.VAPID_PRIVATE_KEY;
+const GH_DATA_TOKEN = process.env.GH_DATA_TOKEN;
+const DATA_REPO = 'ZyntraGlobal/zyntra-app-data';
+
+async function ghGetJSON(caminho) {
+  const r = await fetch('https://api.github.com/repos/' + DATA_REPO + '/contents/' + caminho, {
+    headers: { 'Authorization': 'Bearer ' + GH_DATA_TOKEN, 'Accept': 'application/vnd.github+json' }
+  });
+  if (r.status === 404) return { json: null, sha: null };
+  if (!r.ok) throw new Error('Falha ao ler ' + caminho + ' (' + r.status + ')');
+  const info = await r.json();
+  const json = JSON.parse(Buffer.from(info.content, 'base64').toString('utf8'));
+  return { json, sha: info.sha };
+}
+
+async function ghPutJSON(caminho, obj, sha, mensagem) {
+  const content = Buffer.from(JSON.stringify(obj, null, 2) + '\n').toString('base64');
+  const body = { message: mensagem, content };
+  if (sha) body.sha = sha;
+  const r = await fetch('https://api.github.com/repos/' + DATA_REPO + '/contents/' + caminho, {
+    method: 'PUT',
+    headers: { 'Authorization': 'Bearer ' + GH_DATA_TOKEN, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  if (!r.ok) throw new Error('Falha ao gravar ' + caminho + ' (' + r.status + '): ' + await r.text());
+}
 
 // Título tem que caber numa linha só (o iOS corta e não expande sozinho na
 // tela de bloqueio) — detalhes (títulos das pendências) vão no corpo.
@@ -18,7 +41,7 @@ const FRASES = [
 // Horário-alvo (hora cheia, BRT) em que a notificação deve disparar.
 // O workflow roda a cada 15 min — isso aqui decide SE é a hora certa.
 const HORAS_ALVO = [8];
-const STATE_PATH = path.join(__dirname, '..', 'notif-state-pendencias.json');
+const STATE_FILE = 'notif-state-pendencias.json';
 
 function hojeBRT() {
   const now = new Date();
@@ -30,14 +53,6 @@ function hojeStr() {
   const h = hojeBRT();
   const pad = n => String(n).padStart(2, '0');
   return pad(h.dia) + '/' + pad(h.mes) + '/' + h.ano;
-}
-
-function lerState() {
-  try { return JSON.parse(fs.readFileSync(STATE_PATH, 'utf8')); } catch (e) { return {}; }
-}
-
-function salvarState(state) {
-  fs.writeFileSync(STATE_PATH, JSON.stringify(state, null, 2) + '\n');
 }
 
 function diasEmAberto(dataStr) {
@@ -62,12 +77,8 @@ async function main() {
     console.log('VAPID keys não configuradas (secrets ausentes) — abortando.');
     return;
   }
-
-  const dataPath = path.join(__dirname, '..', 'data.json');
-  const subPath = path.join(__dirname, '..', 'push-sub.json');
-
-  if (!fs.existsSync(dataPath) || !fs.existsSync(subPath)) {
-    console.log('data.json ou push-sub.json não encontrado — abortando.');
+  if (!GH_DATA_TOKEN) {
+    console.log('GH_DATA_TOKEN não configurado (secret ausente) — abortando.');
     return;
   }
 
@@ -80,7 +91,8 @@ async function main() {
   // no próximo run que rodar (evita perder o dia inteiro por causa do atraso).
   const disparoManual = process.env.GITHUB_EVENT_NAME === 'workflow_dispatch';
   const passados = HORAS_ALVO.filter(h => h <= agora.hora);
-  const state = lerState();
+  const { json: stateAtual, sha: stateSha } = await ghGetJSON(STATE_FILE);
+  const state = stateAtual || {};
   const enviadosHoje = state.dia === hoje ? (state.enviados || []) : [];
   const faltando = passados.filter(h => !enviadosHoje.includes(h));
   if (faltando.length === 0 && !disparoManual) {
@@ -88,11 +100,11 @@ async function main() {
     return;
   }
 
-  const dados = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
-  // push-sub.json agora é uma lista (um app pode estar em vários aparelhos) — compatível
-  // com o formato antigo (objeto único) tratando como lista de 1 item.
-  const subRaw = JSON.parse(fs.readFileSync(subPath, 'utf8'));
-  const subs = Array.isArray(subRaw) ? subRaw : (subRaw && subRaw.endpoint ? [subRaw] : []);
+  const { json: dados } = await ghGetJSON('data.json');
+  const { json: subRaw } = await ghGetJSON('push-sub.json');
+  if (!dados) { console.log('data.json não encontrado no repositório de dados — abortando.'); return; }
+  const listaCompleta = Array.isArray(subRaw) ? subRaw : (subRaw && subRaw.endpoint ? [subRaw] : []);
+  const subs = listaCompleta.filter(s => s.role === 'dono' || !s.role);
 
   const pendencias = dados.pendencias || [];
   const abertas = pendencias.filter(p => p.status === 'Aberta' || p.status === 'Em Andamento');
@@ -135,7 +147,7 @@ async function main() {
   }
   if (okCount > 0) {
     console.log('Push enviado com sucesso (' + okCount + '/' + subs.length + ' aparelhos):', titulo);
-    salvarState({ dia: hoje, enviados: passados });
+    await ghPutJSON(STATE_FILE, { dia: hoje, enviados: passados }, stateSha, 'Atualiza estado da notificacao').catch(e => console.log('Aviso: falha ao salvar estado:', e.message));
   } else {
     process.exitCode = 1;
   }
