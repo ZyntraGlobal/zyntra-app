@@ -83,9 +83,8 @@ self.addEventListener('fetch', e => {
 // ── Autocorreção de subscription — roda dentro do Service Worker, então funciona
 // mesmo com o app fechado (o gargalo original era depender do app reaberto em
 // primeiro plano pra detectar/republicar uma subscription trocada ou dessincronizada).
-const GH_TOKEN_SW = 'gho_pxYKZ3' + 'ODVXqH70zN9V0dIsBkqjMlUs2ID4k2';
 const VAPID_PUBLIC_SW = 'BBhENPjxNvUjD-1ug7UJMdfnWJU3AvpBunQKj8dR_JNlr0J3_RFKCpRVEBbrmKIK6J_E9aCSv4y3thL_R0xMONE';
-const PUSH_SUB_API_SW = 'https://api.github.com/repos/ZyntraGlobal/zyntra-app/contents/push-sub.json';
+const PUSH_RELAY_URL = 'https://zyntra-push-relay.nameless-bonus-004f.workers.dev/subscribe';
 
 function _urlB64ToUint8SW(b) {
   const p = '='.repeat((4 - b.length % 4) % 4);
@@ -96,33 +95,16 @@ function _urlB64ToUint8SW(b) {
   return o;
 }
 
-// Igual _salvarSubGitHubG do web-sync.js, mas rodando dentro do Service Worker (sem
-// acesso a localStorage, então identifica "qual entrada é minha" pelo endpoint em vez
-// de um deviceId persistido). Mantém a mesma lista/array — nunca sobrescreve com objeto
-// único, senão apaga o registro dos outros aparelhos toda vez que uma notificação chega.
+// Publica a subscription através do relay (Cloudflare Worker) em vez de escrever
+// direto no GitHub — o token de escrita fica só no relay, nunca aqui no código que
+// o navegador baixa. Ver /Users/felipehorbatey/zyntra/push-relay.
 function _publicarSubGitHubSW(sub) {
   const subJson = sub.toJSON ? sub.toJSON() : sub; // .keys só existe via toJSON()
-  const hh = { 'Authorization': 'Bearer ' + GH_TOKEN_SW, 'Accept': 'application/vnd.github+json', 'User-Agent': 'ZyntraG-PWA', 'Content-Type': 'application/json' };
-  return fetch(PUSH_SUB_API_SW, { headers: hh, cache: 'no-store' })
-    .then(r => r.status === 404 ? null : r.json())
-    .then(info => {
-      let lista = [];
-      try {
-        if (info && info.content) {
-          const atual = JSON.parse(decodeURIComponent(escape(atob(info.content.replace(/\n/g, '')))));
-          lista = Array.isArray(atual) ? atual : (atual && atual.endpoint ? [Object.assign({ deviceId: 'legacy' }, atual)] : []);
-        }
-      } catch(e) { lista = []; }
-      const existente = lista.find(s => s.endpoint === subJson.endpoint);
-      const deviceId = existente ? existente.deviceId : ('sw-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8));
-      lista = lista.filter(s => s.endpoint !== subJson.endpoint);
-      lista.push({ deviceId: deviceId, endpoint: subJson.endpoint, keys: subJson.keys, ua: 'sw-self-heal', updatedAt: Date.now() });
-      const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(lista))));
-      const payload = { message: 'update push subscription (sw)', content: b64 };
-      if (info && info.sha) payload.sha = info.sha;
-      return fetch(PUSH_SUB_API_SW, { method: 'PUT', headers: hh, cache: 'no-store', body: JSON.stringify(payload) });
-    })
-    .catch(() => {});
+  return fetch(PUSH_RELAY_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ app: 'gestao', subscription: { endpoint: subJson.endpoint, keys: subJson.keys } })
+  }).catch(() => {});
 }
 
 // O navegador trocou a subscription sozinho (ex: expirou) — reinscreve e republica
