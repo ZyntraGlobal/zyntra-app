@@ -104,9 +104,15 @@
       let local = null;
       try { local = JSON.parse(localStorage.getItem(CHAVE)); } catch(e) {}
 
+      // Filtrar pra funcionário não muda o _savedAt (é o mesmo dado, só com campos
+      // a menos) — então trocar de usuário no mesmo aparelho (ex: colab → felipe)
+      // sem o papel mudar o timestamp fazia o dono continuar vendo a versão
+      // filtrada presa no aparelho. Por isso o papel da sessão também invalida o
+      // cache, não só a hora.
       const tRemoto = remoto._savedAt || 0;
       const tLocal  = local ? (local._savedAt || 0) : 0;
-      if (tRemoto <= tLocal) {
+      const papelMudou = local && local._papel && local._papel !== sess.role;
+      if (tRemoto <= tLocal && !papelMudou) {
         // Local é mais recente que GitHub — push automático (dados ficaram presos por falha anterior)
         if (tLocal > tRemoto && typeof _ghSalvarG === 'function' && typeof DB !== 'undefined' && DB && DB.produtos) {
           console.log('[ZyntraG] Auto-push: local mais recente que GitHub — enviando...');
@@ -116,7 +122,7 @@
       }
 
       const linhas = _diffGestao(local, remoto);
-      localStorage.setItem(CHAVE, JSON.stringify(remoto));
+      localStorage.setItem(CHAVE, JSON.stringify(Object.assign({}, remoto, { _papel: sess.role })));
       localStorage.removeItem('zg_lock');
 
       if (linhas && linhas.length > 0) {
