@@ -35,6 +35,9 @@ jobs:
             echo "Nada novo pra salvar."
           else
             git commit -m "Atualiza estado da notificacao de investido"
-            git pull --rebase origin main
-            git push
+            for i in 1 2 3 4 5; do
+              git pull --rebase origin main && git push && break
+              echo "Push rejeitado (outra execução concorrente) — tentativa $i, tentando de novo..."
+              sleep $((RANDOM % 6 + 2))
+            done
           fi
