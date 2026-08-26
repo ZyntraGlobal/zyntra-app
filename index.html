@@ -2874,7 +2874,9 @@ async function doLogin(){
       // Primeira carga de dados ANTES de esconder a tela de login — evita
       // mostrar por um instante o que estava desenhado por baixo antes dos
       // dados reais chegarem.
-      try{if(typeof window.forcarSincronizarG==='function')await window.forcarSincronizarG();}catch(e){}
+      // Nunca deixa uma sincronização lenta travar a tela de login pra sempre —
+      // no pior caso segue sem esperar, e o polling normal (10s) resolve depois.
+      try{if(typeof window.forcarSincronizarG==='function')await Promise.race([window.forcarSincronizarG(),new Promise(function(r){setTimeout(r,6000);})]);}catch(e){}
       try{if(res.role==='funcionario'){ir('inicio');}else{pDash();}}catch(e){console.error('pDash error',e);}
       document.getElementById('login-bg').classList.add('hidden');
       _iniciarWatch();
@@ -2893,7 +2895,7 @@ async function doLogin(){
     err.textContent='Erro ao processar login. Verifique sua conexão e tente novamente.';
   }
 }
-function _expirar(){localStorage.removeItem('zg_sess');document.getElementById('login-bg').classList.remove('hidden');document.getElementById('li-pass').value='';var e=document.createElement('div');e.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#1a1917;border:1px solid var(--glb);color:var(--gold);padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;z-index:10000;box-shadow:0 8px 32px rgba(0,0,0,.5)';e.textContent='🔒 Sessão expirada. Faça login novamente.';document.body.appendChild(e);setTimeout(function(){e.remove();},4000);setTimeout(function(){var u=document.getElementById('li-user');if(u)u.focus();},200);}
+function _expirar(){localStorage.removeItem('zg_sess');if(window._zyntraAtualizacaoPendente){window.location.reload();return;}document.getElementById('login-bg').classList.remove('hidden');document.getElementById('li-pass').value='';var e=document.createElement('div');e.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#1a1917;border:1px solid var(--glb);color:var(--gold);padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;z-index:10000;box-shadow:0 8px 32px rgba(0,0,0,.5)';e.textContent='🔒 Sessão expirada. Faça login novamente.';document.body.appendChild(e);setTimeout(function(){e.remove();},4000);setTimeout(function(){var u=document.getElementById('li-user');if(u)u.focus();},200);}
 var _wt=null;function _iniciarWatch(){if(_wt)clearInterval(_wt);_wt=setInterval(function(){var raw=localStorage.getItem('zg_sess');if(!raw){_expirar();clearInterval(_wt);return;}try{var s=JSON.parse(raw);if(!s.until||Date.now()>=s.until){_expirar();clearInterval(_wt);}}catch(e){_expirar();clearInterval(_wt);}},60000);}
 function checkSessao(){localStorage.removeItem('zg_sess');var bg=document.getElementById('login-bg');if(bg)bg.classList.remove('hidden');setTimeout(function(){var u=document.getElementById('li-user');if(u)u.focus();_lgLock();},150);return false;}
 
@@ -3120,7 +3122,17 @@ checkSessao();
 if('serviceWorker' in navigator){
   navigator.serviceWorker.addEventListener('message', function(e){
     if(e.data && e.data.type === 'SW_UPDATED'){
-      window.location.reload();
+      // Recarregar na hora derrubaria uma sessão ativa (checkSessao() sempre exige
+      // login de novo ao abrir a página) e no PWA instalado do iOS um reload no meio
+      // do uso pode até tirar do modo app. Só recarrega imediatamente se a tela de
+      // login já está visível (ninguém no meio de nada); com sessão ativa, adia pro
+      // próximo momento seguro (expiração da sessão em _expirar()).
+      var bgSW = document.getElementById('login-bg');
+      if(bgSW && !bgSW.classList.contains('hidden')){
+        window.location.reload();
+      } else {
+        window._zyntraAtualizacaoPendente = true;
+      }
     }
     if(e.data && e.data.type === 'REFRESH_NOW'){
       // Chegou um push (alguém salvou algo) — sincroniza na hora, sem esperar
