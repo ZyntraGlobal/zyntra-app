@@ -71,11 +71,12 @@ async function main() {
   // em repos de baixa atividade) — em vez de exigir bater a hora exata, verifica
   // se algum horário-alvo já passou e ainda não foi notificado hoje, e recupera
   // no próximo run que rodar (evita perder o dia inteiro por causa do atraso).
+  const disparoManual = process.env.GITHUB_EVENT_NAME === 'workflow_dispatch';
   const passados = HORAS_ALVO.filter(h => h <= agora.hora);
   const state = lerState();
   const enviadosHoje = state.dia === hoje ? (state.enviados || []) : [];
   const faltando = passados.filter(h => !enviadosHoje.includes(h));
-  if (faltando.length === 0) {
+  if (faltando.length === 0 && !disparoManual) {
     console.log('Nenhum horário-alvo pendente ainda (hora atual: ' + agora.hora + 'h BRT).');
     return;
   }
