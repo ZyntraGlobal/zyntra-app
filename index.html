@@ -2813,7 +2813,12 @@ function _atualizarTelaComDadosNovos(){
     if(!papelMudouTela&&DB&&DB._savedAt&&novo._savedAt&&novo._savedAt<=DB._savedAt)return;
     DB=novo;
     if(typeof badges==='function')badges();
-    if(_curPage && typeof ir==='function') ir(_curPage,_curMes);
+    // Trocou de papel: a página atual pode não fazer sentido pro papel novo (ex:
+    // "Início" é a tela do funcionário — não existe pro dono). Manda pra tela
+    // padrão de cada papel em vez de insistir na página de antes da troca.
+    if(papelMudouTela){
+      try{ ir(novo._papel==='funcionario'?'inicio':'dash'); }catch(e){}
+    } else if(_curPage && typeof ir==='function') ir(_curPage,_curMes);
   }catch(e){}
 }
 window.addEventListener('zyntra-sync', _atualizarTelaComDadosNovos);
@@ -2884,7 +2889,7 @@ async function doLogin(){
       // Nunca deixa uma sincronização lenta travar a tela de login pra sempre —
       // no pior caso segue sem esperar, e o polling normal (10s) resolve depois.
       try{if(typeof window.forcarSincronizarG==='function')await Promise.race([window.forcarSincronizarG(),new Promise(function(r){setTimeout(r,6000);})]);}catch(e){}
-      try{if(res.role==='funcionario'){ir('inicio');}else{pDash();}}catch(e){console.error('pDash error',e);}
+      try{ir(res.role==='funcionario'?'inicio':'dash');}catch(e){console.error('pDash error',e);}
       document.getElementById('login-bg').classList.add('hidden');
       _iniciarWatch();
       // Renova push subscription ao fazer login
