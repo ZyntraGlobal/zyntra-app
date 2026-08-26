@@ -1,4 +1,4 @@
-const CACHE = 'zyntra-app-v45';
+const CACHE = 'zyntra-app-v46';
 // index.html e web-sync.js FORA do cache — sempre baixa o mais recente da internet
 const ASSETS = [
   'mobile.css',
@@ -142,7 +142,11 @@ self.addEventListener('push', e => {
       }),
       // A cada push recebido, confirma que a subscription publicada no GitHub é a
       // mesma que está ativa aqui — corrige qualquer dessincronia silenciosa.
-      self.registration.pushManager.getSubscription().then(sub => sub && _publicarSubGitHubSW(sub)).catch(() => {})
+      self.registration.pushManager.getSubscription().then(sub => sub && _publicarSubGitHubSW(sub)).catch(() => {}),
+      // Avisa qualquer aba/app aberto pra sincronizar na hora — sem isso, quem já
+      // está com o app aberto só veria a mudança no próximo ciclo de 10s.
+      self.clients.matchAll({ type: 'window', includeUncontrolled: true })
+        .then(cls => cls.forEach(c => c.postMessage({ type: 'REFRESH_NOW' })))
     ])
   );
 });

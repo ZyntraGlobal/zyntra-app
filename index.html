@@ -3102,6 +3102,12 @@ if('serviceWorker' in navigator){
     if(e.data && e.data.type === 'SW_UPDATED'){
       window.location.reload();
     }
+    if(e.data && e.data.type === 'REFRESH_NOW'){
+      // Chegou um push (alguém salvou algo) — sincroniza na hora, sem esperar
+      // o ciclo normal de 10s. forcarSincronizarG já redesenha a tela sozinho
+      // (evento 'zyntra-sync') se algo realmente mudou.
+      try{if(typeof window.forcarSincronizarG==='function')window.forcarSincronizarG();}catch(e){}
+    }
   });
   navigator.serviceWorker.register('sw.js').then(function(reg){
     reg.update();
