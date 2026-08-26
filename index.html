@@ -2806,7 +2806,11 @@ function _atualizarTelaComDadosNovos(){
     var mbg=document.getElementById('mbg');
     if(mbg&&mbg.classList.contains('open')){window._pendingSyncApply=true;return;}
     var novo=loadDB();
-    if(DB&&DB._savedAt&&novo._savedAt&&novo._savedAt<=DB._savedAt)return;
+    // Trocar de papel no mesmo aparelho (funcionário -> dono) não muda o
+    // _savedAt (é o mesmo dado, só com campos a menos) — sem essa exceção, o
+    // dono ficava preso vendo a versão cortada porque o guard achava "nada mudou".
+    var papelMudouTela=novo._papel&&DB&&DB._papel&&novo._papel!==DB._papel;
+    if(!papelMudouTela&&DB&&DB._savedAt&&novo._savedAt&&novo._savedAt<=DB._savedAt)return;
     DB=novo;
     if(typeof badges==='function')badges();
     if(_curPage && typeof ir==='function') ir(_curPage,_curMes);
