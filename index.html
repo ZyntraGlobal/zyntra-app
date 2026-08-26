@@ -599,9 +599,12 @@ function badges(){
   var alertas=DB.produtos.filter(function(p){return p.qty>0&&p.qty<=p.min;}).length;
   var ba=document.getElementById('b-alert');
   if(ba){ba.textContent=alertas;ba.style.display=alertas>0?'inline':'none';}
-  // Pagamentos
+  // Pagamentos — DB.pag nunca chega pro funcionário (dado de pagamentos da
+  // empresa, fica só com o dono) — sem essa checagem, badges() quebrava aqui
+  // e travava a tela toda vez que o funcionário salvava qualquer coisa,
+  // porque essa função roda logo depois de save() em todo lugar.
   for(var m=1;m<=12;m++){
-    var arr=(DB.pag[m-1]||[]);
+    var arr=((DB.pag||[])[m-1]||[]);
     var el=document.getElementById('p'+m);
     if(el){el.textContent=arr.length;el.style.display=arr.length>0?'inline':'none';}
   }
