@@ -1097,7 +1097,13 @@ function pEstMov(){
   h+='</tbody></table></div></div>';
   setPage(h);
 }
-function delMov(id){if(!confirm('Remover movimentação?'))return;DB.mov=DB.mov.filter(function(m){return m.id!==id;});save();pEstMov();}
+// window.confirm() não funciona em app instalado (PWA standalone) no iOS — usa
+// o modal próprio do sistema em vez do diálogo nativo do navegador.
+function delMov(id){
+  abrirM('Confirmar exclusão','<div style="font-size:14px;color:var(--t2)">Remover movimentação?</div>',function(){
+    DB.mov=DB.mov.filter(function(m){return m.id!==id;});save();fecharM();pEstMov();
+  });
+}
 
 // ── ESTOQUE ALERTAS ───────────────────────────────────
 function pEstAlertas(){
@@ -1305,7 +1311,11 @@ function editPag(mes,idx){
     DB.pag[mes-1][idx]=d;save();badges();fecharM();pPag(mes);
   },true);
 }
-function delPag(mes,idx){if(!confirm('Excluir este pagamento?'))return;DB.pag[mes-1].splice(idx,1);save();badges();pPag(mes);}
+function delPag(mes,idx){
+  abrirM('Confirmar exclusão','<div style="font-size:14px;color:var(--t2)">Excluir este pagamento?</div>',function(){
+    DB.pag[mes-1].splice(idx,1);save();badges();fecharM();pPag(mes);
+  });
+}
 
 // ── RTU ───────────────────────────────────────────────
 var _filtroRtu={busca:'',mes:0};
@@ -1421,7 +1431,11 @@ function editRtu(id){
     save();fecharM();pRtuLanc();
   },true);
 }
-function delRtu(id){if(!confirm('Excluir lançamento?'))return;DB.rtu=DB.rtu.filter(function(x){return x.id!==id;});save();badges();pRtuLanc();}
+function delRtu(id){
+  abrirM('Confirmar exclusão','<div style="font-size:14px;color:var(--t2)">Excluir lançamento?</div>',function(){
+    DB.rtu=DB.rtu.filter(function(x){return x.id!==id;});save();badges();fecharM();pRtuLanc();
+  });
+}
 
 // ── RTU RESUMO ────────────────────────────────────────
 function pRtuResumo(){
@@ -1796,9 +1810,10 @@ function editForn(id){
 function delForn(id){
   if(!DB.fornecedores)return;
   var f=DB.fornecedores.find(function(x){return x.id===id;});if(!f)return;
-  if(!confirm('Excluir o fornecedor "'+f.nome+'"?\n\nEsta ação não pode ser desfeita.'))return;
+  abrirM('Confirmar exclusão','<div style="font-size:14px;color:var(--t2)">Excluir o fornecedor "'+f.nome+'"?<br><br>Esta ação não pode ser desfeita.</div>',function(){
   DB.fornecedores=DB.fornecedores.filter(function(x){return x.id!==id;});
-  save();badges();pFornecedores();
+  save();badges();fecharM();pFornecedores();
+  });
 }
 
 // ── COMPRAS ───────────────────────────────────────────
@@ -2309,9 +2324,10 @@ function editCompra(id){
 function delCompra(id){
   if(!DB.compras)return;
   var c=DB.compras.find(function(x){return x.id===id;});if(!c)return;
-  if(!confirm('Excluir o item "'+c.produto+'" da lista de compras?\n\nEsta ação não pode ser desfeita.'))return;
-  DB.compras=DB.compras.filter(function(x){return x.id!==id;});
-  save();badges();pCompras();
+  abrirM('Confirmar exclusão','<div style="font-size:14px;color:var(--t2)">Excluir o item "'+c.produto+'" da lista de compras?<br><br>Esta ação não pode ser desfeita.</div>',function(){
+    DB.compras=DB.compras.filter(function(x){return x.id!==id;});
+    save();badges();fecharM();pCompras();
+  });
 }
 
 function avancarStatusCompra(id){
@@ -2593,9 +2609,10 @@ function editPendencia(id){
 function delPendencia(id){
   if(!DB.pendencias)return;
   var p=DB.pendencias.find(function(x){return x.id===id;});if(!p)return;
-  if(!confirm('Excluir a pendência "'+p.titulo+'"?\n\nEsta ação não pode ser desfeita.'))return;
-  DB.pendencias=DB.pendencias.filter(function(x){return x.id!==id;});
-  save();badges();pPendencias();
+  abrirM('Confirmar exclusão','<div style="font-size:14px;color:var(--t2)">Excluir a pendência "'+p.titulo+'"?<br><br>Esta ação não pode ser desfeita.</div>',function(){
+    DB.pendencias=DB.pendencias.filter(function(x){return x.id!==id;});
+    save();badges();fecharM();pPendencias();
+  });
 }
 
 // ── MARKETPLACES — SALDO EM CONTA + SAQUES ────────────
@@ -2747,17 +2764,19 @@ function modalAddSaque(){
 function confirmarSaque(id){
   if(!DB.saques)return;
   var s=DB.saques.find(function(x){return x.id===id;});if(!s)return;
-  if(!confirm('Confirmar que o saque de '+R(s.valor)+' ('+s.plataforma+') já caiu na conta bancária?'))return;
-  s.status='Caiu';s.dataCaiu=hoje();
-  save();pMarketplaces();
+  abrirM('Confirmar saque','<div style="font-size:14px;color:var(--t2)">Confirmar que o saque de '+R(s.valor)+' ('+s.plataforma+') já caiu na conta bancária?</div>',function(){
+    s.status='Caiu';s.dataCaiu=hoje();
+    save();fecharM();pMarketplaces();
+  });
 }
 
 function delSaque(id){
   if(!DB.saques)return;
   var s=DB.saques.find(function(x){return x.id===id;});if(!s)return;
-  if(!confirm('Excluir o lançamento de saque de '+R(s.valor)+' ('+s.plataforma+')?\n\nEsta ação não pode ser desfeita.'))return;
-  DB.saques=DB.saques.filter(function(x){return x.id!==id;});
-  save();pMarketplaces();
+  abrirM('Confirmar exclusão','<div style="font-size:14px;color:var(--t2)">Excluir o lançamento de saque de '+R(s.valor)+' ('+s.plataforma+')?<br><br>Esta ação não pode ser desfeita.</div>',function(){
+    DB.saques=DB.saques.filter(function(x){return x.id!==id;});
+    save();fecharM();pMarketplaces();
+  });
 }
 
 function notifChecarG(){
@@ -2971,9 +2990,10 @@ function toggleAtivoUsuario(id){
 }
 function delUsuario(id){
   var u=(DB.usuarios||[]).find(function(x){return x.id===id;});if(!u)return;
-  if(!confirm('Excluir o usuário "'+u.nome+'" ('+u.login+')?\n\nEsta ação não pode ser desfeita.'))return;
-  DB.usuarios=DB.usuarios.filter(function(x){return x.id!==id;});
-  save();pUsuarios();
+  abrirM('Confirmar exclusão','<div style="font-size:14px;color:var(--t2)">Excluir o usuário "'+u.nome+'" ('+u.login+')?<br><br>Esta ação não pode ser desfeita.</div>',function(){
+    DB.usuarios=DB.usuarios.filter(function(x){return x.id!==id;});
+    save();fecharM();pUsuarios();
+  });
 }
 
 // ── INIT ──────────────────────────────────────────────
