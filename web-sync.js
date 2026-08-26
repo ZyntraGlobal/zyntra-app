@@ -2,12 +2,20 @@
   if (typeof process !== 'undefined' && process.versions && process.versions.electron) return;
 
   const CHAVE    = 'zyntra_gestao_v1';
-  // Só leitura — seguro exposto, o repositório é público (só evita o limite de 60 req/hora sem token).
-  const GH_TOKEN = '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';
-  // Escrita: sempre pelo relay (Cloudflare Worker) — nunca com token direto no navegador.
+  // Leitura e escrita passam pelo relay, autenticadas com o token de sessão do
+  // login — o navegador não fala mais direto com o GitHub.
   const PUSH_RELAY_URL = 'https://zyntra-push-relay.nameless-bonus-004f.workers.dev';
-  const API_URL  = 'https://api.github.com/repos/ZyntraGlobal/zyntra-app/contents/data.json';
   const R = v => 'R$ ' + Number(v || 0).toFixed(2).replace('.', ',');
+
+  function _sessaoWS() {
+    try { return JSON.parse(localStorage.getItem('zg_sess') || '{}'); } catch(e) { return {}; }
+  }
+  function _avisarTokenSW() {
+    var tok = _sessaoWS().token;
+    if (tok && navigator.serviceWorker && navigator.serviceWorker.controller) {
+      navigator.serviceWorker.controller.postMessage({ type: 'SESSION_TOKEN', token: tok });
+    }
+  }
   const MESES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 
   async function _notifSync(titulo, linhas) {
@@ -77,23 +85,20 @@
 
   async function sincronizar() {
     try {
+      const sess = _sessaoWS();
+      if (!sess.token) return false;
+
       // AbortController: evita travar pra sempre numa rede lenta/instável
       const ctrl = new AbortController();
       const to = setTimeout(() => ctrl.abort(), 10000);
-      const resp = await fetch(API_URL, {
+      const resp = await fetch(PUSH_RELAY_URL + '/data?app=gestao', {
         signal: ctrl.signal,
-        headers: {
-          'Authorization': 'Bearer ' + GH_TOKEN,
-          'Accept': 'application/vnd.github+json',
-          'User-Agent': 'ZyntraG-PWA'
-        }
+        headers: { 'Authorization': 'Bearer ' + sess.token }
       }).finally(() => clearTimeout(to));
+      if (resp.status === 401) { try { if (typeof window._expirar === 'function') window._expirar(); } catch(e) {} return false; }
       if (!resp.ok) return false;
-      const info = await resp.json();
-      if (!info.content) return false;
-
-      const bytes  = Uint8Array.from(atob(info.content.replace(/\n/g, '')), c => c.charCodeAt(0));
-      const remoto = JSON.parse(new TextDecoder().decode(bytes));
+      const body = await resp.json();
+      const remoto = body && body.data;
       if (!remoto || !remoto.produtos) return false;
 
       let local = null;
@@ -164,8 +169,10 @@
       // (só endpoint tem getter), as chaves só saem via .toJSON(). Sem isso, a
       // subscription salva ficava sem "keys" e o push falhava silenciosamente.
       var subJson = sub.toJSON ? sub.toJSON() : sub;
+      var _tok = _sessaoWS().token;
+      if (!_tok) return;
       fetch(PUSH_RELAY_URL + '/subscribe', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + _tok },
         body: JSON.stringify({ app: 'gestao', subscription: { endpoint: sub.endpoint, keys: subJson.keys } })
       }).then(function(r) {
         if (r && r.ok) {
@@ -178,6 +185,7 @@
     } catch(e) {}
   }
   function _renewPushG() {
+    _avisarTokenSW();
     if (!('serviceWorker' in navigator) || !('Notification' in window) || Notification.permission !== 'granted') return;
     var now = Date.now();
     if (now - _lastPushRenew < 1200000) return; // a cada 20 min

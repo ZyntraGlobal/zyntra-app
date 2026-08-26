@@ -474,10 +474,8 @@ function _pontoRep(p){return Math.ceil((p.vendas30/30)*(p.leadTime||7));}
 // ── Salvar no GitHub (iPhone/PWA) ─────────────────────────
 // Leitura: token só de leitura, seguro pra ficar exposto (o repositório já é público —
 // isso só serve pra evitar o limite de 60 req/hora sem autenticação, sem risco de escrita).
-var _GH_G_READONLY_TOKEN = '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';
-var _GH_G_REPO  = 'ZyntraGlobal/zyntra-app';
-// Escrita: nunca direto no navegador — sempre pelo relay (Cloudflare Worker), que guarda
-// o token de escrita do lado do servidor. Ver /Users/felipehorbatey/zyntra/push-relay.
+// Leitura e escrita passam pelo relay, autenticadas com o token de sessão do
+// login — o navegador não fala mais direto com o GitHub.
 var _PUSH_RELAY_URL = 'https://zyntra-push-relay.nameless-bonus-004f.workers.dev';
 
 function _pushSWNotif(titulo, corpo){
@@ -527,9 +525,11 @@ function _ghSalvarG(){
   // salvando ao mesmo tempo) agora acontece do lado do servidor, dentro do relay.
   // resumo: enviado junto pra virar o corpo do push instantâneo pros outros aparelhos.
   var _resumoParaPush=_resumoSalvo(_antes||{},DB);
-  fetch(_PUSH_RELAY_URL+'/save-data',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({app:'gestao',data:DB,resumo:{titulo:'Zyntra Gestão — atualizado',corpo:_resumoParaPush}})})
+  var _tokenSessao=_sessaoAtual().token;
+  fetch(_PUSH_RELAY_URL+'/save-data',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+_tokenSessao},body:JSON.stringify({app:'gestao',data:DB,resumo:{titulo:'Zyntra Gestão — atualizado',corpo:_resumoParaPush}})})
     .then(function(r){return r.json().then(function(j){return{status:r.status,ok:r.ok,j:j};});})
     .then(function(res){
+      if(res.status===401){try{_expirar();}catch(e){}throw new Error('Sessão expirada');}
       if(!res.ok||!res.j||!res.j.ok)throw new Error((res.j&&res.j.error)||('HTTP_'+res.status));
       DB._savedAt=res.j._savedAt;
       try{localStorage.setItem('zyntra_gestao_v1',JSON.stringify(DB));}catch(e){}
@@ -652,8 +652,9 @@ function ir(tipo,arg,el){
 
 // ── INÍCIO DO FUNCIONÁRIO — atalhos pro que ele tem liberado ──
 function pInicioFunc(){
-  var u=_usuarioAtual();
-  var nome=(u&&u.nome)||'Colaborador';
+  var s=_sessaoAtual();
+  var u={nome:s.nome,paginas:s.paginas};
+  var nome=u.nome||'Colaborador';
   var basicos=[
     {tipo:'est_produtos',label:'Estoque',ico:'📦'},
     {tipo:'rtu_lanc',label:'Controle RTU',ico:'🏦'},
@@ -2815,19 +2816,17 @@ var PAGINAS_RESTRITAS=[
   {tipo:'marketplaces',label:'Marketplaces — Saldo & A Receber'},
   {tipo:'pag',label:'Pagamentos Empresa'}
 ];
-function _usuarioAtual(){
-  try{
-    var s=JSON.parse(localStorage.getItem('zg_sess')||'{}');
-    if(!s.user)return null;
-    return (DB.usuarios||[]).find(function(u){return u.login===s.user;})||null;
-  }catch(e){return null;}
+function _sessaoAtual(){
+  try{return JSON.parse(localStorage.getItem('zg_sess')||'{}');}catch(e){return {};}
 }
 function _paginaPermitida(tipo){
   if(!_isFuncionario())return true;
   var restrita=PAGINAS_RESTRITAS.some(function(p){return p.tipo===tipo;});
   if(!restrita)return true;
-  var u=_usuarioAtual();
-  return !!(u&&u.paginas&&u.paginas.indexOf(tipo)>=0);
+  // paginas vem do relay no login — a barreira de verdade é no servidor, isso
+  // aqui é só pra não desenhar uma tela que o usuário nem pode ver.
+  var s=_sessaoAtual();
+  return !!(s&&s.paginas&&s.paginas.indexOf(tipo)>=0);
 }
 function _bloqueadoFunc(){setPage('<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:60vh;gap:16px"><div style="font-size:48px">🔒</div><div style="font-size:16px;font-weight:700;color:var(--t)">Acesso Restrito</div><div style="font-size:13px;color:var(--t3);text-align:center">Esta seção é exclusiva do proprietário.</div></div>');}
 var _MAX_TENT=3,_LOCK_MS=2*60*1000;
@@ -2845,39 +2844,20 @@ async function doLogin(){
   if(!user||!pass){err.textContent='Preencha usuário e senha.';return;}
   btn.disabled=true;btn.textContent='Verificando...';
   try{
-    var hash=await sha256h(user+':'+pass+':'+_SALT);
-    var uReg=(DB.usuarios||[]).find(function(u){return u.login===user&&u.ativo!==false;});
-    var okDinamico=!!(uReg&&uReg.senhaHash===hash);
-    var okFixo=!!(_USERS[user]&&_USERS[user]===hash);
-    if(okDinamico||okFixo){
+    // Login validado no relay — nunca mais no navegador.
+    var resp=await fetch(_PUSH_RELAY_URL+'/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({app:'gestao',user:user,pass:pass})});
+    var res=await resp.json().catch(function(){return {};});
+    if(resp.ok&&res.ok){
       btn.textContent='✓ Entrando...';
       await new Promise(function(r){setTimeout(r,350);});
-      var role=okDinamico?'funcionario':(_ROLES[user]||'dono');
-      localStorage.setItem('zg_sess',JSON.stringify({user:user,role:role,until:Date.now()+4*60*60*1000}));
+      localStorage.setItem('zg_sess',JSON.stringify({user:user,role:res.role,paginas:res.paginas||[],nome:res.nome,token:res.token,until:Date.now()+4*60*60*1000}));
       document.getElementById('login-bg').classList.add('hidden');
       try{badges();}catch(e){}
-      try{if(role==='funcionario'){ir('inicio');}else{pDash();}}catch(e){console.error('pDash error',e);}
+      try{if(typeof window.forcarSincronizarG==='function')await window.forcarSincronizarG();}catch(e){}
+      try{if(res.role==='funcionario'){ir('inicio');}else{pDash();}}catch(e){console.error('pDash error',e);}
       _iniciarWatch();
       // Renova push subscription ao fazer login
       try{_assinarPushG();}catch(e){}
-      // Auto-push: se há dados no iPhone mais recentes que o GitHub, envia automaticamente
-      if(!window.zyntraElectron){setTimeout(function(){
-        try{
-          var local=JSON.parse(localStorage.getItem('zyntra_gestao_v1')||'{}');
-          if(!local||!local._savedAt||!local.produtos)return;
-          fetch('https://api.github.com/repos/'+_GH_G_REPO+'/contents/data.json',{headers:{'Authorization':'Bearer '+_GH_G_READONLY_TOKEN,'Accept':'application/vnd.github+json','User-Agent':'ZyntraG-PWA'},cache:'no-store'})
-            .then(function(r){return r.json();})
-            .then(function(info){
-              if(!info||!info.content)return;
-              var bytes=Uint8Array.from(atob(info.content.replace(/\n/g,'')),function(c){return c.charCodeAt(0);});
-              var rem=JSON.parse(new TextDecoder().decode(bytes));
-              if(local._savedAt>(rem._savedAt||0)){
-                console.log('[ZyntraG] Auto-push login: local mais recente — enviando para GitHub...');
-                _ghSalvarG();
-              }
-            }).catch(function(){});
-        }catch(e){}
-      },2000);}
     }else{
       btn.disabled=false;btn.textContent='ENTRAR NO SISTEMA';
       document.getElementById('li-pass').value='';
