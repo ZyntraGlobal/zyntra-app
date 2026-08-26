@@ -2851,10 +2851,13 @@ async function doLogin(){
       btn.textContent='✓ Entrando...';
       await new Promise(function(r){setTimeout(r,350);});
       localStorage.setItem('zg_sess',JSON.stringify({user:user,role:res.role,paginas:res.paginas||[],nome:res.nome,token:res.token,until:Date.now()+4*60*60*1000}));
-      document.getElementById('login-bg').classList.add('hidden');
       try{badges();}catch(e){}
+      // Primeira carga de dados ANTES de esconder a tela de login — evita
+      // mostrar por um instante o que estava desenhado por baixo antes dos
+      // dados reais chegarem.
       try{if(typeof window.forcarSincronizarG==='function')await window.forcarSincronizarG();}catch(e){}
       try{if(res.role==='funcionario'){ir('inicio');}else{pDash();}}catch(e){console.error('pDash error',e);}
+      document.getElementById('login-bg').classList.add('hidden');
       _iniciarWatch();
       // Renova push subscription ao fazer login
       try{_assinarPushG();}catch(e){}
