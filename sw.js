@@ -83,7 +83,7 @@ self.addEventListener('fetch', e => {
 // ── Autocorreção de subscription — roda dentro do Service Worker, então funciona
 // mesmo com o app fechado (o gargalo original era depender do app reaberto em
 // primeiro plano pra detectar/republicar uma subscription trocada ou dessincronizada).
-const VAPID_PUBLIC_SW = 'BBhENPjxNvUjD-1ug7UJMdfnWJU3AvpBunQKj8dR_JNlr0J3_RFKCpRVEBbrmKIK6J_E9aCSv4y3thL_R0xMONE';
+const VAPID_PUBLIC_SW = 'BITLfwTQwUU_BYIbbdEXYoUAEp7sy6iiL52Cn-GmnuljgI4F0cPgiT5xgjSM-uV33AIP9LvWf3QrsLR1CRvE-FQ';
 const PUSH_RELAY_URL = 'https://zyntra-push-relay.nameless-bonus-004f.workers.dev/subscribe';
 
 function _urlB64ToUint8SW(b) {

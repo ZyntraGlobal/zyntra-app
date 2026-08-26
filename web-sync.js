@@ -184,14 +184,28 @@
     _lastPushRenew = now;
     navigator.serviceWorker.ready.then(function(reg) {
       function urlB64(b){var p='='.repeat((4-b.length%4)%4);var s=(b+p).replace(/-/g,'+').replace(/_/g,'/');var r=window.atob(s);var o=new Uint8Array(r.length);for(var i=0;i<r.length;i++)o[i]=r.charCodeAt(i);return o;}
+      var chaveAtual = urlB64('BITLfwTQwUU_BYIbbdEXYoUAEp7sy6iiL52Cn-GmnuljgI4F0cPgiT5xgjSM-uV33AIP9LvWf3QrsLR1CRvE-FQ');
       var salvar = function(s){
         fetch('https://ntfy.sh/zyntra-sub-gestao-zg2026x',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(s)}).catch(function(){});
         _salvarSubGitHubG(s);
       };
+      // Se a chave VAPID mudou (rotação de chave), a subscription antiga fica inválida
+      // pro servidor — descarta e reinscreve com a chave nova, sem precisar de ação manual.
+      function chaveBate(sub){
+        try {
+          var atual = new Uint8Array(sub.options.applicationServerKey);
+          if (atual.length !== chaveAtual.length) return false;
+          for (var i=0;i<atual.length;i++) if (atual[i]!==chaveAtual[i]) return false;
+          return true;
+        } catch(e) { return true; }
+      }
       reg.pushManager.getSubscription().then(function(sub) {
-        if (sub) { salvar(sub); return; }
-        reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlB64('BBhENPjxNvUjD-1ug7UJMdfnWJU3AvpBunQKj8dR_JNlr0J3_RFKCpRVEBbrmKIK6J_E9aCSv4y3thL_R0xMONE') })
-          .then(salvar).catch(function(){});
+        if (sub && chaveBate(sub)) { salvar(sub); return; }
+        var refazer = function(){
+          reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: chaveAtual })
+            .then(salvar).catch(function(){});
+        };
+        if (sub) { sub.unsubscribe().then(refazer).catch(refazer); } else { refazer(); }
       });
     }).catch(function(){});
   }
@@ -225,7 +239,7 @@
     return navigator.serviceWorker.ready.then(function(reg) {
       return reg.pushManager.getSubscription().then(function(sub) {
         if (sub) { _salvarSubGitHubG(sub, true); return true; }
-        return reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlB64('BBhENPjxNvUjD-1ug7UJMdfnWJU3AvpBunQKj8dR_JNlr0J3_RFKCpRVEBbrmKIK6J_E9aCSv4y3thL_R0xMONE') })
+        return reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlB64('BITLfwTQwUU_BYIbbdEXYoUAEp7sy6iiL52Cn-GmnuljgI4F0cPgiT5xgjSM-uV33AIP9LvWf3QrsLR1CRvE-FQ') })
           .then(function(sub2) { _salvarSubGitHubG(sub2, true); return true; }).catch(function() { return false; });
       });
     }).catch(function() { return false; });
