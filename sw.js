@@ -1,4 +1,4 @@
-const CACHE = 'zyntra-app-v44';
+const CACHE = 'zyntra-app-v45';
 // index.html e web-sync.js FORA do cache — sempre baixa o mais recente da internet
 const ASSETS = [
   'mobile.css',
@@ -34,8 +34,10 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   const url = e.request.url;
 
-  // Requisições ao GitHub API e externas: NUNCA interceptar — passa direto
-  if (url.includes('api.github.com') || url.includes('ntfy.sh') || url.includes('googleapis.com/oauth')) {
+  // Requisições ao GitHub API, ao relay (dados reais/login/notificação) e
+  // externas: NUNCA interceptar nem cachear — sempre direto da rede. Sem isso,
+  // a resposta de /data ficava presa em cache e nunca mais era atualizada.
+  if (url.includes('api.github.com') || url.includes('ntfy.sh') || url.includes('googleapis.com/oauth') || url.includes('zyntra-push-relay')) {
     return;
   }
 
