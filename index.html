@@ -3083,7 +3083,11 @@ checkSessao();
 <script>
 (function(){
   function isMob(){ return window.innerWidth <= 768; }
-  function showNav(){ if(isMob()){ document.getElementById('mob-nav').style.display='flex'; } }
+  // Reavalia nos dois sentidos — antes só ligava o menu mobile e nunca desligava,
+  // então se a primeira medição da janela (ex: no app nativo do Mac, antes da
+  // janela terminar de abrir) pegasse um valor pequeno, o menu ficava preso
+  // ligado pra sempre mesmo com a janela grande depois.
+  function showNav(){ document.getElementById('mob-nav').style.display = isMob() ? 'flex' : 'none'; }
   
   window.mobIr = function(sec) {
     document.querySelectorAll('.mob-nav-btn').forEach(b=>b.classList.remove('on'));
