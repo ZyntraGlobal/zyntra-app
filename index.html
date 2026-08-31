@@ -558,7 +558,9 @@ function _ghSalvarG(_antes){
       var ts=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
       if(el){el.textContent='✅ Salvo '+ts;el.style.color='var(--grn)';el.style.background='rgba(74,222,128,.15)';el.style.borderColor='rgba(74,222,128,.3)';}
       _notif('✅ Salvo e sincronizado!','Notebook vai atualizar em instantes','grn');
-      _pushSWNotif('Zyntra Gestão — salvo ✅',_resumoParaPush);
+      // Notificação do sistema já chega pra esse mesmo aparelho via push real do
+      // servidor (ele também está inscrito como "dono") — chamar _pushSWNotif aqui
+      // duplicava a notificação só no aparelho que salvou.
       // Trigger instantâneo: notifica o desktop sem esperar o poll de 30s
       fetch('https://ntfy.sh/zyntra-trigger-gestao-zg2026',{method:'POST',headers:{'Content-Type':'text/plain'},body:'sync',cache:'no-store'}).catch(function(){});
     })
