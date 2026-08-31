@@ -489,48 +489,52 @@ function _resumoSalvo(antes, depois){
   var L=[];
   var R=function(v){return 'R$ '+Number(v||0).toFixed(2).replace('.',',');};
   var MESES=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-  // RTU
+  // RTU — mostra categoria e mês, não só nome e valor
   var mA={}; (antes.rtu||[]).forEach(function(r){mA[r.id]=r;});
   var novIds=new Set((depois.rtu||[]).map(function(r){return r.id;}));
   (depois.rtu||[]).forEach(function(r){
-    if(!mA[r.id])L.push('➕ RTU: '+r.produto+' · '+R(r.valor));
-    else if(mA[r.id].valor!==r.valor)L.push('✏️ RTU '+r.produto+': '+R(mA[r.id].valor)+' → '+R(r.valor));
+    var ctx=(r.cat||'')+(r.mes?' · '+MESES[r.mes-1]:'');
+    if(!mA[r.id])L.push('➕ RTU: '+r.produto+' ('+ctx+') · '+R(r.valor));
+    else if(mA[r.id].valor!==r.valor)L.push('✏️ RTU '+r.produto+' ('+ctx+'): '+R(mA[r.id].valor)+' → '+R(r.valor));
   });
-  (antes.rtu||[]).forEach(function(r){if(!novIds.has(r.id))L.push('🗑️ RTU removido: '+r.produto);});
-  // Pagamentos
+  (antes.rtu||[]).forEach(function(r){if(!novIds.has(r.id))L.push('🗑️ RTU removido: '+r.produto+' ('+(r.cat||'')+') · '+R(r.valor));});
+  // Pagamentos — mostra categoria e forma, não só descrição e valor
   for(var m=0;m<12;m++){
     var ant=(antes.pag&&antes.pag[m])||[];
     var nov=(depois.pag&&depois.pag[m])||[];
-    for(var i=ant.length;i<nov.length;i++)L.push('➕ Pgto '+MESES[m]+': '+nov[i].desc+' · '+R(nov[i].valor));
+    for(var i=ant.length;i<nov.length;i++)L.push('➕ Pgto '+MESES[m]+': '+nov[i].desc+' ('+(nov[i].cat||'')+(nov[i].forma?' · '+nov[i].forma:'')+') · '+R(nov[i].valor));
     for(var j=0;j<Math.min(ant.length,nov.length);j++){
       if(ant[j]&&nov[j]&&ant[j].status!==nov[j].status)
-        L.push((nov[j].status==='Pago'?'💳':'✏️')+' '+(nov[j].desc||ant[j].desc)+' ('+MESES[m]+'): '+ant[j].status+' → '+nov[j].status);
+        L.push((nov[j].status==='Pago'?'💳':'✏️')+' '+(nov[j].desc||ant[j].desc)+' ('+MESES[m]+' · '+(nov[j].cat||'')+'): '+ant[j].status+' → '+nov[j].status);
     }
   }
-  // Estoque
+  // Estoque — mostra categoria e quantidade resultante, não só a variação
   var mAP={}; (antes.produtos||[]).forEach(function(p){mAP[p.id]=p;});
   var idsDP=new Set((depois.produtos||[]).map(function(p){return p.id;}));
   (depois.produtos||[]).forEach(function(p){
     var a=mAP[p.id];
-    if(!a)L.push('➕ Produto: '+p.nome);
-    else if(a.qty!==p.qty){var d=p.qty-a.qty;L.push('📦 '+p.nome+': '+(d>0?'+':'')+d+(p.qty<=p.min?' ⚠️':''));}
+    if(!a)L.push('➕ Produto: '+p.nome+' ('+(p.cat||'')+') · qtd '+p.qty);
+    else if(a.qty!==p.qty){var d=p.qty-a.qty;L.push('📦 '+p.nome+' ('+(p.cat||'')+'): '+(d>0?'+':'')+d+' → total '+p.qty+(p.qty<=p.min?' ⚠️':''));}
   });
-  (antes.produtos||[]).forEach(function(p){if(!idsDP.has(p.id))L.push('🗑️ Produto removido: '+p.nome);});
+  (antes.produtos||[]).forEach(function(p){if(!idsDP.has(p.id))L.push('🗑️ Produto removido: '+p.nome+' ('+(p.cat||'')+')');});
   // Diff genérico por id, usado pelas listas abaixo (fornecedores, compras,
   // pendências, marketplaces, saques, movimentações) — mesmo padrão do RTU acima.
-  function _diffLista(ant,dep,label,nomeFn,statusFn){
+  // ctxFn é opcional: texto extra entre parênteses (categoria/valor/fornecedor etc),
+  // pra dar contexto completo e não só o nome do item.
+  function _diffLista(ant,dep,label,nomeFn,statusFn,ctxFn){
     var m={}; (ant||[]).forEach(function(x){m[x.id]=x;});
     var ids=new Set((dep||[]).map(function(x){return x.id;}));
+    var ctx=function(x){var c=ctxFn?ctxFn(x):'';return c?' ('+c+')':'';};
     (dep||[]).forEach(function(x){
-      if(!m[x.id])L.push('➕ '+label+': '+nomeFn(x));
-      else if(statusFn&&statusFn(m[x.id])!==statusFn(x))L.push('✏️ '+label+' '+nomeFn(x)+': '+statusFn(m[x.id])+' → '+statusFn(x));
+      if(!m[x.id])L.push('➕ '+label+': '+nomeFn(x)+ctx(x));
+      else if(statusFn&&statusFn(m[x.id])!==statusFn(x))L.push('✏️ '+label+' '+nomeFn(x)+ctx(x)+': '+statusFn(m[x.id])+' → '+statusFn(x));
     });
-    (ant||[]).forEach(function(x){if(!ids.has(x.id))L.push('🗑️ '+label+' removido: '+nomeFn(x));});
+    (ant||[]).forEach(function(x){if(!ids.has(x.id))L.push('🗑️ '+label+' removido: '+nomeFn(x)+ctx(x));});
   }
-  _diffLista(antes.fornecedores,depois.fornecedores,'Fornecedor',function(x){return x.nome;});
-  _diffLista(antes.compras,depois.compras,'Compra',function(x){return x.produto;},function(x){return x.status;});
-  _diffLista(antes.pendencias,depois.pendencias,'Pendência',function(x){return x.titulo;},function(x){return x.status;});
-  _diffLista(antes.marketplaces,depois.marketplaces,'Marketplace',function(x){return x.plataforma;});
+  _diffLista(antes.fornecedores,depois.fornecedores,'Fornecedor',function(x){return x.nome;},null,function(x){return x.marcas||'';});
+  _diffLista(antes.compras,depois.compras,'Compra',function(x){return x.produto;},function(x){return x.status;},function(x){return R(x.valorCompra)+(x.fornecedor?' · '+x.fornecedor:'');});
+  _diffLista(antes.pendencias,depois.pendencias,'Pendência',function(x){return x.titulo;},function(x){return x.status;},function(x){return x.categoria||'';});
+  _diffLista(antes.marketplaces,depois.marketplaces,'Marketplace',function(x){return x.plataforma;},function(x){return R(x.saldo);});
   _diffLista(antes.saques,depois.saques,'Saque',function(x){return x.plataforma+' · '+R(x.valor);},function(x){return x.status;});
   _diffLista(antes.mov,depois.mov,'Movimentação',function(x){return (x.prodNome||'')+' ('+x.tipo+' '+x.qty+')';});
   if(!L.length)L.push('Dados sincronizados com sucesso');
