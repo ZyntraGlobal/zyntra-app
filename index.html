@@ -357,9 +357,7 @@ async function forcarSincronizar(){
     _notif('❌ Tempo esgotado','Verifique sua conexão e tente de novo','red');
   },12000);
   try{
-    if(window.zyntraElectron&&window.zyntraElectron.forcarSync){
-      await window.zyntraElectron.forcarSync();
-    }else if(typeof window.forcarSincronizarG==='function'){
+    if(typeof window.forcarSincronizarG==='function'){
       // Sempre redesenha, mesmo se o polling em segundo plano já tiver
       // absorvido a mudança em silêncio antes deste clique — sem isso a
       // TELA (não só o armazenamento local) ficava desatualizada.
@@ -573,21 +571,23 @@ function _ghSalvarG(_antes){
 
 function save(){
   _calcABC();
+  // Captura o estado ANTES de sobrescrever o localStorage — precisa vir antes do
+  // setItem abaixo, senão "antes" e "depois" viram o mesmo objeto e a mensagem de
+  // notificação nunca detecta o que mudou (sempre cai no fallback genérico).
+  var _antes=null;
+  try{_antes=JSON.parse(localStorage.getItem('zyntra_gestao_v1'));}catch(e){}
+  // Persiste os dados no localStorage imediatamente (sem avançar _savedAt)
+  // _savedAt só avança após o PUT no GitHub ser confirmado (evita phantom timestamp)
+  try{localStorage.setItem('zyntra_gestao_v1',JSON.stringify(DB));}catch(e){}
+  // No Electron, o relay (abaixo) continua sendo a fonte real — o app nativo antes
+  // salvava só localmente/direto no GitHub com token embutido no código, sem nunca
+  // passar pelo relay, então nunca via os dados que outros aparelhos salvavam
+  // (e vice-versa). Agora ele passa pelo mesmo caminho de todo mundo, e o arquivo
+  // local é só um backup extra, best-effort, que não interfere no fluxo principal.
   if(window.zyntraElectron){
-    DB._savedAt=Date.now();
-    try{localStorage.setItem('zyntra_gestao_v1',JSON.stringify(DB));}catch(e){}
-    window.zyntraElectron.salvar(DB).then(function(r){if(r&&r.ok){var h=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});var el=document.getElementById('fs-status');if(el){el.textContent='✅ Salvo '+h;el.style.color='var(--grn)';el.style.borderColor='rgba(74,222,128,.3)';}}});
-  } else {
-    // Captura o estado ANTES de sobrescrever o localStorage — precisa vir antes do
-    // setItem abaixo, senão "antes" e "depois" viram o mesmo objeto e a mensagem de
-    // notificação nunca detecta o que mudou (sempre cai no fallback genérico).
-    var _antes=null;
-    try{_antes=JSON.parse(localStorage.getItem('zyntra_gestao_v1'));}catch(e){}
-    // Persiste os dados no localStorage imediatamente (sem avançar _savedAt)
-    // _savedAt só avança após o PUT no GitHub ser confirmado (evita phantom timestamp)
-    try{localStorage.setItem('zyntra_gestao_v1',JSON.stringify(DB));}catch(e){}
-    _ghSalvarG(_antes);
+    try{ window.zyntraElectron.salvar(Object.assign({},DB,{_savedAt:Date.now()})); }catch(e){}
   }
+  _ghSalvarG(_antes);
 }
 
 // ── HELPERS ──────────────────────────────────────────
