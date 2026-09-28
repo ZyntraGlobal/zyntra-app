@@ -1254,6 +1254,15 @@ function pEstAlertas(){
 }
 
 // ── PAGAMENTOS ────────────────────────────────────────
+// Filtro de situação: 'todos' | 'pago' | 'pendente' | 'vencido' (mantido entre re-renders/sync)
+var _filtroPag='todos';
+function _situacaoPag(p){
+  if(p.status==='Pago')return 'pago';
+  var d=diasAte(p.datavenc);
+  if(p.status==='Atrasado'||(d!==null&&d<0))return 'vencido';
+  return 'pendente';
+}
+function pagFiltrar(mes,f){_filtroPag=f;pPag(mes);}
 function pPag(mes){
   if(!_paginaPermitida('pag')){_bloqueadoFunc();return;}
   var lista=DB.pag[mes-1]||[];
@@ -1281,16 +1290,25 @@ function pPag(mes){
     h+='<div class="card '+(atrasado>0?'danger':'')+'"><div class="lbl">Atrasado</div><div class="val '+(atrasado>0?'red':'grn')+'">'+(atrasado>0?R(atrasado):'R$ 0,00')+'</div></div>';
     h+='<div class="card"><div class="lbl">% Pago</div><div class="val grn">'+pctPago.toFixed(0)+'%</div><div class="progress-bar"><div class="progress-fill" style="width:'+pctPago+'%;background:var(--grn)"></div></div></div></div>';
   }
-  h+='<div class="brow"><button class="btn btnp" onclick="modalAddPag('+mes+')">+ Novo Pagamento</button></div>';
-  h+='<div class="panel"><div class="ph"><div class="pt">Pagamentos — '+MFULL[mes-1].toUpperCase()+' 2026</div></div>';
+  var _cnt={todos:lista.length,pago:0,pendente:0,vencido:0};
+  lista.forEach(function(p){_cnt[_situacaoPag(p)]++;});
+  var _btnF=function(f,label){var on=_filtroPag===f;return '<button class="btn bsm'+(on?' btnp':'')+'" onclick="pagFiltrar('+mes+',\''+f+'\')">'+label+' ('+_cnt[f]+')</button>';};
+  h+='<div class="brow">'+_btnF('todos','Todos')+_btnF('pago','✅ Pagos')+_btnF('pendente','⏳ Pendentes')+_btnF('vencido','🔴 Vencidos');
+  h+='<button class="btn btnp" style="margin-left:auto" onclick="modalAddPag('+mes+')">+ Novo Pagamento</button></div>';
+  var _visiveis=[];
+  lista.forEach(function(p,i){if(_filtroPag==='todos'||_situacaoPag(p)===_filtroPag)_visiveis.push({p:p,i:i});});
+  var _nomeF={pago:'Pagos',pendente:'Pendentes',vencido:'Vencidos'};
+  h+='<div class="panel"><div class="ph"><div class="pt">Pagamentos — '+MFULL[mes-1].toUpperCase()+' 2026'+(_filtroPag!=='todos'?' · '+_nomeF[_filtroPag].toUpperCase():'')+'</div></div>';
   var _colsPag=_func?9:11;
   h+='<div class="ts tw"><table><thead><tr><th>DESCRIÇÃO</th><th>CATEGORIA</th><th>TIPO</th>';
   if(!_func){h+='<th class="tr">VALOR (R$)</th>';}
   h+='<th>FORMA</th><th>VENCIMENTO</th><th>STATUS</th><th>PAGAMENTO</th><th>PRIOR.</th><th>RESP.</th><th></th></tr></thead><tbody>';
   if(lista.length===0){h+='<tr><td colspan="'+_colsPag+'"><div style="padding:48px;text-align:center"><div style="font-size:32px;margin-bottom:12px">💳</div><div style="font-size:15px;font-weight:600;color:var(--t);margin-bottom:6px">Nenhum pagamento em '+MFULL[mes-1]+'</div><div style="font-size:12px;color:var(--t3);margin-bottom:20px">Registre contas a pagar, assinaturas, impostos e muito mais.</div><button class="btn btnp" onclick="modalAddPag('+mes+')">+ Adicionar Primeiro Pagamento</button></div></td></tr>';}
-  else lista.forEach(function(p,i){
+  else if(_visiveis.length===0){h+='<tr><td colspan="'+_colsPag+'"><div style="padding:32px;text-align:center;font-size:13px;color:var(--t3)">Nenhum pagamento '+_nomeF[_filtroPag].toLowerCase()+' em '+MFULL[mes-1]+'. <button class="btn bsm" onclick="pagFiltrar('+mes+',\'todos\')">Ver todos</button></div></td></tr>';}
+  else _visiveis.forEach(function(v){
+    var p=v.p,i=v.i;
     var dias=diasAte(p.datavenc);
-    var rowBg=p.status==='Atrasado'?'background:var(--rdbg)':p.status==='Pago'?'':'';
+    var rowBg=_situacaoPag(p)==='vencido'?'background:var(--rdbg)':'';
     h+='<tr style="'+rowBg+'"><td style="font-weight:500;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+p.desc+'">'+p.desc+'</td>';
     h+='<td style="font-size:11px">'+p.cat+'</td><td style="font-size:11px">'+p.tipo+'</td>';
     if(!_func){h+='<td class="tr" style="font-weight:700;color:var(--gold)">'+R(p.valor)+'</td>';}
