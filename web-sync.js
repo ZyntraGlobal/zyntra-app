@@ -83,6 +83,19 @@
     return linhas.length ? linhas : null;
   }
 
+  // Só no app desktop (Electron): espelha os dados que chegaram do relay no backup
+  // em arquivo do computador (Autosave, AppData, pasta de backup automático). Antes
+  // esse backup só era regravado quando alguém salvava PELO desktop — lançamentos
+  // feitos no iPhone deixavam o arquivo dias atrasado. Só pra dono: funcionário
+  // recebe dados filtrados, e gravar isso por cima estragaria o backup completo.
+  // save-data do main.js só grava arquivos locais, não envia nada pro relay.
+  var _espelhouLocal = false;
+  function _espelharBackupLocal(dados, papel) {
+    if (papel !== 'dono') return;
+    if (!window.zyntraElectron || typeof window.zyntraElectron.salvar !== 'function') return;
+    try { window.zyntraElectron.salvar(dados); _espelhouLocal = true; } catch(e) {}
+  }
+
   async function sincronizar() {
     try {
       const sess = _sessaoWS();
@@ -113,6 +126,7 @@
       const tLocal  = local ? (local._savedAt || 0) : 0;
       const papelMudou = local && local._papel && local._papel !== sess.role;
       if (tRemoto <= tLocal && !papelMudou) {
+        if (!_espelhouLocal && tRemoto === tLocal) _espelharBackupLocal(remoto, sess.role);
         // Local é mais recente que GitHub — push automático (dados ficaram presos por falha anterior)
         if (tLocal > tRemoto && typeof _ghSalvarG === 'function' && typeof DB !== 'undefined' && DB && DB.produtos) {
           console.log('[ZyntraG] Auto-push: local mais recente que GitHub — enviando...');
@@ -123,6 +137,7 @@
 
       const linhas = _diffGestao(local, remoto);
       localStorage.setItem(CHAVE, JSON.stringify(Object.assign({}, remoto, { _papel: sess.role })));
+      _espelharBackupLocal(remoto, sess.role);
       localStorage.removeItem('zg_lock');
 
       if (linhas && linhas.length > 0) {
