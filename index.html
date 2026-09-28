@@ -1577,7 +1577,7 @@ function _renovarPushBtnG(){
   _assinarPushG();
   if(window._forcarRenovarPushG){
     window._forcarRenovarPushG().then(function(ok){
-      _notif(ok?'🔄 Push renovado':'⚠️ Falha ao renovar',ok?'Assinatura publicada no GitHub e no relay':'Verifique se as notificações estão permitidas',ok?'grn':'red');
+      _notif(ok?'🔄 Push renovado':'⚠️ Falha ao renovar',ok?'Assinatura publicada no GitHub e no relay':'Confira se as notificações estão permitidas e se você está logado (saia e entre de novo)',ok?'grn':'red');
     });
   }else{
     _notif('🔄 Push renovado','Assinatura atualizada no relay','grn');

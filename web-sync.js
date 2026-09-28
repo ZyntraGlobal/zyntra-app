@@ -170,14 +170,14 @@
       var ultimaPub = Number(localStorage.getItem('zg_push_pub_ts') || 0);
       // Sem mudança de endpoint/papel, republica mesmo assim 1x/dia — autocorreção caso o
       // arquivo remoto tenha ficado dessincronizado sem o endpoint em si ter mudado.
-      if (!mudou && !forcar && (Date.now() - ultimaPub) < 86400000) return;
+      if (!mudou && !forcar && (Date.now() - ultimaPub) < 86400000) return Promise.resolve(true);
       // sub é um PushSubscription nativo — .keys não existe como propriedade direta
       // (só endpoint tem getter), as chaves só saem via .toJSON(). Sem isso, a
       // subscription salva ficava sem "keys" e o push falhava silenciosamente.
       var subJson = sub.toJSON ? sub.toJSON() : sub;
       var _tok = _sessaoWS().token;
-      if (!_tok) return;
-      fetch(PUSH_RELAY_URL + '/subscribe', {
+      if (!_tok) return Promise.resolve(false);
+      return fetch(PUSH_RELAY_URL + '/subscribe', {
         method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + _tok },
         body: JSON.stringify({ app: 'gestao', subscription: { endpoint: sub.endpoint, keys: subJson.keys } })
       }).then(function(r) {
@@ -188,8 +188,9 @@
         } else {
           setTimeout(function() { _salvarSubGitHubG(sub, true); }, 30000);
         }
-      }).catch(function() { setTimeout(function() { _salvarSubGitHubG(sub, true); }, 30000); });
-    } catch(e) {}
+        return !!(r && r.ok);
+      }).catch(function() { setTimeout(function() { _salvarSubGitHubG(sub, true); }, 30000); return false; });
+    } catch(e) { return Promise.resolve(false); }
   }
   function _renewPushG() {
     _avisarTokenSW();
@@ -248,14 +249,21 @@
   // vivem fechados dentro desta IIFE, então precisam de uma ponte explícita pra fora.
   // Ignora os dois throttles (20min do _renewPushG, 1x/dia do _salvarSubGitHubG) —
   // é um pedido manual e direto do usuário, sempre publica na hora.
+  // Sempre descarta a inscrição atual e cria uma nova: se a Apple invalidou a antiga
+  // (ex: permissão desligada/religada, app reinstalado), getSubscription() pode continuar
+  // devolvendo a inscrição morta — republicar ela não resolve nada. Resolve true só
+  // quando o relay confirma que gravou (antes mostrava "renovado" mesmo sem sessão).
   window._forcarRenovarPushG = function() {
     if (!('serviceWorker' in navigator) || !('Notification' in window) || Notification.permission !== 'granted') return Promise.resolve(false);
     function urlB64(b){var p='='.repeat((4-b.length%4)%4);var s=(b+p).replace(/-/g,'+').replace(/_/g,'/');var r=window.atob(s);var o=new Uint8Array(r.length);for(var i=0;i<r.length;i++)o[i]=r.charCodeAt(i);return o;}
     return navigator.serviceWorker.ready.then(function(reg) {
-      return reg.pushManager.getSubscription().then(function(sub) {
-        if (sub) { _salvarSubGitHubG(sub, true); return true; }
+      var nova = function() {
         return reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlB64('BITLfwTQwUU_BYIbbdEXYoUAEp7sy6iiL52Cn-GmnuljgI4F0cPgiT5xgjSM-uV33AIP9LvWf3QrsLR1CRvE-FQ') })
-          .then(function(sub2) { _salvarSubGitHubG(sub2, true); return true; }).catch(function() { return false; });
+          .then(function(sub2) { return _salvarSubGitHubG(sub2, true); });
+      };
+      return reg.pushManager.getSubscription().then(function(sub) {
+        if (!sub) return nova();
+        return sub.unsubscribe().then(nova, nova);
       });
     }).catch(function() { return false; });
   };
