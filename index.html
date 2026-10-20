@@ -206,6 +206,8 @@ tfoot td{font-weight:700;border-top:2px solid var(--bdr2);border-bottom:none!imp
   <div class="ni" onclick="ir('compras',this)"><span class="ico">🛒</span><span class="lbl">Lista de Compras</span><span class="bdg" id="b-compras" style="display:none">0</span></div>
   <div class="sb-sec">Marketplaces</div>
   <div class="ni" onclick="ir('marketplaces',this)"><span class="ico">🏪</span><span class="lbl">Saldo & A Receber</span></div>
+  <div class="sb-sec">Gateways</div>
+  <div class="ni" onclick="ir('gateways',this)"><span class="ico">💳</span><span class="lbl">Saldo & Retenções</span><span class="bdg" id="b-gw" style="display:none">0</span></div>
   <div class="sb-sec">Sistema</div>
   <div class="ni" id="ni-usuarios" onclick="ir('usuarios',this)"><span class="ico">👥</span><span class="lbl">Usuários</span></div>
   <div class="ni" onclick="fazerBackupG()" id="ni-backup"><span class="ico">💾</span><span class="lbl">Backup</span></div>
@@ -337,6 +339,7 @@ var EST_CATS=['Mouse','Teclado','Headset','Mousepad','Controle','Som','Memória'
 var COMPRA_STATUS=['Pendente','Comprado','Recebido','Cancelado'];
 var COMPRA_MARGEM_MIN=15; // % mínimo de margem pra considerar "vale a pena"
 var COMPRA_PLATAFORMAS=['Amazon','Shopee','Mercado Livre','TikTok Shop','Site Zyntra'];
+var GATEWAYS=['Stark Bank','Abacate Pay','Bestfy'];
 var PENDENCIA_STATUS=['Aberta','Em Andamento','Resolvida','Cancelada'];
 var PENDENCIA_PRIORIDADE=['Baixa','Média','Alta','Urgente'];
 var PENDENCIA_PLATAFORMAS=['Site Zyntra','Amazon','Shopee','Mercado Livre','TikTok Shop','Instagram','Outro'];
@@ -405,6 +408,18 @@ function _normMkt(m){
     obs:m.obs||'', atualizadoEm:m.atualizadoEm||''
   };
 }
+function _normGw(g){
+  return {
+    id:g.id, gateway:g.gateway||'', disponivel:Number(g.disponivel)||0,
+    obs:g.obs||'', atualizadoEm:g.atualizadoEm||''
+  };
+}
+function _normGwRet(r){
+  return {
+    id:r.id, gateway:r.gateway||'', valor:Number(r.valor)||0,
+    dias:Number(r.dias)||0, motivo:r.motivo||'', data:r.data||hoje()
+  };
+}
 function _normSaque(s){
   return {
     id:s.id, plataforma:s.plataforma||'', valor:Number(s.valor)||0,
@@ -418,7 +433,7 @@ function _normUsuario(u){
   };
 }
 function loadDB(){
-  try{var s=localStorage.getItem('zyntra_gestao_v1');if(s){var d=JSON.parse(s);d.produtos=d.produtos.map(_normProd);if(!d.fornecedores)d.fornecedores=[];if(!d.nForn)d.nForn=1;if(!d.compras)d.compras=[];else d.compras=d.compras.map(_normCompra);if(!d.nCompras)d.nCompras=1;if(!d.pendencias)d.pendencias=[];else d.pendencias=d.pendencias.map(_normPendencia);if(!d.nPendencias)d.nPendencias=1;if(!d.marketplaces)d.marketplaces=[];else d.marketplaces=d.marketplaces.map(_normMkt);if(!d.nMkt)d.nMkt=1;if(!d.saques)d.saques=[];else d.saques=d.saques.map(_normSaque);if(!d.nSaque)d.nSaque=1;if(!d.usuarios)d.usuarios=[];else d.usuarios=d.usuarios.map(_normUsuario);if(!d.nUsuarios)d.nUsuarios=1;return d;}}catch(e){}
+  try{var s=localStorage.getItem('zyntra_gestao_v1');if(s){var d=JSON.parse(s);d.produtos=d.produtos.map(_normProd);if(!d.fornecedores)d.fornecedores=[];if(!d.nForn)d.nForn=1;if(!d.compras)d.compras=[];else d.compras=d.compras.map(_normCompra);if(!d.nCompras)d.nCompras=1;if(!d.pendencias)d.pendencias=[];else d.pendencias=d.pendencias.map(_normPendencia);if(!d.nPendencias)d.nPendencias=1;if(!d.marketplaces)d.marketplaces=[];else d.marketplaces=d.marketplaces.map(_normMkt);if(!d.nMkt)d.nMkt=1;if(!d.saques)d.saques=[];else d.saques=d.saques.map(_normSaque);if(!d.nSaque)d.nSaque=1;if(!d.gateways)d.gateways=[];else d.gateways=d.gateways.map(_normGw);if(!d.nGw)d.nGw=1;if(!d.gwRet)d.gwRet=[];else d.gwRet=d.gwRet.map(_normGwRet);if(!d.nGwRet)d.nGwRet=1;if(!d.usuarios)d.usuarios=[];else d.usuarios=d.usuarios.map(_normUsuario);if(!d.nUsuarios)d.nUsuarios=1;return d;}}catch(e){}
   return{
     produtos:JSON.parse(JSON.stringify(PRODUTOS_BASE)).map(_normProd),
     mov:[],
@@ -430,6 +445,8 @@ function loadDB(){
     pendencias:[],nPendencias:1,
     marketplaces:[],nMkt:1,
     saques:[],nSaque:1,
+    gateways:[],nGw:1,
+    gwRet:[],nGwRet:1,
     usuarios:[],nUsuarios:1
   };
 }
@@ -533,6 +550,8 @@ function _resumoSalvo(antes, depois){
   _diffLista(antes.compras,depois.compras,'Compra',function(x){return x.produto;},function(x){return x.status;},function(x){return R(x.valorCompra)+(x.fornecedor?' · '+x.fornecedor:'');});
   _diffLista(antes.pendencias,depois.pendencias,'Pendência',function(x){return x.titulo;},function(x){return x.status;},function(x){return x.categoria||'';});
   _diffLista(antes.marketplaces,depois.marketplaces,'Marketplace',function(x){return x.plataforma;},function(x){return R(x.saldo);});
+  _diffLista(antes.gateways,depois.gateways,'Gateway',function(x){return x.gateway;},function(x){return R(x.disponivel);});
+  _diffLista(antes.gwRet,depois.gwRet,'Retenção',function(x){return x.gateway+' · '+R(x.valor)+' D+'+x.dias;});
   _diffLista(antes.saques,depois.saques,'Saque',function(x){return x.plataforma+' · '+R(x.valor);},function(x){return x.status;});
   _diffLista(antes.mov,depois.mov,'Movimentação',function(x){return (x.prodNome||'')+' ('+x.tipo+' '+x.qty+')';});
   if(!L.length)L.push('Dados sincronizados com sucesso');
@@ -628,6 +647,8 @@ function badges(){
   var alertas=DB.produtos.filter(function(p){return p.qty>0&&p.qty<=p.min;}).length;
   var ba=document.getElementById('b-alert');
   if(ba){ba.textContent=alertas;ba.style.display=alertas>0?'inline':'none';}
+  var bgw=document.getElementById('b-gw');
+  if(bgw){var gv=(DB.gwRet||[]).length?_gwVencidas().length:0;bgw.textContent=gv;bgw.style.display=gv>0?'inline':'none';}
   // Pagamentos — DB.pag nunca chega pro funcionário (dado de pagamentos da
   // empresa, fica só com o dono) — sem essa checagem, badges() quebrava aqui
   // e travava a tela toda vez que o funcionário salvava qualquer coisa,
@@ -663,7 +684,7 @@ function ir(tipo,arg,el){
     if(tipo==='dash'&&_isFuncionario()){document.getElementById('ptitle').textContent='Início';pInicioFunc();return;}
     _bloqueadoFunc();document.getElementById('ptitle').textContent='Acesso Restrito';return;
   }
-  var titulos={dash:'Dashboard',est_produtos:'Estoque — Produtos',est_fin:'Estoque — Financeiro',est_mov:'Estoque — Movimentações',est_alertas:'Estoque — Alertas',rtu_lanc:'Controle RTU — Lançamentos',rtu_resumo:'Controle RTU — Resumo Anual',notif:'Alertas & Notificações',fornecedores:'Fornecedores',compras:'Compras — Lista de Compras',pendencias:'Avisos & Pendências',marketplaces:'Marketplaces — Saldo & A Receber',usuarios:'Usuários & Acessos',inicio:'Início'};
+  var titulos={dash:'Dashboard',est_produtos:'Estoque — Produtos',est_fin:'Estoque — Financeiro',est_mov:'Estoque — Movimentações',est_alertas:'Estoque — Alertas',rtu_lanc:'Controle RTU — Lançamentos',rtu_resumo:'Controle RTU — Resumo Anual',notif:'Alertas & Notificações',fornecedores:'Fornecedores',compras:'Compras — Lista de Compras',pendencias:'Avisos & Pendências',marketplaces:'Marketplaces — Saldo & A Receber',gateways:'Gateways — Saldo & Retenções',usuarios:'Usuários & Acessos',inicio:'Início'};
   document.getElementById('ptitle').textContent=titulos[tipo]||(tipo==='pag'?'Pagamentos — '+MFULL[(arg||1)-1]+' 2026':tipo);
   if(tipo==='dash')pDash();
   else if(tipo==='est_produtos')pEstProdutos();
@@ -678,6 +699,7 @@ function ir(tipo,arg,el){
   else if(tipo==='compras')pCompras();
   else if(tipo==='pendencias')pPendencias();
   else if(tipo==='marketplaces')pMarketplaces();
+  else if(tipo==='gateways')pGateways();
   else if(tipo==='usuarios')pUsuarios();
   else if(tipo==='inicio')pInicioFunc();
 }
@@ -2741,6 +2763,149 @@ function modalEditMkt(plataforma){
   });
 }
 
+// ── GATEWAYS — saldo disponível + valores retidos (D+N) por gateway ──
+function _gwSomarDias(dataStr,dias){
+  var p=(dataStr||'').split(/[\/\-]/);if(p.length!==3)return '';
+  var ano=Number(p[2]);if(ano<100)ano+=2000;
+  var d=new Date(ano,Number(p[1])-1,Number(p[0]));if(isNaN(d.getTime()))return '';
+  d.setDate(d.getDate()+(Number(dias)||0));
+  return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear();
+}
+function _gwFaltam(r){
+  // dias que faltam pra liberar (negativo = já passou do prazo)
+  var lib=_gwSomarDias(r.data,r.dias);
+  return lib?-_diasEmAberto(lib):null;
+}
+function _gwVencidas(){
+  return (DB.gwRet||[]).filter(function(r){var f=_gwFaltam(r);return f!==null&&f<=0;});
+}
+
+function pGateways(){
+  if(!_paginaPermitida('gateways')){_bloqueadoFunc();return;}
+  if(!DB.gateways)DB.gateways=[];
+  if(!DB.gwRet)DB.gwRet=[];
+  var totalDisp=DB.gateways.reduce(function(a,g){return a+(Number(g.disponivel)||0);},0);
+  var totalRet=DB.gwRet.reduce(function(a,r){return a+(Number(r.valor)||0);},0);
+  var vencidas=_gwVencidas();
+
+  var h='<div class="g3">';
+  h+='<div class="card hl"><div class="lbl">Disponível Agora</div><div class="val gld">'+R(totalDisp)+'</div><div class="sub">soma dos 3 gateways</div></div>';
+  h+='<div class="card"><div class="lbl">Retido / A Liberar</div><div class="val" style="color:#8cc5c7">'+R(totalRet)+'</div><div class="sub">'+DB.gwRet.length+' valor'+(DB.gwRet.length!==1?'es':'')+' aguardando D+</div></div>';
+  h+='<div class="card '+(vencidas.length?'warn':'')+'"><div class="lbl">Prazo Vencido</div><div class="val '+(vencidas.length?'amb':'grn')+'">'+vencidas.length+'</div><div class="sub">já deveriam ter liberado — confirme</div></div>';
+  h+='</div>';
+
+  h+='<div class="panel" style="margin-bottom:12px"><div style="padding:10px 16px;font-size:11px;color:var(--t3)">💳 Lance o saldo disponível e cada valor retido do gateway (ex: "Disponível em D+40 — devido a disputas abertas"). Quando o valor liberar, toque em ✅ Liberou e ele passa pro disponível.</div></div>';
+
+  GATEWAYS.forEach(function(gw){
+    var reg=DB.gateways.find(function(g){return g.gateway===gw;})||{};
+    var rets=DB.gwRet.filter(function(r){return r.gateway===gw;}).sort(function(a,b){return (_gwFaltam(a)||0)-(_gwFaltam(b)||0);});
+    var retTotal=rets.reduce(function(a,r){return a+(Number(r.valor)||0);},0);
+    var dias=reg.atualizadoEm?_diasEmAberto(reg.atualizadoEm):null;
+    var statusTxt=!reg.atualizadoEm?'Nunca atualizado':(dias===0?'Atualizado hoje':'Atualizado há '+dias+' dia'+(dias!==1?'s':''));
+    var gwJs=gw.replace(/'/g,"\\'");
+
+    h+='<div class="panel" style="margin-bottom:14px;padding:14px 16px">';
+    h+='<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px">';
+    h+='<div style="font-size:15px;font-weight:700">'+gw+'</div>';
+    h+='<div class="brow" style="margin:0"><button class="btn bsm" onclick="modalEditGw(\''+gwJs+'\')">✏️ Saldo Disponível</button> <button class="btn bsm btnp" onclick="modalAddGwRet(\''+gwJs+'\')">+ Valor Retido</button></div>';
+    h+='</div>';
+
+    h+='<div class="g2">';
+    h+='<div class="card" style="cursor:pointer" onclick="modalEditGw(\''+gwJs+'\')"><div class="lbl">Saldo Disponível</div><div class="val gld">'+R(reg.disponivel||0)+'</div><div class="sub">'+statusTxt+'</div>'+(reg.obs?'<div class="sub" style="margin-top:4px;font-style:italic">💬 '+reg.obs+'</div>':'')+'</div>';
+    h+='<div class="card"><div class="lbl">Total Retido</div><div class="val" style="color:#8cc5c7">'+R(retTotal)+'</div><div class="sub">'+rets.length+' lançamento'+(rets.length!==1?'s':'')+'</div></div>';
+    h+='</div>';
+
+    if(!rets.length){
+      h+='<div style="font-size:11px;color:var(--t3);padding:4px 2px">Nenhum valor retido lançado.</div>';
+    } else {
+      h+='<div class="g2" style="margin-bottom:0">';
+      rets.forEach(function(r){
+        var f=_gwFaltam(r);var lib=_gwSomarDias(r.data,r.dias);
+        var prazoTxt=f===null?'':(f>0?'libera em '+lib+' · faltam '+f+' dia'+(f!==1?'s':''):(f===0?'libera hoje ('+lib+')':'prazo venceu em '+lib));
+        h+='<div class="card'+(f!==null&&f<=0?' warn':'')+'" style="padding:16px 18px;border-radius:12px">';
+        h+='<div style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--t2)"><span>📅</span><span>Disponível em D+'+r.dias+'</span></div>';
+        h+='<div style="font-size:22px;font-weight:700;color:#8cc5c7;margin:8px 0 6px">'+R(r.valor)+'</div>';
+        if(r.motivo)h+='<div style="font-size:11px;color:var(--t2)">'+r.motivo+' <span title="Lançado em '+r.data+'" style="color:var(--t3)">ⓘ</span></div>';
+        h+='<div class="sub" style="margin-top:4px;'+(f!==null&&f<=0?'color:var(--amb)':'')+'">Lançado em '+r.data+(prazoTxt?' · '+prazoTxt:'')+'</div>';
+        h+='<div style="margin-top:10px"><button class="btn bsm btnp" onclick="liberarGwRet('+r.id+')">✅ Liberou</button> <button class="btn bsm" onclick="modalEditGwRet('+r.id+')">✏️</button> <button class="btn bsm btnd" onclick="delGwRet('+r.id+')" title="Excluir">✕</button></div>';
+        h+='</div>';
+      });
+      h+='</div>';
+    }
+    h+='</div>';
+  });
+  setPage(h);
+}
+
+function modalEditGw(gw){
+  if(!DB.gateways)DB.gateways=[];
+  var reg=DB.gateways.find(function(g){return g.gateway===gw;})||{};
+  abrirM('Saldo Disponível — '+gw,'<div class="fg f2">'+
+    '<div style="grid-column:1/-1"><label>Saldo Disponível (R$)</label><input id="gw-disp" type="number" min="0" step="0.01" value="'+(reg.disponivel||'')+'" placeholder="0,00" autofocus></div>'+
+    '<div style="grid-column:1/-1"><label>Observação</label><input id="gw-obs" value="'+(reg.obs||'')+'" placeholder="Ex: saque solicitado, conta bloqueada, etc"></div>'+
+    '</div>',function(){
+    var v=Number(document.getElementById('gw-disp').value)||0;
+    var obs=(document.getElementById('gw-obs').value||'').trim();
+    if(!DB.nGw)DB.nGw=1;
+    var r=DB.gateways.find(function(g){return g.gateway===gw;});
+    if(r){r.disponivel=v;r.obs=obs;r.atualizadoEm=hoje();}
+    else DB.gateways.push({id:DB.nGw++,gateway:gw,disponivel:v,obs:obs,atualizadoEm:hoje()});
+    save();fecharM();pGateways();
+  });
+}
+
+function _formGwRet(vals){
+  vals=vals||{};
+  return '<div class="fg f2">'+
+    '<div><label>Valor Retido (R$)</label><input id="gr-valor" type="number" min="0" step="0.01" value="'+(vals.valor||'')+'" placeholder="0,00" autofocus></div>'+
+    '<div><label>Disponível em D+ (dias)</label><input id="gr-dias" type="number" min="0" step="1" value="'+(vals.dias!=null?vals.dias:'')+'" placeholder="Ex: 40"></div>'+
+    '<div style="grid-column:1/-1"><label>Motivo</label><input id="gr-motivo" value="'+(vals.motivo||'')+'" placeholder="Ex: Devido a disputas abertas"></div>'+
+    '<div style="grid-column:1/-1"><label>Data de referência (conta o D+ a partir dela)</label><input id="gr-data" value="'+(vals.data||hoje())+'" placeholder="DD/MM/AAAA"></div>'+
+    '</div>';
+}
+function _lerFormGwRet(){
+  return {
+    valor:Number(document.getElementById('gr-valor').value)||0,
+    dias:Math.max(0,Math.round(Number(document.getElementById('gr-dias').value)||0)),
+    motivo:(document.getElementById('gr-motivo').value||'').trim(),
+    data:_normalizarData(document.getElementById('gr-data').value)||hoje()
+  };
+}
+function modalAddGwRet(gw){
+  abrirM('Novo Valor Retido — '+gw,_formGwRet(),function(){
+    var v=_lerFormGwRet();
+    if(!v.valor){_notif('Informe o valor','','red');return;}
+    if(!DB.gwRet)DB.gwRet=[];if(!DB.nGwRet)DB.nGwRet=1;
+    DB.gwRet.push({id:DB.nGwRet++,gateway:gw,valor:v.valor,dias:v.dias,motivo:v.motivo,data:v.data});
+    save();fecharM();pGateways();
+  });
+}
+function modalEditGwRet(id){
+  var r=(DB.gwRet||[]).find(function(x){return x.id===id;});if(!r)return;
+  abrirM('Editar Valor Retido — '+r.gateway,_formGwRet(r),function(){
+    var v=_lerFormGwRet();
+    if(!v.valor){_notif('Informe o valor','','red');return;}
+    r.valor=v.valor;r.dias=v.dias;r.motivo=v.motivo;r.data=v.data;
+    save();fecharM();pGateways();
+  });
+}
+function liberarGwRet(id){
+  var r=(DB.gwRet||[]).find(function(x){return x.id===id;});if(!r)return;
+  if(!confirm('Confirmar que '+R(r.valor)+' da '+r.gateway+' foi liberado?\nO valor será somado ao saldo disponível.'))return;
+  if(!DB.gateways)DB.gateways=[];if(!DB.nGw)DB.nGw=1;
+  var g=DB.gateways.find(function(x){return x.gateway===r.gateway;});
+  if(g){g.disponivel=Math.round(((Number(g.disponivel)||0)+r.valor)*100)/100;g.atualizadoEm=hoje();}
+  else DB.gateways.push({id:DB.nGw++,gateway:r.gateway,disponivel:r.valor,obs:'',atualizadoEm:hoje()});
+  DB.gwRet=DB.gwRet.filter(function(x){return x.id!==id;});
+  save();pGateways();
+}
+function delGwRet(id){
+  var r=(DB.gwRet||[]).find(function(x){return x.id===id;});if(!r)return;
+  if(!confirm('Excluir o valor retido de '+R(r.valor)+' ('+r.gateway+')?'))return;
+  DB.gwRet=DB.gwRet.filter(function(x){return x.id!==id;});
+  save();pGateways();
+}
+
 // ── SAQUES — lançamentos diários de saque solicitado até confirmar queda ──
 function _pillSaqueStatus(s){
   return s==='Caiu'?'<span class="pill ppago">✅ Caiu na conta</span>':'<span class="pill ppendente">⏳ Aguardando</span>';
@@ -2892,6 +3057,7 @@ var PAGINAS_RESTRITAS=[
   {tipo:'rtu_resumo',label:'Controle RTU — Resumo Anual'},
   {tipo:'notif',label:'Alertas & Notificações'},
   {tipo:'marketplaces',label:'Marketplaces — Saldo & A Receber'},
+  {tipo:'gateways',label:'Gateways — Saldo & Retenções'},
   {tipo:'pag',label:'Pagamentos Empresa'}
 ];
 function _sessaoAtual(){
