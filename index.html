@@ -808,6 +808,14 @@ function pDash(){
   var mktStatus=mktDesatualizados>0?'amb':'grn';
   var mktLabel=mktDesatualizados>0?mktDesatualizados+' desatualizado'+(mktDesatualizados>1?'s':''):mktComSaldo>0?'Tudo em dia':'Nenhum saldo lançado';
 
+  // ── GATEWAYS ──
+  var gwDisp=(DB.gateways||[]).reduce(function(a,g){return a+(Number(g.disponivel)||0);},0);
+  var gwRetTodos=DB.gwRet||[];
+  var gwRetTotal=gwRetTodos.reduce(function(a,r){return a+(Number(r.valor)||0);},0);
+  var gwVenc=gwRetTodos.length?_gwVencidas().length:0;
+  var gwStatus=gwVenc>0?'amb':'grn';
+  var gwLabel=gwVenc>0?gwVenc+' prazo'+(gwVenc>1?'s':'')+' vencido'+(gwVenc>1?'s':''):(gwDisp+gwRetTotal)>0?'Tudo em dia':'Nenhum saldo lançado';
+
   // ── PENDÊNCIAS ──
   var pendTodos=DB.pendencias||[];
   var pendAbertas=pendTodos.filter(function(p){return p.status==='Aberta'||p.status==='Em Andamento';});
@@ -865,6 +873,14 @@ function pDash(){
     ['Saldo em conta',R(mktTotalSaldo),'var(--gold)'],
     ['Saques aguardando',R(mktTotalSaque),mktTotalSaque>0?'var(--grn)':'var(--t3)'],
     ['Desatualizados',mktDesatualizados,mktDesatualizados>0?'var(--amb)':'var(--t3)']
+  ]);
+  h+='</div>';
+  // Card Gateways — linha própria
+  h+='<div style="display:grid;grid-template-columns:1fr;gap:16px;margin-top:16px">';
+  h+=modCard('💳','Gateways',R(gwDisp+gwRetTotal),'gold',GATEWAYS.join(' · '),gwStatus,gwLabel,"ir('gateways')",[
+    ['Disponível agora',R(gwDisp),'var(--gold)'],
+    ['Retido / a liberar',R(gwRetTotal),gwRetTotal>0?'#8cc5c7':'var(--t3)'],
+    ['Prazo vencido',gwVenc,gwVenc>0?'var(--amb)':'var(--t3)']
   ]);
   h+='</div>';
 
