@@ -1975,8 +1975,12 @@ function _tabelaCompras(lista,titulo){
     var dCompra=c.dataCompra||c.data;
     var diasAtraso=(c.status==='Pendente'&&dCompra!==hoje())?_diasEmAberto(dCompra):0;
     h+='<tr>';
-    var _tagBling=c.origem==='bling'?' <span class="pill pn" style="font-size:9px" title="'+_escH(c.obs)+'">Bling'+(c.blingPedidoNum?' #'+_escH(c.blingPedidoNum):'')+'</span>':'';
-    h+='<td style="min-width:180px"><div style="font-weight:600;color:var(--t);font-size:12px">'+_escH(c.produto)+_tagBling+'</div><div style="font-size:10px;color:var(--t3);margin-top:1px">'+(c.cat||'')+' · Comprar em '+dCompra+(diasAtraso>0?' · <span style="color:var(--amb);font-weight:700">atrasado há '+diasAtraso+'d</span>':'')+'</div></td>';
+    // Nome de marketplace costuma ser enorme — mostra até ~70 caracteres e o resto no tooltip
+    var _nome=c.produto||'',_nomeCurto=_nome.length>70?_nome.slice(0,70).replace(/\s+\S*$/,'')+'…':_nome;
+    var _linha2=c.origem==='bling'
+      ?'<span style="color:var(--gld);font-weight:700">'+_escH(c.plataforma||'Plataforma?')+'</span> · Pedido #'+_escH(c.blingPedidoNum||c.blingPedidoId)+(c.sku?' · SKU '+_escH(c.sku):'')+' · vendido em '+_escH(c.data)
+      :(c.cat||'')+' · Comprar em '+dCompra;
+    h+='<td style="min-width:220px;max-width:340px"><div style="font-weight:600;color:var(--t);font-size:12px;white-space:normal" title="'+_escH(_nome)+'">'+_escH(_nomeCurto)+'</div><div style="font-size:10px;color:var(--t3);margin-top:2px">'+_linha2+(diasAtraso>0?' · <span style="color:var(--amb);font-weight:700">atrasado há '+diasAtraso+'d</span>':'')+'</div></td>';
     h+='<td style="font-size:12px">'+(c.fornecedor||'<span style="color:var(--t3)">—</span>')+'</td>';
     h+='<td class="tc">'+(c.plataforma?'<span class="pill pn">'+c.plataforma+'</span>':'<span style="color:var(--t3);font-size:11px">—</span>')+'</td>';
     h+='<td class="tr tnw">'+c.qtd+'</td>';
@@ -2029,6 +2033,7 @@ function pCompras(busca,filtStatus,filtForn){
   h+='<button class="btn btnp bsm" style="margin-left:auto" onclick="modalAddCompra()">+ Novo Item</button>';
   h+='</div>';
 
+  if(_comprasView==='geral'||_comprasView==='hoje')h+=_renderBlingAguardando();
   if(_comprasView==='hoje')h+=_renderComprasHoje();
   else if(_comprasView==='diaria')h+=_renderComprasDiaria();
   else if(_comprasView==='mensal')h+=_renderComprasMensal();
@@ -2078,6 +2083,41 @@ function blingMapearLoja(lojaId,plataforma){
   (DB.compras||[]).forEach(function(c){if(c.origem==='bling'&&c.blingLojaId===String(lojaId)&&!c.plataforma)c.plataforma=plataforma;});
   save();pCompras();
 }
+// Quadro "Pedidos do Bling — falta o custo": tudo que veio do pedido (produto,
+// plataforma, venda, taxa) já preenchido, e um campo pra digitar o valor de
+// compra ali mesmo, sem abrir o formulário inteiro.
+function _renderBlingAguardando(){
+  var itens=(DB.compras||[]).filter(function(c){return c.origem==='bling'&&c.status==='Pendente'&&!c.valorCompra;});
+  if(!itens.length)return '';
+  itens.sort(function(a,b){return (b.id||0)-(a.id||0);});
+  var h='<div class="panel" style="margin-bottom:12px;border-color:rgba(251,191,36,.35)"><div class="ph"><div class="pt">📥 Pedidos do Bling — falta o valor de compra ('+itens.length+')</div></div>';
+  h+='<div style="padding:4px 12px 10px">';
+  itens.forEach(function(c){
+    var liquido=(c.precoVenda-c.taxaUnit);
+    h+='<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--bdr2)">';
+    h+='<div style="flex:1 1 260px;min-width:0"><div style="font-weight:600;font-size:13px;color:var(--t);white-space:normal">'+_escH(c.produto)+'</div>';
+    h+='<div style="font-size:11px;color:var(--t3);margin-top:3px"><span class="pill pn">'+_escH(c.plataforma||'Plataforma?')+'</span> Pedido #'+_escH(c.blingPedidoNum||c.blingPedidoId)+(c.sku?' · SKU '+_escH(c.sku):'')+' · '+_escH(c.data)+'</div></div>';
+    h+='<div style="display:flex;gap:14px;font-size:12px;text-align:right">';
+    h+='<div><div style="color:var(--t3);font-size:10px">QTD</div><b>'+c.qtd+'</b></div>';
+    h+='<div><div style="color:var(--t3);font-size:10px">VENDA UNIT.</div><b>'+R(c.precoVenda)+'</b></div>';
+    h+='<div><div style="color:var(--t3);font-size:10px">TAXA PLAT.</div><b style="color:var(--red)">− '+R(c.taxaUnit)+'</b></div>';
+    h+='<div><div style="color:var(--t3);font-size:10px">VOCÊ RECEBE</div><b style="color:var(--grn)">'+R(liquido)+'</b></div>';
+    h+='</div>';
+    h+='<div style="display:flex;gap:6px;align-items:center"><input id="bc-'+c.id+'" type="number" min="0" step="0.01" placeholder="Custo unit. R$" style="width:120px" onkeydown="if(event.key===\'Enter\')blingSalvarCusto('+c.id+')"><button class="btn btnp bsm" onclick="blingSalvarCusto('+c.id+')">Salvar</button></div>';
+    h+='</div>';
+  });
+  h+='</div></div>';
+  return h;
+}
+function blingSalvarCusto(id){
+  var el=document.getElementById('bc-'+id),v=el?Number(el.value):0;
+  if(!v||v<=0){alert('Digite o valor de compra (custo por unidade).');if(el)el.focus();return;}
+  var c=(DB.compras||[]).find(function(x){return x.id===id;});if(!c)return;
+  c.valorCompra=Math.round(v*100)/100;c.valorSugerido=false;
+  if(!c.impostoPct)c.impostoPct=Math.round((RTU_CONFIG.aliqFed+RTU_CONFIG.aliqEst)*100);
+  save();badges();pCompras();
+}
+
 function _renderComprasBling(){
   if(!_blingStatus){_blingAtualizarStatus();return '<div class="panel"><div class="empty" style="padding:36px">Carregando status do Bling...</div></div>';}
   var st=_blingStatus,h='<div class="panel" style="padding:16px">';
@@ -2104,7 +2144,8 @@ function _renderComprasBling(){
   if(vistas.length){
     h+='<div class="panel"><div class="ph"><div class="pt">Qual loja do Bling é qual plataforma?</div></div><div class="ts tw"><table><thead><tr><th>LOJA NO BLING</th><th>EXEMPLO DE PEDIDO</th><th>PLATAFORMA</th></tr></thead><tbody>';
     vistas.forEach(function(l){
-      var atual=(DB.blingLojas||{})[l.id]||'';
+      var _detectada=((DB.compras||[]).find(function(c){return c.origem==='bling'&&c.blingLojaId===l.id&&c.plataforma;})||{}).plataforma||'';
+      var atual=(DB.blingLojas||{})[l.id]||_detectada;
       var opts='<option value="">— Escolher —</option>'+COMPRA_PLATAFORMAS.map(function(p){return '<option'+(p===atual?' selected':'')+'>'+p+'</option>';}).join('');
       h+='<tr><td class="tnw">'+(l.id==='0'?'Sem loja (manual)':'#'+_escH(l.id))+'</td><td style="font-size:12px">'+_escH(l.exemplo)+'</td><td><select onchange="blingMapearLoja(\''+_escH(l.id)+'\',this.value)"'+(atual?'':' style="border-color:var(--amb)"')+'>'+opts+'</select></td></tr>';
     });
