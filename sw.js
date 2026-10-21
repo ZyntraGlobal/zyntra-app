@@ -1,4 +1,4 @@
-const CACHE = 'zyntra-app-v54';
+const CACHE = 'zyntra-app-v55';
 // index.html e web-sync.js FORA do cache — sempre baixa o mais recente da internet
 const ASSETS = [
   'mobile.css',

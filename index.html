@@ -143,6 +143,58 @@ tfoot td{font-weight:700;border-top:2px solid var(--bdr2);border-bottom:none!imp
 @keyframes lgDot{0%,100%{opacity:.3;transform:scale(1)}50%{opacity:1;transform:scale(1.4)}}
 @keyframes lgShake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
 @keyframes slideIn{from{transform:translateX(120%);opacity:0}to{transform:translateX(0);opacity:1}}
+/* ── Compras: seletor de seção + Pedidos do Bling (mobile-first) ── */
+.zseg{display:flex;gap:4px;padding:4px;margin-bottom:14px;background:var(--w);border:1px solid var(--bdr);border-radius:12px}
+.zseg button{flex:1;min-width:0;display:flex;align-items:center;justify-content:center;gap:7px;padding:10px 8px;border:0;border-radius:9px;background:transparent;color:var(--t2);font:600 13px Inter,sans-serif;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.zseg button.on{background:var(--gold);color:#16130c}
+.zseg .n{display:inline-block;min-width:20px;padding:1px 6px;border-radius:10px;font-size:11px;background:var(--w3);color:var(--t)}
+.zseg button.on .n{background:rgba(0,0,0,.18);color:#16130c}
+.zkpi{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:12px}
+.zkpi>div{background:var(--w);border:1px solid var(--bdr);border-radius:10px;padding:10px 12px;min-width:0}
+.zkpi .l{font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.zkpi .v{font-size:20px;font-weight:800;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.zkpi .s{font-size:11px;color:var(--t3);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.zsync{display:flex;align-items:center;gap:10px;padding:9px 12px;margin-bottom:12px;background:var(--w);border:1px solid var(--bdr);border-radius:10px;font-size:12px;color:var(--t2)}
+.zsync .dot{width:8px;height:8px;border-radius:50%;background:var(--grn);box-shadow:0 0 0 3px var(--gnbg);flex-shrink:0}
+.zsync.err{border-color:rgba(248,113,113,.4)} .zsync.err .dot{background:var(--red);box-shadow:0 0 0 3px var(--rdbg)}
+.zsync .tx{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.zsync button{flex-shrink:0;border:1px solid var(--bdr2);background:var(--w2);color:var(--t);border-radius:8px;padding:6px 10px;font:600 12px Inter,sans-serif;cursor:pointer}
+.zchips{display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:0 0 10px;padding-bottom:2px}
+.zchips::-webkit-scrollbar{display:none}
+.zchips button{flex-shrink:0;padding:7px 12px;border-radius:20px;border:1px solid var(--bdr2);background:var(--w);color:var(--t2);font:600 12px Inter,sans-serif;cursor:pointer;white-space:nowrap}
+.zchips button.on{background:var(--gl);border-color:var(--glb);color:var(--gold)}
+.zped{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:10px}
+.zcard{background:var(--w);border:1px solid var(--bdr);border-radius:12px;padding:12px;min-width:0;display:flex;flex-direction:column;gap:10px}
+.zcard.semcusto{border-left:3px solid var(--amb)}
+.zcard .top{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--t3)}
+.zcard .plat{padding:2px 8px;border-radius:6px;font-size:10px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;background:var(--w3);color:var(--t)}
+.zcard .plat.amazon{background:rgba(255,153,0,.15);color:#ffb84d}
+.zcard .plat.shopee{background:rgba(238,77,45,.15);color:#ff7a5c}
+.zcard .plat.ml{background:rgba(255,230,0,.13);color:#ffe24d}
+.zcard .plat.tiktok{background:rgba(37,244,238,.12);color:#5ff5f0}
+.zcard .plat.site{background:var(--gl);color:var(--gold)}
+.zcard .top .dt{margin-left:auto;white-space:nowrap}
+.zcard .nome{font-size:13px;font-weight:600;color:var(--t);line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.zcard .vals{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:8px 0;border-top:1px solid var(--bdr);border-bottom:1px solid var(--bdr)}
+.zcard .vals div{min-width:0}
+.zcard .vals .l{font-size:9.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--t3)}
+.zcard .vals .v{font-size:13px;font-weight:700;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.zcard .act{display:flex;gap:8px;align-items:center}
+.zcard .custo{flex:1;min-width:0;display:flex;gap:6px}
+.zcard .custo input{flex:1;min-width:0;padding:8px 10px;border:1px solid var(--bdr2);border-radius:8px;background:var(--w2);color:var(--t);font:600 13px Inter,sans-serif;outline:none}
+.zcard .custo button{flex-shrink:0;padding:8px 12px;border:0;border-radius:8px;background:var(--gold);color:#16130c;font:700 12px Inter,sans-serif;cursor:pointer}
+.zcard .custook{flex:1;min-width:0;font-size:12px;color:var(--t2);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.zcard select{flex-shrink:0;width:128px;padding:8px;border:1px solid var(--bdr2);border-radius:8px;background:var(--w2);color:var(--t);font:600 12px Inter,sans-serif}
+.zfoot{display:flex;gap:16px;flex-wrap:wrap;padding:12px 2px 0;font-size:12px;color:var(--t2)}
+@media (max-width:768px){
+  .zseg button{font-size:13px!important;padding:10px 6px!important;min-height:0}
+  .zkpi{gap:6px}
+  .zkpi>div{padding:9px 9px}
+  .zkpi .v{font-size:17px}
+  .zped{grid-template-columns:1fr}
+  .zcard .custo input,.zcard select{font-size:16px!important;padding:8px 10px!important}
+  .zcard select{width:136px}
+}
 </style>
 <script>
 // Pré-carrega dados do GitHub ANTES do app inicializar (síncrono)
@@ -1978,7 +2030,7 @@ function _tabelaCompras(lista,titulo){
     // Nome de marketplace costuma ser enorme — mostra até ~70 caracteres e o resto no tooltip
     var _nome=c.produto||'',_nomeCurto=_nome.length>70?_nome.slice(0,70).replace(/\s+\S*$/,'')+'…':_nome;
     var _linha2=c.origem==='bling'
-      ?'<span style="color:var(--gld);font-weight:700">'+_escH(c.plataforma||'Plataforma?')+'</span> · Pedido #'+_escH(c.blingPedidoNum||c.blingPedidoId)+(c.sku?' · SKU '+_escH(c.sku):'')+' · vendido em '+_escH(c.data)
+      ?'<span style="color:var(--gold);font-weight:700">'+_escH(c.plataforma||'Plataforma?')+'</span> · Pedido #'+_escH(c.blingPedidoNum||c.blingPedidoId)+(c.sku?' · SKU '+_escH(c.sku):'')+' · vendido em '+_escH(c.data)
       :(c.cat||'')+' · Comprar em '+dCompra;
     h+='<td style="min-width:220px;max-width:340px"><div style="font-weight:600;color:var(--t);font-size:12px;white-space:normal" title="'+_escH(_nome)+'">'+_escH(_nomeCurto)+'</div><div style="font-size:10px;color:var(--t3);margin-top:2px">'+_linha2+(diasAtraso>0?' · <span style="color:var(--amb);font-weight:700">atrasado há '+diasAtraso+'d</span>':'')+'</div></td>';
     h+='<td style="font-size:12px">'+(c.fornecedor||'<span style="color:var(--t3)">—</span>')+'</td>';
@@ -2019,8 +2071,8 @@ function pCompras(busca,filtStatus,filtForn){
   var nManualPend=DB.compras.filter(function(c){return !_ehBling(c)&&c.status==='Pendente';}).length;
   var h='';
   if(!_isFuncionario()){
-    var secBtn=function(sec,label,n){var on=_comprasSecao===sec;return '<button class="btn'+(on?' btnp':'')+'" style="flex:1;justify-content:center;font-size:13px;padding:10px 14px" onclick="comprasSecao(\''+sec+'\')">'+label+(n?' <span class="pill '+(on?'pn':'ppendente')+'" style="margin-left:6px">'+n+'</span>':'')+'</button>';};
-    h+='<div style="display:flex;gap:8px;margin-bottom:14px">'+secBtn('manual','📝 Minhas compras (manuais)',nManualPend)+secBtn('bling','🔗 Pedidos do Bling',nBlingAComprar)+'</div>';
+    var secBtn=function(sec,label,n){return '<button class="'+(_comprasSecao===sec?'on':'')+'" onclick="comprasSecao(\''+sec+'\')">'+label+(n?' <span class="n">'+n+'</span>':'')+'</button>';};
+    h+='<div class="zseg">'+secBtn('manual','📝 Minhas compras',nManualPend)+secBtn('bling','🔗 Pedidos Bling',nBlingAComprar)+'</div>';
   }
   if(_comprasSecao==='bling'){h+=_renderSecaoBling();setPage(h);return;}
 
@@ -2105,10 +2157,43 @@ function blingSalvarCusto(id){
   save();badges();pCompras();
 }
 
-// Lista de todos os itens que vieram de pedidos do Bling, com status
-// editável direto na linha (A comprar → Comprado → Recebido / Cancelado).
+function _renderSecaoBling(){
+  var itens=(DB.compras||[]).filter(_ehBling);
+  var aComprar=itens.filter(function(c){return c.status==='Pendente';});
+  var vendidoAberto=aComprar.reduce(function(a,c){return a+c.precoVenda*c.qtd;},0);
+  var semCusto=aComprar.filter(function(c){return !c.valorCompra;}).length;
+  var investir=aComprar.reduce(function(a,c){return a+_calcCompraCalc(c).custoTotal;},0);
+  var h='<div class="zkpi">';
+  h+='<div><div class="l">A comprar</div><div class="v" style="color:var(--gold)">'+aComprar.length+'</div><div class="s">'+R(vendidoAberto)+'</div></div>';
+  h+='<div><div class="l">Sem custo</div><div class="v" style="color:'+(semCusto?'var(--amb)':'var(--grn)')+'">'+semCusto+'</div><div class="s">'+(semCusto?'informar':'tudo certo')+'</div></div>';
+  h+='<div><div class="l">Investir</div><div class="v">'+R(investir)+'</div><div class="s">custo informado</div></div>';
+  h+='</div>';
+  return h+_renderComprasBling();
+}
+
+// ── Integração Bling: status e conexão ───────────────────────────────────
+function _renderComprasBling(){
+  if(!_blingStatus){_blingAtualizarStatus();return '<div class="zsync"><span class="dot" style="background:var(--t3);box-shadow:none"></span><span class="tx">Verificando conexão com o Bling...</span></div>'+_renderBlingPedidos();}
+  var st=_blingStatus,h='';
+  var hora=function(t){return t?new Date(t).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'—';};
+  if(st.erroTela){
+    h+='<div class="zsync err"><span class="dot"></span><span class="tx">'+_escH(st.erroTela)+'</span><button onclick="_blingStatus=null;pCompras()">Tentar de novo</button></div>';
+  }else if(!st.credenciais){
+    h+='<div class="zsync err"><span class="dot"></span><span class="tx">App do Bling não configurado no servidor</span></div>';
+  }else if(!st.conectado){
+    h+='<div class="zsync err"><span class="dot"></span><span class="tx">Bling desconectado</span><button onclick="blingConectar()">Conectar Bling</button></div>';
+  }else if(st.ultimoErro){
+    h+='<div class="zsync err"><span class="dot"></span><span class="tx" title="'+_escH(st.ultimoErro)+'">Erro ao buscar pedidos no Bling</span><button onclick="blingConectar()">Reconectar</button></div>';
+  }else{
+    var res=st.ultimoResultado||{};
+    h+='<div class="zsync"><span class="dot"></span><span class="tx"><b style="color:var(--t)">Bling conectado</b> · '+hora(st.ultimaExec)+(res.emAberto!=null?' · '+res.emAberto+' em aberto':'')+'</span><button onclick="blingSincronizarAgora()" title="Buscar pedidos agora">🔄</button></div>';
+  }
+  return h+_renderBlingPedidos();
+}
+
+// ── Pedidos do Bling: um card por item, com custo e status na própria linha ──
 var _blingFiltro='Pendente';
-var _BLING_STATUS_LABEL={Pendente:'🕓 A comprar',Comprado:'🛒 Comprado',Recebido:'📦 Recebido',Cancelado:'✕ Cancelado'};
+var _BLING_STATUS_LABEL={Pendente:'A comprar',Comprado:'Comprado',Recebido:'Recebido',Cancelado:'Cancelado'};
 function blingFiltrar(f){_blingFiltro=f;pCompras();}
 function blingMudarStatus(id,st){
   var c=(DB.compras||[]).find(function(x){return x.id===id;});if(!c||c.status===st)return;
@@ -2122,78 +2207,41 @@ function blingMudarStatus(id,st){
   if(st==='Comprado')c.dataCompra=hoje();
   save();badges();pCompras();
 }
+function _classePlat(p){return {'Amazon':'amazon','Shopee':'shopee','Mercado Livre':'ml','TikTok Shop':'tiktok','Site Zyntra':'site'}[p]||'';}
 function _renderBlingPedidos(){
-  var todos=(DB.compras||[]).filter(function(c){return c.origem==='bling';});
+  var todos=(DB.compras||[]).filter(_ehBling);
   todos.sort(function(a,b){return (b.id||0)-(a.id||0);});
   var cnt={todos:todos.length,Pendente:0,Comprado:0,Recebido:0,Cancelado:0};
   todos.forEach(function(c){if(cnt[c.status]!=null)cnt[c.status]++;});
   var lista=_blingFiltro==='todos'?todos:todos.filter(function(c){return c.status===_blingFiltro;});
-  var btn=function(f,l){return '<button class="btn bsm'+(_blingFiltro===f?' btnp':'')+'" onclick="blingFiltrar(\''+f+'\')">'+l+' ('+cnt[f]+')</button>';};
-  var h='<div class="panel" style="margin-top:12px"><div class="ph" style="flex-wrap:wrap;gap:8px"><div class="pt">📦 Pedidos recebidos</div>';
-  h+='<div class="brow" style="margin:0">'+btn('Pendente','🕓 A comprar')+btn('Comprado','🛒 Comprados')+btn('Recebido','📦 Recebidos')+btn('Cancelado','✕ Cancelados')+btn('todos','Todos')+'</div></div>';
+  var chip=function(f,l){return '<button class="'+(_blingFiltro===f?'on':'')+'" onclick="blingFiltrar(\''+f+'\')">'+l+' · '+cnt[f]+'</button>';};
+  var h='<div class="zchips">'+chip('Pendente','🕓 A comprar')+chip('Comprado','🛒 Comprados')+chip('Recebido','📦 Recebidos')+chip('Cancelado','✕ Cancelados')+chip('todos','Todos')+'</div>';
   if(!lista.length){
-    h+='<div class="empty" style="padding:28px;font-size:12px;color:var(--t3)">'+(todos.length?'Nenhum pedido nesse filtro.':'Nenhum pedido importado ainda — os pedidos do Bling aparecem aqui em até 1 minuto.')+'</div></div>';
-    return h;
+    return h+'<div class="panel"><div class="empty" style="padding:28px;font-size:12px;color:var(--t3)">'+(todos.length?'Nenhum pedido nesse filtro.':'Nenhum pedido importado ainda — os pedidos do Bling aparecem aqui em até 1 minuto.')+'</div></div>';
   }
   var totVenda=0,totCusto=0;
-  h+='<div style="padding:2px 12px 8px">';
+  h+='<div class="zped">';
   lista.forEach(function(c){
     var r=_calcCompraCalc(c);totVenda+=c.precoVenda*c.qtd;totCusto+=r.custoTotal;
     var stOpts=COMPRA_STATUS.map(function(st){return '<option value="'+st+'"'+(c.status===st?' selected':'')+'>'+_BLING_STATUS_LABEL[st]+'</option>';}).join('');
-    h+='<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--bdr2)">';
-    h+='<div style="flex:1 1 260px;min-width:0"><div style="font-weight:600;font-size:13px;color:var(--t);white-space:normal">'+_escH(c.produto)+'</div>';
-    h+='<div style="font-size:11px;color:var(--t3);margin-top:3px"><span class="pill pn">'+_escH(c.plataforma||'Plataforma?')+'</span> Pedido #'+_escH(c.blingPedidoNum||c.blingPedidoId)+(c.sku?' · SKU '+_escH(c.sku):'')+' · vendido em '+_escH(c.data)+'</div></div>';
-    h+='<div style="display:flex;gap:14px;font-size:12px;text-align:right">';
-    h+='<div><div style="color:var(--t3);font-size:10px">QTD</div><b>'+c.qtd+'</b></div>';
-    h+='<div><div style="color:var(--t3);font-size:10px">VENDA</div><b>'+R(c.precoVenda)+'</b></div>';
-    h+='<div><div style="color:var(--t3);font-size:10px">TAXA</div><b style="color:var(--red)">− '+R(c.taxaUnit)+'</b></div>';
-    h+='<div><div style="color:var(--t3);font-size:10px">CUSTO UNIT.</div>'+(c.valorCompra?'<b style="cursor:pointer" onclick="editCompra('+c.id+')" title="Editar">'+R(c.valorCompra)+'</b>':'<span style="display:inline-flex;gap:4px"><input id="bc-'+c.id+'" type="number" min="0" step="0.01" placeholder="R$" style="width:84px;padding:3px 6px;font-size:12px" onkeydown="if(event.key===\'Enter\')blingSalvarCusto('+c.id+')"><button class="btn btnp bsm" onclick="blingSalvarCusto('+c.id+')">OK</button></span>')+'</div>';
-    h+='<div><div style="color:var(--t3);font-size:10px">LUCRO</div><b class="'+(r.viavel==='semdados'?'':r.lucroTotal>=0?'grn':'red')+'">'+(r.viavel==='semdados'?'—':R(r.lucroTotal))+'</b></div>';
+    var semCusto=!c.valorCompra;
+    h+='<div class="zcard'+(semCusto&&c.status==='Pendente'?' semcusto':'')+'">';
+    h+='<div class="top"><span class="plat '+_classePlat(c.plataforma)+'">'+_escH(c.plataforma||'Outro')+'</span><span>#'+_escH(c.blingPedidoNum||c.blingPedidoId)+(c.qtd>1?' · <b style="color:var(--t)">'+c.qtd+' un.</b>':'')+'</span><span class="dt">'+_escH((c.data||'').slice(0,5))+'</span></div>';
+    h+='<div class="nome" title="'+_escH(c.produto)+'">'+_escH(c.produto)+'</div>';
+    h+='<div class="vals">';
+    h+='<div><div class="l">Venda</div><div class="v">'+R(c.precoVenda)+'</div></div>';
+    h+='<div><div class="l">Taxa</div><div class="v" style="color:var(--red)">−'+R(c.taxaUnit)+'</div></div>';
+    if(semCusto)h+='<div><div class="l">Você recebe</div><div class="v" style="color:var(--grn)">'+R(c.precoVenda-c.taxaUnit)+'</div></div>';
+    else h+='<div><div class="l">Lucro</div><div class="v" style="color:'+(r.lucroUnit>=0?'var(--grn)':'var(--red)')+'">'+R(r.lucroTotal)+(r.margemPct!=null?' <span style="font-size:10px;color:var(--t3)">'+r.margemPct.toFixed(0)+'%</span>':'')+'</div></div>';
     h+='</div>';
-    h+='<select onchange="blingMudarStatus('+c.id+',this.value)" style="min-width:130px">'+stOpts+'</select>';
-    h+='</div>';
+    h+='<div class="act">';
+    if(semCusto)h+='<div class="custo"><input id="bc-'+c.id+'" type="number" inputmode="decimal" min="0" step="0.01" placeholder="Custo R$" onkeydown="if(event.key===\'Enter\')blingSalvarCusto('+c.id+')"><button onclick="blingSalvarCusto('+c.id+')">OK</button></div>';
+    else h+='<div class="custook" onclick="editCompra('+c.id+')" title="Editar">Custo <b style="color:var(--t)">'+R(c.valorCompra)+'</b> ✏️</div>';
+    var corSt={Pendente:'var(--amb)',Comprado:'var(--blu)',Recebido:'var(--grn)',Cancelado:'var(--t3)'}[c.status]||'var(--t)';
+    h+='<select onchange="blingMudarStatus('+c.id+',this.value)" style="color:'+corSt+'">'+stOpts+'</select>';
+    h+='</div></div>';
   });
-  h+='</div><div style="padding:8px 12px 12px;font-size:12px;color:var(--t2);display:flex;gap:18px;flex-wrap:wrap"><span>'+lista.length+' item(ns)</span><span>Vendido: <b style="color:var(--t)">'+R(totVenda)+'</b></span><span>Custo informado: <b style="color:var(--t)">'+R(totCusto)+'</b></span></div></div>';
-  return h;
-}
-
-function _renderSecaoBling(){
-  var itens=(DB.compras||[]).filter(_ehBling);
-  var aComprar=itens.filter(function(c){return c.status==='Pendente';});
-  var vendidoAberto=aComprar.reduce(function(a,c){return a+c.precoVenda*c.qtd;},0);
-  var semCusto=aComprar.filter(function(c){return !c.valorCompra;}).length;
-  var investir=aComprar.reduce(function(a,c){return a+_calcCompraCalc(c).custoTotal;},0);
-  var h='<div class="g3" style="margin-bottom:12px">';
-  h+='<div class="card hl"><div class="lbl">🕓 A comprar</div><div class="val gld">'+aComprar.length+'</div><div class="sub">'+R(vendidoAberto)+' em vendas</div></div>';
-  h+='<div class="card'+(semCusto?' warn':'')+'"><div class="lbl">💲 Falta informar custo</div><div class="val '+(semCusto?'amb':'grn')+'">'+semCusto+'</div><div class="sub">digite o custo na linha do pedido</div></div>';
-  h+='<div class="card"><div class="lbl">💰 Investir (custo informado)</div><div class="val">'+R(investir)+'</div><div class="sub">dos itens a comprar</div></div>';
-  h+='</div>';
-  return h+_renderComprasBling();
-}
-
-function _renderComprasBling(){
-  if(!_blingStatus){_blingAtualizarStatus();return '<div class="panel"><div class="empty" style="padding:36px">Carregando status do Bling...</div></div>';}
-  var st=_blingStatus,h='<div class="panel" style="padding:16px">';
-  var fmt=function(t){return t?new Date(t).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'—';};
-  h+='<div class="pt" style="margin-bottom:10px">🔗 Integração Bling</div>';
-  if(st.erroTela)h+='<div style="color:var(--red);font-size:12px;margin-bottom:10px">'+_escH(st.erroTela)+'</div>';
-  if(!st.credenciais&&!st.erroTela){
-    h+='<div style="font-size:13px;color:var(--t2)">O app do Bling ainda não foi configurado no servidor.</div>';
-  }else if(!st.conectado){
-    h+='<div style="font-size:13px;color:var(--t2);margin-bottom:12px">Conecte sua conta do Bling pra os pedidos de todas as plataformas entrarem aqui sozinhos.</div>';
-    h+='<button class="btn btnp" onclick="blingConectar()">Conectar Bling</button>';
-  }else{
-    var res=st.ultimoResultado||{};
-    h+='<div class="g3" style="margin-bottom:12px">';
-    h+='<div class="card"><div class="lbl">Status</div><div class="val '+(st.ultimoErro?'red':'grn')+'" style="font-size:16px">'+(st.ultimoErro?'⚠️ Com erro':'✅ Conectado')+'</div><div class="sub">importando pedidos desde '+(st.desde?st.desde.split('-').reverse().join('/'):'—')+'</div></div>';
-    h+='<div class="card"><div class="lbl">Última busca</div><div class="val" style="font-size:16px">'+fmt(st.ultimaExec)+'</div><div class="sub">automática a cada minuto</div></div>';
-    h+='<div class="card"><div class="lbl">Última importação</div><div class="val" style="font-size:16px">'+(res.novos||0)+' novo(s)</div><div class="sub">'+(res.emAberto!=null?res.emAberto+' pedido(s) em aberto no Bling':'')+(res.pendentesDeDetalhe?' · '+res.pendentesDeDetalhe+' na fila':'')+'</div></div>';
-    h+='</div>';
-    if(st.ultimoErro)h+='<div style="color:var(--red);font-size:12px;margin-bottom:10px">'+_escH(st.ultimoErro)+'</div>';
-    h+='<div class="brow"><button class="btn btnp bsm" onclick="blingSincronizarAgora()">🔄 Buscar pedidos agora</button>'+(st.ultimoErro?' <button class="btn bsm" onclick="blingConectar()">Reconectar Bling</button>':'')+'</div>';
-  }
-  h+='</div>';
-  h+=_renderBlingPedidos();
+  h+='</div><div class="zfoot"><span>'+lista.length+' item(ns)</span><span>Vendido <b style="color:var(--t)">'+R(totVenda)+'</b></span><span>Custo informado <b style="color:var(--t)">'+R(totCusto)+'</b></span></div>';
   return h;
 }
 
