@@ -2048,9 +2048,9 @@ function pCompras(busca,filtStatus,filtForn){
 function _escH(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 
 // ── Integração Bling ─────────────────────────────────────────────────────
-// O relay (Cloudflare Worker) busca os pedidos no Bling a cada 15 min e cria os
-// itens em Compras sozinho. Esta aba só mostra o status, conecta a conta e
-// diz qual loja do Bling é qual plataforma (DB.blingLojas: {lojaId: plataforma}).
+// O relay (Cloudflare Worker) busca os pedidos no Bling a cada minuto e cria os
+// itens em Compras sozinho, já com a plataforma reconhecida pelo número do
+// pedido. Esta aba mostra o status, conecta a conta e lista os pedidos.
 var _blingStatus=null;
 function _blingFetch(caminho,metodo){
   return fetch(_PUSH_RELAY_URL+caminho,{method:metodo||'GET',headers:{'Authorization':'Bearer '+_sessaoAtual().token}})
@@ -2075,13 +2075,6 @@ function blingSincronizarAgora(){
     if(typeof window.forcarSincronizarG==='function')window.forcarSincronizarG();
     _blingAtualizarStatus();
   }).catch(function(e){alert('Bling: '+(e.message||e));});
-}
-function blingMapearLoja(lojaId,plataforma){
-  if(!DB.blingLojas)DB.blingLojas={};
-  if(plataforma)DB.blingLojas[lojaId]=plataforma;else delete DB.blingLojas[lojaId];
-  // Itens já importados dessa loja que ficaram sem plataforma também recebem
-  (DB.compras||[]).forEach(function(c){if(c.origem==='bling'&&c.blingLojaId===String(lojaId)&&!c.plataforma)c.plataforma=plataforma;});
-  save();pCompras();
 }
 // Quadro "Pedidos do Bling — falta o custo": tudo que veio do pedido (produto,
 // plataforma, venda, taxa) já preenchido, e um campo pra digitar o valor de
@@ -2145,7 +2138,7 @@ function _renderBlingPedidos(){
   var h='<div class="panel" style="margin-top:12px"><div class="ph" style="flex-wrap:wrap;gap:8px"><div class="pt">📦 Pedidos recebidos</div>';
   h+='<div class="brow" style="margin:0">'+btn('Pendente','🕓 A comprar')+btn('Comprado','🛒 Comprados')+btn('Recebido','📦 Recebidos')+btn('Cancelado','✕ Cancelados')+btn('todos','Todos')+'</div></div>';
   if(!lista.length){
-    h+='<div class="empty" style="padding:28px;font-size:12px;color:var(--t3)">'+(todos.length?'Nenhum pedido nesse filtro.':'Nenhum pedido importado ainda — os novos pedidos do Bling aparecem aqui em até 15 min.')+'</div></div>';
+    h+='<div class="empty" style="padding:28px;font-size:12px;color:var(--t3)">'+(todos.length?'Nenhum pedido nesse filtro.':'Nenhum pedido importado ainda — os pedidos do Bling aparecem aqui em até 1 minuto.')+'</div></div>';
     return h;
   }
   var totVenda=0,totCusto=0;
@@ -2185,7 +2178,7 @@ function _renderComprasBling(){
     var res=st.ultimoResultado||{};
     h+='<div class="g3" style="margin-bottom:12px">';
     h+='<div class="card"><div class="lbl">Status</div><div class="val '+(st.ultimoErro?'red':'grn')+'" style="font-size:16px">'+(st.ultimoErro?'⚠️ Com erro':'✅ Conectado')+'</div><div class="sub">importando pedidos desde '+(st.desde?st.desde.split('-').reverse().join('/'):'—')+'</div></div>';
-    h+='<div class="card"><div class="lbl">Última busca</div><div class="val" style="font-size:16px">'+fmt(st.ultimaExec)+'</div><div class="sub">automática a cada 15 min</div></div>';
+    h+='<div class="card"><div class="lbl">Última busca</div><div class="val" style="font-size:16px">'+fmt(st.ultimaExec)+'</div><div class="sub">automática a cada minuto</div></div>';
     h+='<div class="card"><div class="lbl">Última importação</div><div class="val" style="font-size:16px">'+(res.novos||0)+' novo(s)</div><div class="sub">'+(res.pedidosNaJanela||0)+' pedidos recentes no Bling'+(res.pendentesDeDetalhe?' · '+res.pendentesDeDetalhe+' na fila':'')+'</div></div>';
     h+='</div>';
     if(st.ultimoErro)h+='<div style="color:var(--red);font-size:12px;margin-bottom:10px">'+_escH(st.ultimoErro)+'</div>';
@@ -2193,17 +2186,6 @@ function _renderComprasBling(){
   }
   h+='</div>';
   h+=_renderBlingPedidos();
-  var vistas=DB.blingLojasVistas||[];
-  if(vistas.length){
-    h+='<div class="panel"><div class="ph"><div class="pt">Qual loja do Bling é qual plataforma?</div></div><div class="ts tw"><table><thead><tr><th>LOJA NO BLING</th><th>EXEMPLO DE PEDIDO</th><th>PLATAFORMA</th></tr></thead><tbody>';
-    vistas.forEach(function(l){
-      var _detectada=((DB.compras||[]).find(function(c){return c.origem==='bling'&&c.blingLojaId===l.id&&c.plataforma;})||{}).plataforma||'';
-      var atual=(DB.blingLojas||{})[l.id]||_detectada;
-      var opts='<option value="">— Escolher —</option>'+COMPRA_PLATAFORMAS.map(function(p){return '<option'+(p===atual?' selected':'')+'>'+p+'</option>';}).join('');
-      h+='<tr><td class="tnw">'+(l.id==='0'?'Sem loja (manual)':'#'+_escH(l.id))+'</td><td style="font-size:12px">'+_escH(l.exemplo)+'</td><td><select onchange="blingMapearLoja(\''+_escH(l.id)+'\',this.value)"'+(atual?'':' style="border-color:var(--amb)"')+'>'+opts+'</select></td></tr>';
-    });
-    h+='</tbody></table></div></div>';
-  }
   return h;
 }
 
