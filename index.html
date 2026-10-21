@@ -2118,6 +2118,58 @@ function blingSalvarCusto(id){
   save();badges();pCompras();
 }
 
+// Lista de todos os itens que vieram de pedidos do Bling, com status
+// editável direto na linha (A comprar → Comprado → Recebido / Cancelado).
+var _blingFiltro='Pendente';
+var _BLING_STATUS_LABEL={Pendente:'🕓 A comprar',Comprado:'🛒 Comprado',Recebido:'📦 Recebido',Cancelado:'✕ Cancelado'};
+function blingFiltrar(f){_blingFiltro=f;pCompras();}
+function blingMudarStatus(id,st){
+  var c=(DB.compras||[]).find(function(x){return x.id===id;});if(!c||c.status===st)return;
+  if(st==='Comprado'&&!c.valorCompra){
+    var v=prompt('Quanto custou cada unidade? (R$)\n'+c.produto);
+    if(v===null){pCompras();return;}
+    v=Number(String(v).replace(',','.'));
+    if(v>0){c.valorCompra=Math.round(v*100)/100;c.valorSugerido=false;if(!c.impostoPct)c.impostoPct=Math.round((RTU_CONFIG.aliqFed+RTU_CONFIG.aliqEst)*100);}
+  }
+  c.status=st;
+  if(st==='Comprado')c.dataCompra=hoje();
+  save();badges();pCompras();
+}
+function _renderBlingPedidos(){
+  var todos=(DB.compras||[]).filter(function(c){return c.origem==='bling';});
+  todos.sort(function(a,b){return (b.id||0)-(a.id||0);});
+  var cnt={todos:todos.length,Pendente:0,Comprado:0,Recebido:0,Cancelado:0};
+  todos.forEach(function(c){if(cnt[c.status]!=null)cnt[c.status]++;});
+  var lista=_blingFiltro==='todos'?todos:todos.filter(function(c){return c.status===_blingFiltro;});
+  var btn=function(f,l){return '<button class="btn bsm'+(_blingFiltro===f?' btnp':'')+'" onclick="blingFiltrar(\''+f+'\')">'+l+' ('+cnt[f]+')</button>';};
+  var h='<div class="panel" style="margin-top:12px"><div class="ph" style="flex-wrap:wrap;gap:8px"><div class="pt">📦 Pedidos recebidos</div>';
+  h+='<div class="brow" style="margin:0">'+btn('Pendente','🕓 A comprar')+btn('Comprado','🛒 Comprados')+btn('Recebido','📦 Recebidos')+btn('Cancelado','✕ Cancelados')+btn('todos','Todos')+'</div></div>';
+  if(!lista.length){
+    h+='<div class="empty" style="padding:28px;font-size:12px;color:var(--t3)">'+(todos.length?'Nenhum pedido nesse filtro.':'Nenhum pedido importado ainda — os novos pedidos do Bling aparecem aqui em até 15 min.')+'</div></div>';
+    return h;
+  }
+  var totVenda=0,totCusto=0;
+  h+='<div style="padding:2px 12px 8px">';
+  lista.forEach(function(c){
+    var r=_calcCompraCalc(c);totVenda+=c.precoVenda*c.qtd;totCusto+=r.custoTotal;
+    var stOpts=COMPRA_STATUS.map(function(st){return '<option value="'+st+'"'+(c.status===st?' selected':'')+'>'+_BLING_STATUS_LABEL[st]+'</option>';}).join('');
+    h+='<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--bdr2)">';
+    h+='<div style="flex:1 1 260px;min-width:0"><div style="font-weight:600;font-size:13px;color:var(--t);white-space:normal">'+_escH(c.produto)+'</div>';
+    h+='<div style="font-size:11px;color:var(--t3);margin-top:3px"><span class="pill pn">'+_escH(c.plataforma||'Plataforma?')+'</span> Pedido #'+_escH(c.blingPedidoNum||c.blingPedidoId)+(c.sku?' · SKU '+_escH(c.sku):'')+' · vendido em '+_escH(c.data)+'</div></div>';
+    h+='<div style="display:flex;gap:14px;font-size:12px;text-align:right">';
+    h+='<div><div style="color:var(--t3);font-size:10px">QTD</div><b>'+c.qtd+'</b></div>';
+    h+='<div><div style="color:var(--t3);font-size:10px">VENDA</div><b>'+R(c.precoVenda)+'</b></div>';
+    h+='<div><div style="color:var(--t3);font-size:10px">TAXA</div><b style="color:var(--red)">− '+R(c.taxaUnit)+'</b></div>';
+    h+='<div><div style="color:var(--t3);font-size:10px">CUSTO</div>'+(c.valorCompra?'<b>'+R(c.valorCompra)+'</b>':'<a href="#" onclick="editCompra('+c.id+');return false" style="color:var(--amb);font-weight:700">informar</a>')+'</div>';
+    h+='<div><div style="color:var(--t3);font-size:10px">LUCRO</div><b class="'+(r.viavel==='semdados'?'':r.lucroTotal>=0?'grn':'red')+'">'+(r.viavel==='semdados'?'—':R(r.lucroTotal))+'</b></div>';
+    h+='</div>';
+    h+='<select onchange="blingMudarStatus('+c.id+',this.value)" style="min-width:130px">'+stOpts+'</select>';
+    h+='</div>';
+  });
+  h+='</div><div style="padding:8px 12px 12px;font-size:12px;color:var(--t2);display:flex;gap:18px;flex-wrap:wrap"><span>'+lista.length+' item(ns)</span><span>Vendido: <b style="color:var(--t)">'+R(totVenda)+'</b></span><span>Custo informado: <b style="color:var(--t)">'+R(totCusto)+'</b></span></div></div>';
+  return h;
+}
+
 function _renderComprasBling(){
   if(!_blingStatus){_blingAtualizarStatus();return '<div class="panel"><div class="empty" style="padding:36px">Carregando status do Bling...</div></div>';}
   var st=_blingStatus,h='<div class="panel" style="padding:16px">';
@@ -2140,6 +2192,7 @@ function _renderComprasBling(){
     h+='<div class="brow"><button class="btn btnp bsm" onclick="blingSincronizarAgora()">🔄 Buscar pedidos agora</button>'+(st.ultimoErro?' <button class="btn bsm" onclick="blingConectar()">Reconectar Bling</button>':'')+'</div>';
   }
   h+='</div>';
+  h+=_renderBlingPedidos();
   var vistas=DB.blingLojasVistas||[];
   if(vistas.length){
     h+='<div class="panel"><div class="ph"><div class="pt">Qual loja do Bling é qual plataforma?</div></div><div class="ts tw"><table><thead><tr><th>LOJA NO BLING</th><th>EXEMPLO DE PEDIDO</th><th>PLATAFORMA</th></tr></thead><tbody>';
