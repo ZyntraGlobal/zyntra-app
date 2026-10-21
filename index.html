@@ -839,18 +839,17 @@ function pDash(){
   }
 
   // ── COMPRAS ──
-  var comprasTodos=DB.compras||[];
-  var comprasPendTodos=comprasTodos.filter(function(c){return c.status==='Pendente';});
-  var comprasPendVencidos=comprasPendTodos.filter(function(c){return _diasEmAberto(c.dataCompra||c.data)>=0;});
-  var investirHoje=comprasPendVencidos.reduce(function(a,c){return a+_calcCompraCalc(c).custoTotal;},0);
-  var comprasInvestidasHoje=comprasTodos.filter(function(c){return c.status==='Comprado'&&(c.dataCompra||c.data)===hoje();});
-  var investidoHoje=comprasInvestidasHoje.reduce(function(a,c){return a+_calcCompraCalc(c).custoTotal;},0);
-  var comprasAtivas=comprasTodos.filter(function(c){return c.status!=='Cancelado';});
-  var comprasNaoVale=comprasAtivas.filter(function(c){return _calcCompraCalc(c).viavel==='ruim';}).length;
-  var comprasPendTotal=comprasPendVencidos.length;
-  var comprasAtrasados=comprasPendVencidos.filter(function(c){return (c.dataCompra||c.data)!==hoje();}).length;
-  var comprasStatus=comprasNaoVale>0?'red':comprasPendTotal>0?'amb':'grn';
-  var comprasLabel=comprasNaoVale>0?comprasNaoVale+' sem viabilidade':comprasPendTotal>0?comprasPendTotal+' vencida'+(comprasPendTotal>1?'s':'')+(comprasAtrasados>0?' ('+comprasAtrasados+' atrasada'+(comprasAtrasados>1?'s':'')+')':''):'Nada vencido hoje';
+  // Card do dashboard mostra os pedidos do Bling (a lista manual continua em Compras)
+  var blingItens=(DB.compras||[]).filter(function(c){return c.origem==='bling';});
+  var blingAComprar=blingItens.filter(function(c){return c.status==='Pendente';});
+  var blingPedidos={};blingAComprar.forEach(function(c){blingPedidos[c.blingPedidoId]=1;});
+  var blingNPedidos=Object.keys(blingPedidos).length;
+  var blingValorTotal=blingAComprar.reduce(function(a,c){return a+c.precoVenda*c.qtd;},0);
+  var blingSemCusto=blingAComprar.filter(function(c){return !c.valorCompra;}).length;
+  var blingComprados=blingItens.filter(function(c){return c.status==='Comprado';}).length;
+  var blingInvestir=blingAComprar.reduce(function(a,c){return a+_calcCompraCalc(c).custoTotal;},0);
+  var comprasStatus=blingSemCusto>0?'amb':'grn';
+  var comprasLabel=blingNPedidos===0?'Nenhum pedido em aberto':blingSemCusto>0?blingSemCusto+' sem custo':'Custos informados';
 
   // ── MARKETPLACES ──
   var mktTodos=DB.marketplaces||[];
@@ -905,11 +904,11 @@ function pDash(){
   ]);
 
   // Card Compras
-  h+=modCard('🛒','Compras Hoje',R(investirHoje),'gold',comprasTodos.length+' ite'+(comprasTodos.length!==1?'ns':'m')+' na lista · '+comprasPendTotal+' pendente'+(comprasPendTotal!==1?'s':''),comprasStatus,comprasLabel,"ir('compras')",[
-    ['Investir hoje',R(investirHoje),'var(--gold)'],
-    ['Investido hoje',R(investidoHoje),comprasInvestidasHoje.length>0?'var(--grn)':'var(--t3)'],
-    ['Pendentes',comprasPendTotal,comprasPendTotal>0?'var(--amb)':'var(--t3)'],
-    ['Sem viabilidade',comprasNaoVale,comprasNaoVale>0?'var(--red)':'var(--t3)']
+  h+=modCard('🔗','Pedidos Bling',R(blingValorTotal),'gold',blingNPedidos+' pedido'+(blingNPedidos!==1?'s':'')+' em aberto · '+blingAComprar.length+' ite'+(blingAComprar.length!==1?'ns':'m')+' a comprar',comprasStatus,comprasLabel,"_comprasSecao='bling';ir('compras')",[
+    ['Pedidos',blingNPedidos,'var(--gold)'],
+    ['Comprados',blingComprados,blingComprados>0?'var(--grn)':'var(--t3)'],
+    ['Sem custo',blingSemCusto,blingSemCusto>0?'var(--amb)':'var(--t3)'],
+    ['Investir',R(blingInvestir),blingInvestir>0?'var(--t)':'var(--t3)']
   ]);
 
   h+='</div>';
