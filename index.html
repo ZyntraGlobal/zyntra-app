@@ -2003,12 +2003,33 @@ function _tabelaCompras(lista,titulo){
 }
 
 var _filtroCompras={busca:'',status:'',forn:''};
+// Compras tem duas seções separadas: "Minhas compras" (itens lançados à mão) e
+// "Pedidos do Bling" (importados automaticamente). Funcionário só vê a primeira.
+var _comprasSecao='manual';
+function comprasSecao(sec){_comprasSecao=sec;pCompras();}
+function _ehBling(c){return c&&c.origem==='bling';}
 function pCompras(busca,filtStatus,filtForn){
   if(busca===undefined&&filtStatus===undefined&&filtForn===undefined){busca=_filtroCompras.busca;filtStatus=_filtroCompras.status;filtForn=_filtroCompras.forn;}
   busca=busca||'';filtStatus=filtStatus||'';filtForn=filtForn||'';
   _filtroCompras.busca=busca;_filtroCompras.status=filtStatus;_filtroCompras.forn=filtForn;
   if(!DB.compras)DB.compras=[];
+  if(_isFuncionario())_comprasSecao='manual';
 
+  var nBlingAComprar=DB.compras.filter(function(c){return _ehBling(c)&&c.status==='Pendente';}).length;
+  var nManualPend=DB.compras.filter(function(c){return !_ehBling(c)&&c.status==='Pendente';}).length;
+  var h='';
+  if(!_isFuncionario()){
+    var secBtn=function(sec,label,n){var on=_comprasSecao===sec;return '<button class="btn'+(on?' btnp':'')+'" style="flex:1;justify-content:center;font-size:13px;padding:10px 14px" onclick="comprasSecao(\''+sec+'\')">'+label+(n?' <span class="pill '+(on?'pn':'ppendente')+'" style="margin-left:6px">'+n+'</span>':'')+'</button>';};
+    h+='<div style="display:flex;gap:8px;margin-bottom:14px">'+secBtn('manual','📝 Minhas compras (manuais)',nManualPend)+secBtn('bling','🔗 Pedidos do Bling',nBlingAComprar)+'</div>';
+  }
+  if(_comprasSecao==='bling'){h+=_renderSecaoBling();setPage(h);return;}
+
+  // Seção manual: todas as telas abaixo leem DB.compras, então durante o
+  // desenho DB.compras passa a ser só os itens manuais (e volta logo depois —
+  // botões de editar/excluir procuram pelo id na lista completa).
+  var _todasCompras=DB.compras;
+  DB.compras=_todasCompras.filter(function(c){return !_ehBling(c);});
+  try{
   // Resumo fixo — aparece em qualquer aba, pra sempre saber os dois números principais
   var hj=hoje();
   var todos=DB.compras;
@@ -2016,12 +2037,13 @@ function pCompras(busca,filtStatus,filtForn){
   var investirHojeTopo=pendentesVenc.reduce(function(a,c){return a+_calcCompraCalc(c).custoTotal;},0);
   var investidasHojeTopo=todos.filter(function(c){return c.status==='Comprado'&&(c.dataCompra||c.data)===hj;});
   var investidoHojeTopo=investidasHojeTopo.reduce(function(a,c){return a+_calcCompraCalc(c).custoTotal;},0);
-  var h='<div class="g3" style="margin-bottom:12px">';
+  h+='<div class="g3" style="margin-bottom:12px">';
   h+='<div class="card'+(investirHojeTopo>0?' hl':'')+'"><div class="lbl">💰 Investir Hoje</div><div class="val'+(investirHojeTopo>0?' gld':'')+'">'+R(investirHojeTopo)+'</div><div class="sub">'+pendentesVenc.length+' pendente'+(pendentesVenc.length===1?'':'s')+'</div></div>';
   h+='<div class="card'+(investidoHojeTopo>0?' hl':'')+'"><div class="lbl">💵 Investido Hoje</div><div class="val'+(investidoHojeTopo>0?' grn':'')+'">'+R(investidoHojeTopo)+'</div><div class="sub">'+investidasHojeTopo.length+' comprado'+(investidasHojeTopo.length===1?'':'s')+'</div></div>';
   h+='<div class="card"><div class="lbl">📦 Pendentes no Total</div><div class="val amb">'+todos.filter(function(c){return c.status==='Pendente';}).length+'</div><div class="sub">todas as datas</div></div>';
   h+='</div>';
 
+  if(_comprasView==='bling')_comprasView='geral';
   h+='<div class="brow" style="margin-bottom:10px">';
   h+=_comprasTabBtn('geral','📋 Visão Geral');
   h+=_comprasTabBtn('hoje','📅 Hoje');
@@ -2029,18 +2051,16 @@ function pCompras(busca,filtStatus,filtForn){
   h+=_comprasTabBtn('mensal','🗓 Mensal');
   h+=_comprasTabBtn('plataformas','🛍 Plataformas');
   h+=_comprasTabBtn('produto','🔢 Por Produto');
-  if(!_isFuncionario())h+=_comprasTabBtn('bling','🔗 Bling');
   h+='<button class="btn btnp bsm" style="margin-left:auto" onclick="modalAddCompra()">+ Novo Item</button>';
   h+='</div>';
 
-  if(_comprasView==='geral'||_comprasView==='hoje')h+=_renderBlingAguardando();
   if(_comprasView==='hoje')h+=_renderComprasHoje();
   else if(_comprasView==='diaria')h+=_renderComprasDiaria();
   else if(_comprasView==='mensal')h+=_renderComprasMensal();
   else if(_comprasView==='plataformas')h+=_renderComprasPlataformas();
   else if(_comprasView==='produto')h+=_renderComprasPorProduto();
-  else if(_comprasView==='bling')h+=_renderComprasBling();
   else h+=_renderComprasGeral(busca||'',filtStatus||'',filtForn||'');
+  }finally{DB.compras=_todasCompras;}
 
   setPage(h);
 }
@@ -2057,8 +2077,8 @@ function _blingFetch(caminho,metodo){
     .then(function(r){return r.json().then(function(j){if(!r.ok&&!j.motivo)throw new Error(j.error||('HTTP_'+r.status));return j;});});
 }
 function _blingAtualizarStatus(){
-  _blingFetch('/bling/status').then(function(j){_blingStatus=j;if(_comprasView==='bling')pCompras();})
-    .catch(function(e){_blingStatus={erroTela:String(e.message||e)};if(_comprasView==='bling')pCompras();});
+  _blingFetch('/bling/status').then(function(j){_blingStatus=j;if(_comprasSecao==='bling')pCompras();})
+    .catch(function(e){_blingStatus={erroTela:String(e.message||e)};if(_comprasSecao==='bling')pCompras();});
 }
 function blingConectar(){
   // Abre a janela antes do fetch — no iPhone, window.open depois de um await é bloqueado
@@ -2075,32 +2095,6 @@ function blingSincronizarAgora(){
     if(typeof window.forcarSincronizarG==='function')window.forcarSincronizarG();
     _blingAtualizarStatus();
   }).catch(function(e){alert('Bling: '+(e.message||e));});
-}
-// Quadro "Pedidos do Bling — falta o custo": tudo que veio do pedido (produto,
-// plataforma, venda, taxa) já preenchido, e um campo pra digitar o valor de
-// compra ali mesmo, sem abrir o formulário inteiro.
-function _renderBlingAguardando(){
-  var itens=(DB.compras||[]).filter(function(c){return c.origem==='bling'&&c.status==='Pendente'&&!c.valorCompra;});
-  if(!itens.length)return '';
-  itens.sort(function(a,b){return (b.id||0)-(a.id||0);});
-  var h='<div class="panel" style="margin-bottom:12px;border-color:rgba(251,191,36,.35)"><div class="ph"><div class="pt">📥 Pedidos do Bling — falta o valor de compra ('+itens.length+')</div></div>';
-  h+='<div style="padding:4px 12px 10px">';
-  itens.forEach(function(c){
-    var liquido=(c.precoVenda-c.taxaUnit);
-    h+='<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--bdr2)">';
-    h+='<div style="flex:1 1 260px;min-width:0"><div style="font-weight:600;font-size:13px;color:var(--t);white-space:normal">'+_escH(c.produto)+'</div>';
-    h+='<div style="font-size:11px;color:var(--t3);margin-top:3px"><span class="pill pn">'+_escH(c.plataforma||'Plataforma?')+'</span> Pedido #'+_escH(c.blingPedidoNum||c.blingPedidoId)+(c.sku?' · SKU '+_escH(c.sku):'')+' · '+_escH(c.data)+'</div></div>';
-    h+='<div style="display:flex;gap:14px;font-size:12px;text-align:right">';
-    h+='<div><div style="color:var(--t3);font-size:10px">QTD</div><b>'+c.qtd+'</b></div>';
-    h+='<div><div style="color:var(--t3);font-size:10px">VENDA UNIT.</div><b>'+R(c.precoVenda)+'</b></div>';
-    h+='<div><div style="color:var(--t3);font-size:10px">TAXA PLAT.</div><b style="color:var(--red)">− '+R(c.taxaUnit)+'</b></div>';
-    h+='<div><div style="color:var(--t3);font-size:10px">VOCÊ RECEBE</div><b style="color:var(--grn)">'+R(liquido)+'</b></div>';
-    h+='</div>';
-    h+='<div style="display:flex;gap:6px;align-items:center"><input id="bc-'+c.id+'" type="number" min="0" step="0.01" placeholder="Custo unit. R$" style="width:120px" onkeydown="if(event.key===\'Enter\')blingSalvarCusto('+c.id+')"><button class="btn btnp bsm" onclick="blingSalvarCusto('+c.id+')">Salvar</button></div>';
-    h+='</div>';
-  });
-  h+='</div></div>';
-  return h;
 }
 function blingSalvarCusto(id){
   var el=document.getElementById('bc-'+id),v=el?Number(el.value):0;
@@ -2153,7 +2147,7 @@ function _renderBlingPedidos(){
     h+='<div><div style="color:var(--t3);font-size:10px">QTD</div><b>'+c.qtd+'</b></div>';
     h+='<div><div style="color:var(--t3);font-size:10px">VENDA</div><b>'+R(c.precoVenda)+'</b></div>';
     h+='<div><div style="color:var(--t3);font-size:10px">TAXA</div><b style="color:var(--red)">− '+R(c.taxaUnit)+'</b></div>';
-    h+='<div><div style="color:var(--t3);font-size:10px">CUSTO</div>'+(c.valorCompra?'<b>'+R(c.valorCompra)+'</b>':'<a href="#" onclick="editCompra('+c.id+');return false" style="color:var(--amb);font-weight:700">informar</a>')+'</div>';
+    h+='<div><div style="color:var(--t3);font-size:10px">CUSTO UNIT.</div>'+(c.valorCompra?'<b style="cursor:pointer" onclick="editCompra('+c.id+')" title="Editar">'+R(c.valorCompra)+'</b>':'<span style="display:inline-flex;gap:4px"><input id="bc-'+c.id+'" type="number" min="0" step="0.01" placeholder="R$" style="width:84px;padding:3px 6px;font-size:12px" onkeydown="if(event.key===\'Enter\')blingSalvarCusto('+c.id+')"><button class="btn btnp bsm" onclick="blingSalvarCusto('+c.id+')">OK</button></span>')+'</div>';
     h+='<div><div style="color:var(--t3);font-size:10px">LUCRO</div><b class="'+(r.viavel==='semdados'?'':r.lucroTotal>=0?'grn':'red')+'">'+(r.viavel==='semdados'?'—':R(r.lucroTotal))+'</b></div>';
     h+='</div>';
     h+='<select onchange="blingMudarStatus('+c.id+',this.value)" style="min-width:130px">'+stOpts+'</select>';
@@ -2161,6 +2155,20 @@ function _renderBlingPedidos(){
   });
   h+='</div><div style="padding:8px 12px 12px;font-size:12px;color:var(--t2);display:flex;gap:18px;flex-wrap:wrap"><span>'+lista.length+' item(ns)</span><span>Vendido: <b style="color:var(--t)">'+R(totVenda)+'</b></span><span>Custo informado: <b style="color:var(--t)">'+R(totCusto)+'</b></span></div></div>';
   return h;
+}
+
+function _renderSecaoBling(){
+  var itens=(DB.compras||[]).filter(_ehBling);
+  var aComprar=itens.filter(function(c){return c.status==='Pendente';});
+  var vendidoAberto=aComprar.reduce(function(a,c){return a+c.precoVenda*c.qtd;},0);
+  var semCusto=aComprar.filter(function(c){return !c.valorCompra;}).length;
+  var investir=aComprar.reduce(function(a,c){return a+_calcCompraCalc(c).custoTotal;},0);
+  var h='<div class="g3" style="margin-bottom:12px">';
+  h+='<div class="card hl"><div class="lbl">🕓 A comprar</div><div class="val gld">'+aComprar.length+'</div><div class="sub">'+R(vendidoAberto)+' em vendas</div></div>';
+  h+='<div class="card'+(semCusto?' warn':'')+'"><div class="lbl">💲 Falta informar custo</div><div class="val '+(semCusto?'amb':'grn')+'">'+semCusto+'</div><div class="sub">digite o custo na linha do pedido</div></div>';
+  h+='<div class="card"><div class="lbl">💰 Investir (custo informado)</div><div class="val">'+R(investir)+'</div><div class="sub">dos itens a comprar</div></div>';
+  h+='</div>';
+  return h+_renderComprasBling();
 }
 
 function _renderComprasBling(){
@@ -2179,7 +2187,7 @@ function _renderComprasBling(){
     h+='<div class="g3" style="margin-bottom:12px">';
     h+='<div class="card"><div class="lbl">Status</div><div class="val '+(st.ultimoErro?'red':'grn')+'" style="font-size:16px">'+(st.ultimoErro?'⚠️ Com erro':'✅ Conectado')+'</div><div class="sub">importando pedidos desde '+(st.desde?st.desde.split('-').reverse().join('/'):'—')+'</div></div>';
     h+='<div class="card"><div class="lbl">Última busca</div><div class="val" style="font-size:16px">'+fmt(st.ultimaExec)+'</div><div class="sub">automática a cada minuto</div></div>';
-    h+='<div class="card"><div class="lbl">Última importação</div><div class="val" style="font-size:16px">'+(res.novos||0)+' novo(s)</div><div class="sub">'+(res.pedidosNaJanela||0)+' pedidos recentes no Bling'+(res.pendentesDeDetalhe?' · '+res.pendentesDeDetalhe+' na fila':'')+'</div></div>';
+    h+='<div class="card"><div class="lbl">Última importação</div><div class="val" style="font-size:16px">'+(res.novos||0)+' novo(s)</div><div class="sub">'+(res.emAberto!=null?res.emAberto+' pedido(s) em aberto no Bling':'')+(res.pendentesDeDetalhe?' · '+res.pendentesDeDetalhe+' na fila':'')+'</div></div>';
     h+='</div>';
     if(st.ultimoErro)h+='<div style="color:var(--red);font-size:12px;margin-bottom:10px">'+_escH(st.ultimoErro)+'</div>';
     h+='<div class="brow"><button class="btn btnp bsm" onclick="blingSincronizarAgora()">🔄 Buscar pedidos agora</button>'+(st.ultimoErro?' <button class="btn bsm" onclick="blingConectar()">Reconectar Bling</button>':'')+'</div>';
