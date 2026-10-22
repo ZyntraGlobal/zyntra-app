@@ -167,37 +167,59 @@ tfoot td{font-weight:700;border-top:2px solid var(--bdr2);border-bottom:none!imp
 .zplat button.on{background:var(--w3);border-color:var(--t2);color:var(--t)}
 .pdot{width:8px;height:8px;border-radius:50%;background:var(--t3);display:inline-block}
 .pdot.amazon{background:#ff9900}.pdot.shopee{background:#ee4d2d}.pdot.ml{background:#ffe600}.pdot.tiktok{background:#25f4ee}.pdot.site{background:var(--gold)}
-.zped{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:10px}
-.zcard{background:var(--w);border:1px solid var(--bdr);border-radius:12px;padding:12px;min-width:0;display:flex;flex-direction:column;gap:10px}
-.zcard.semcusto{border-left:3px solid var(--amb)}
-.zcard .top{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--t3)}
-.zcard .plat{padding:2px 8px;border-radius:6px;font-size:10px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;background:var(--w3);color:var(--t)}
-.zcard .plat.amazon{background:rgba(255,153,0,.15);color:#ffb84d}
-.zcard .plat.shopee{background:rgba(238,77,45,.15);color:#ff7a5c}
-.zcard .plat.ml{background:rgba(255,230,0,.13);color:#ffe24d}
-.zcard .plat.tiktok{background:rgba(37,244,238,.12);color:#5ff5f0}
-.zcard .plat.site{background:var(--gl);color:var(--gold)}
-.zcard .top .dt{margin-left:auto;white-space:nowrap}
-.zcard .nome{font-size:13px;font-weight:600;color:var(--t);line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.zcard .vals{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:8px 0;border-top:1px solid var(--bdr);border-bottom:1px solid var(--bdr)}
-.zcard .vals div{min-width:0}
-.zcard .vals .l{font-size:9.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--t3)}
-.zcard .vals .v{font-size:13px;font-weight:700;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.zcard .act{display:flex;gap:8px;align-items:center}
-.zcard .custo{flex:1;min-width:0;display:flex;gap:6px}
-.zcard .custo input{flex:1;min-width:0;padding:8px 10px;border:1px solid var(--bdr2);border-radius:8px;background:var(--w2);color:var(--t);font:600 13px Inter,sans-serif;outline:none}
-.zcard .custo button{flex-shrink:0;padding:8px 12px;border:0;border-radius:8px;background:var(--gold);color:#16130c;font:700 12px Inter,sans-serif;cursor:pointer}
-.zcard .custook{flex:1;min-width:0;font-size:12px;color:var(--t2);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.zcard select{flex-shrink:0;width:128px;padding:8px;border:1px solid var(--bdr2);border-radius:8px;background:var(--w2);color:var(--t);font:600 12px Inter,sans-serif}
+.zlist{background:var(--w);border:1px solid var(--bdr);border-radius:12px;overflow:hidden}
+.zhead,.zrow{display:grid;grid-template-columns:108px minmax(0,1fr) 100px 84px 150px 118px 128px;gap:12px;align-items:center;padding:0 16px}
+.zhead{padding-top:10px;padding-bottom:10px;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--t3);border-bottom:1px solid var(--bdr);background:var(--w2)}
+.zhead .r,.zrow .r{text-align:right}
+.zday{display:flex;align-items:baseline;gap:10px;padding:14px 16px 6px;font-size:12px;color:var(--t3);border-top:1px solid var(--bdr)}
+.zhead+.zday{border-top:0}
+.zday b{color:var(--t);font-size:13px}
+.zrow{padding-top:11px;padding-bottom:11px;border-top:1px solid rgba(255,255,255,.04);transition:background .12s}
+.zrow:hover{background:rgba(255,255,255,.02)}
+.zrow.canc{opacity:.5}
+.zrow .c-ped{display:flex;align-items:center;gap:8px;min-width:0}
+.zrow .plat{padding:3px 8px;border-radius:6px;font-size:10px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;background:var(--w3);color:var(--t);white-space:nowrap}
+.zrow .plat.amazon{background:rgba(255,153,0,.15);color:#ffb84d}
+.zrow .plat.shopee{background:rgba(238,77,45,.15);color:#ff7a5c}
+.zrow .plat.ml{background:rgba(255,230,0,.13);color:#ffe24d}
+.zrow .plat.tiktok{background:rgba(37,244,238,.12);color:#5ff5f0}
+.zrow .plat.site{background:var(--gl);color:var(--gold)}
+.zrow .num{font-size:11px;color:var(--t3)}
+.zrow .nome{font-size:13px;font-weight:500;color:var(--t);line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.zrow .qtd{color:var(--gold)}
+.zrow .c-val{font-size:13px;font-weight:600;white-space:nowrap}
+.zrow .c-val i{display:none;font-style:normal}
+.zrow .c-val small{margin-left:5px;font-size:10px;color:var(--t3)}
+.zrow .tx{color:var(--red);font-weight:500}
+.zrow .custo{display:flex;gap:6px}
+.zrow .custo input{flex:1;min-width:0;padding:7px 10px;border:1px solid rgba(251,191,36,.35);border-radius:8px;background:var(--w2);color:var(--t);font:600 13px Inter,sans-serif;outline:none}
+.zrow .custo input:focus{border-color:var(--gold)}
+.zrow .custo button{flex-shrink:0;width:34px;border:0;border-radius:8px;background:var(--gold);color:#16130c;font:800 14px Inter,sans-serif;cursor:pointer}
+.zrow .custook{font-size:13px;font-weight:600;cursor:pointer}
+.zrow .custook .ed{font-size:11px;opacity:.5}
+.zrow .custook .lb{display:none;font-style:normal;font-weight:500;color:var(--t3)}
+.zrow select{width:100%;padding:7px 8px;border:1px solid var(--bdr2);border-radius:8px;background:var(--w2);font:600 12px Inter,sans-serif}
+@media (max-width:1100px){
+  .zhead{display:none}
+  .zrow{grid-template-columns:minmax(0,1fr) minmax(0,.75fr) minmax(0,1.25fr);grid-template-areas:"ped ped ped" "prod prod prod" "venda tx luc" "custo custo st";gap:8px 10px;padding:12px 14px}
+  .zrow .c-ped{grid-area:ped}.zrow .c-prod{grid-area:prod}.zrow .c-custo{grid-area:custo}.zrow .c-st{grid-area:st}
+  .zrow .c-val:nth-of-type(3){grid-area:venda}.zrow .tx{grid-area:tx}.zrow .luc{grid-area:luc}
+  .zrow .r{text-align:left}
+  .zrow .nome{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+  .zrow .c-val i{display:block;font-size:9.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--t3);margin-bottom:2px}
+  .zrow .c-custo{grid-column:1 / 3}
+  .zrow .luc small{display:none}
+  .zrow .custook .lb{display:inline}
+}
+@media (max-width:768px){
+  .zrow .custo input,.zrow select{font-size:16px!important;padding:8px 10px!important}
+}
 .zfoot{display:flex;gap:16px;flex-wrap:wrap;padding:12px 2px 0;font-size:12px;color:var(--t2)}
 @media (max-width:768px){
   .zseg button{font-size:13px!important;padding:10px 6px!important;min-height:0}
   .zkpi{gap:6px}
   .zkpi>div{padding:9px 9px}
   .zkpi .v{font-size:17px}
-  .zped{grid-template-columns:1fr}
-  .zcard .custo input,.zcard select{font-size:16px!important;padding:8px 10px!important}
-  .zcard select{width:136px}
 }
 </style>
 <script>
@@ -2233,27 +2255,36 @@ function _renderBlingPedidos(){
   if(!lista.length){
     return h+'<div class="panel"><div class="empty" style="padding:28px;font-size:12px;color:var(--t3)">'+(todosPlats.length?'Nenhum pedido nesse filtro.':'Nenhum pedido importado ainda — os pedidos do Bling aparecem aqui em até 1 minuto.')+'</div></div>';
   }
-  var totVenda=0,totCusto=0;
-  h+='<div class="zped">';
-  lista.forEach(function(c){
-    var r=_calcCompraCalc(c);totVenda+=c.precoVenda*c.qtd;totCusto+=r.custoTotal;
-    var stOpts=COMPRA_STATUS.map(function(st){return '<option value="'+st+'"'+(c.status===st?' selected':'')+'>'+_BLING_STATUS_LABEL[st]+'</option>';}).join('');
-    var semCusto=!c.valorCompra;
-    h+='<div class="zcard'+(semCusto&&c.status==='Pendente'?' semcusto':'')+'">';
-    h+='<div class="top"><span class="plat '+_classePlat(c.plataforma)+'">'+_escH(c.plataforma||'Outro')+'</span><span>#'+_escH(c.blingPedidoNum||c.blingPedidoId)+(c.qtd>1?' · <b style="color:var(--t)">'+c.qtd+' un.</b>':'')+'</span><span class="dt">'+_escH((c.data||'').slice(0,5))+'</span></div>';
-    h+='<div class="nome" title="'+_escH(c.produto)+'">'+_escH(c.produto)+'</div>';
-    h+='<div class="vals">';
-    h+='<div><div class="l">Venda</div><div class="v">'+R(c.precoVenda)+'</div></div>';
-    h+='<div><div class="l">Taxa</div><div class="v" style="color:var(--red)">−'+R(c.taxaUnit)+'</div></div>';
-    if(semCusto)h+='<div><div class="l">Você recebe</div><div class="v" style="color:var(--grn)">'+R(c.precoVenda-c.taxaUnit)+'</div></div>';
-    else h+='<div><div class="l">Lucro</div><div class="v" style="color:'+(r.lucroUnit>=0?'var(--grn)':'var(--red)')+'">'+R(r.lucroTotal)+(r.margemPct!=null?' <span style="font-size:10px;color:var(--t3)">'+r.margemPct.toFixed(0)+'%</span>':'')+'</div></div>';
-    h+='</div>';
-    h+='<div class="act">';
-    if(semCusto)h+='<div class="custo"><input id="bc-'+c.id+'" type="number" inputmode="decimal" min="0" step="0.01" placeholder="Custo R$" onkeydown="if(event.key===\'Enter\')blingSalvarCusto('+c.id+')"><button onclick="blingSalvarCusto('+c.id+')">OK</button></div>';
-    else h+='<div class="custook" onclick="editCompra('+c.id+')" title="Editar">Custo <b style="color:var(--t)">'+R(c.valorCompra)+'</b> ✏️</div>';
-    var corSt={Pendente:'var(--amb)',Comprado:'var(--blu)',Recebido:'var(--grn)',Cancelado:'var(--t3)'}[c.status]||'var(--t)';
-    h+='<select onchange="blingMudarStatus('+c.id+',this.value)" style="color:'+corSt+'">'+stOpts+'</select>';
-    h+='</div></div>';
+  // Lista única, agrupada pelo dia da venda (Hoje / Ontem / data)
+  var totVenda=0,totCusto=0,grupos=[],porDia={};
+  lista.forEach(function(c){var d=c.data||'';if(!porDia[d]){porDia[d]=[];grupos.push(d);}porDia[d].push(c);});
+  var ordem=function(d){var p=d.split('/');return p.length===3?p[2]+p[1]+p[0]:'';};
+  grupos.sort(function(x,y){return ordem(y).localeCompare(ordem(x));});
+  var hj=hoje(),ont=(function(){var d=new Date();d.setDate(d.getDate()-1);return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear();})();
+  var corSt={Pendente:'var(--amb)',Comprado:'var(--blu)',Recebido:'var(--grn)',Cancelado:'var(--t3)'};
+  h+='<div class="zlist"><div class="zhead"><span>Pedido</span><span>Produto</span><span class="r">Venda</span><span class="r">Taxa</span><span>Custo unit.</span><span class="r">Lucro</span><span>Status</span></div>';
+  grupos.forEach(function(d){
+    var its=porDia[d],somaDia=its.reduce(function(a,c){return a+c.precoVenda*c.qtd;},0);
+    var rot=d===hj?'Hoje':d===ont?'Ontem':'';
+    h+='<div class="zday"><b>'+(rot?rot+' · ':'')+_escH(d.slice(0,5))+'</b><span>'+its.length+' pedido'+(its.length!==1?'s':'')+' · '+R(somaDia)+'</span></div>';
+    its.forEach(function(c){
+      var r=_calcCompraCalc(c);totVenda+=c.precoVenda*c.qtd;totCusto+=r.custoTotal;
+      var semCusto=!c.valorCompra;
+      var stOpts=COMPRA_STATUS.map(function(st){return '<option value="'+st+'"'+(c.status===st?' selected':'')+'>'+_BLING_STATUS_LABEL[st]+'</option>';}).join('');
+      h+='<div class="zrow'+(c.status==='Cancelado'?' canc':'')+'">';
+      h+='<div class="c-ped"><span class="plat '+_classePlat(c.plataforma)+'">'+_escH(c.plataforma==='Site Zyntra'?'Site':(c.plataforma||'Outro'))+'</span><span class="num">#'+_escH(c.blingPedidoNum||c.blingPedidoId)+'</span></div>';
+      h+='<div class="c-prod"><div class="nome" title="'+_escH(c.produto)+'">'+(c.qtd>1?'<b class="qtd">'+c.qtd+'×</b> ':'')+_escH(c.produto)+'</div></div>';
+      h+='<div class="c-val r"><i>Venda</i>'+R(c.precoVenda)+'</div>';
+      h+='<div class="c-val r tx"><i>Taxa</i>'+(c.taxaUnit?'−'+R(c.taxaUnit):'—')+'</div>';
+      h+='<div class="c-custo">'+(semCusto
+        ?'<div class="custo"><input id="bc-'+c.id+'" type="number" inputmode="decimal" min="0" step="0.01" placeholder="Custo R$" onkeydown="if(event.key===\'Enter\')blingSalvarCusto('+c.id+')"><button onclick="blingSalvarCusto('+c.id+')" title="Salvar custo">✓</button></div>'
+        :'<span class="custook" onclick="editCompra('+c.id+')" title="Editar"><i class="lb">Custo </i>'+R(c.valorCompra)+' <span class="ed">✏️</span></span>')+'</div>';
+      h+='<div class="c-val r luc"><i>'+(semCusto?'Recebe':'Lucro')+'</i>'+(semCusto
+        ?'<span style="color:var(--t2)">'+R((c.precoVenda-c.taxaUnit)*c.qtd)+'</span><small>recebe</small>'
+        :'<span style="color:'+(r.lucroTotal>=0?'var(--grn)':'var(--red)')+'">'+R(r.lucroTotal)+'</span>'+(r.margemPct!=null?'<small>'+r.margemPct.toFixed(0)+'%</small>':''))+'</div>';
+      h+='<div class="c-st"><select onchange="blingMudarStatus('+c.id+',this.value)" style="color:'+(corSt[c.status]||'var(--t)')+'">'+stOpts+'</select></div>';
+      h+='</div>';
+    });
   });
   h+='</div><div class="zfoot"><span>'+lista.length+' item(ns)</span><span>Vendido <b style="color:var(--t)">'+R(totVenda)+'</b></span><span>Custo informado <b style="color:var(--t)">'+R(totCusto)+'</b></span></div>';
   return h;
