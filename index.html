@@ -163,6 +163,10 @@ tfoot td{font-weight:700;border-top:2px solid var(--bdr2);border-bottom:none!imp
 .zchips::-webkit-scrollbar{display:none}
 .zchips button{flex-shrink:0;padding:7px 12px;border-radius:20px;border:1px solid var(--bdr2);background:var(--w);color:var(--t2);font:600 12px Inter,sans-serif;cursor:pointer;white-space:nowrap}
 .zchips button.on{background:var(--gl);border-color:var(--glb);color:var(--gold)}
+.zplat button{display:inline-flex;align-items:center;gap:6px}
+.zplat button.on{background:var(--w3);border-color:var(--t2);color:var(--t)}
+.pdot{width:8px;height:8px;border-radius:50%;background:var(--t3);display:inline-block}
+.pdot.amazon{background:#ff9900}.pdot.shopee{background:#ee4d2d}.pdot.ml{background:#ffe600}.pdot.tiktok{background:#25f4ee}.pdot.site{background:var(--gold)}
 .zped{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:10px}
 .zcard{background:var(--w);border:1px solid var(--bdr);border-radius:12px;padding:12px;min-width:0;display:flex;flex-direction:column;gap:10px}
 .zcard.semcusto{border-left:3px solid var(--amb)}
@@ -2157,7 +2161,7 @@ function blingSalvarCusto(id){
 }
 
 function _renderSecaoBling(){
-  var itens=(DB.compras||[]).filter(_ehBling);
+  var itens=(DB.compras||[]).filter(function(c){return _ehBling(c)&&_blingNaPlat(c);});
   var aComprar=itens.filter(function(c){return c.status==='Pendente';});
   var vendidoAberto=aComprar.reduce(function(a,c){return a+c.precoVenda*c.qtd;},0);
   var semCusto=aComprar.filter(function(c){return !c.valorCompra;}).length;
@@ -2192,6 +2196,11 @@ function _renderComprasBling(){
 
 // ── Pedidos do Bling: um card por item, com custo e status na própria linha ──
 var _blingFiltro='Pendente';
+// Filtro por plataforma (combina com o filtro de status)
+var _blingPlat='todas';
+var _BLING_PLATS=['Amazon','Mercado Livre','Shopee','TikTok Shop','Site Zyntra'];
+function blingFiltrarPlat(p){_blingPlat=p;pCompras();}
+function _blingNaPlat(c){return _blingPlat==='todas'||c.plataforma===_blingPlat;}
 var _BLING_STATUS_LABEL={Pendente:'A comprar',Comprado:'Comprado',Recebido:'Recebido',Cancelado:'Cancelado'};
 function blingFiltrar(f){_blingFiltro=f;pCompras();}
 function blingMudarStatus(id,st){
@@ -2208,15 +2217,22 @@ function blingMudarStatus(id,st){
 }
 function _classePlat(p){return {'Amazon':'amazon','Shopee':'shopee','Mercado Livre':'ml','TikTok Shop':'tiktok','Site Zyntra':'site'}[p]||'';}
 function _renderBlingPedidos(){
-  var todos=(DB.compras||[]).filter(_ehBling);
+  var todosPlats=(DB.compras||[]).filter(_ehBling);
+  // contagem por plataforma dentro do status escolhido
+  var noStatus=_blingFiltro==='todos'?todosPlats:todosPlats.filter(function(c){return c.status===_blingFiltro;});
+  var cntPlat={todas:noStatus.length};
+  _BLING_PLATS.forEach(function(pl){cntPlat[pl]=noStatus.filter(function(c){return c.plataforma===pl;}).length;});
+  var pchip=function(pl,l){return '<button class="'+(_blingPlat===pl?'on':'')+'" onclick="blingFiltrarPlat(\''+pl+'\')">'+(pl==='todas'?'':'<span class="pdot '+_classePlat(pl)+'"></span>')+l+' · '+cntPlat[pl]+'</button>';};
+  var hp='<div class="zchips zplat">'+pchip('todas','Todas')+_BLING_PLATS.map(function(pl){return pchip(pl,pl==='Site Zyntra'?'Site':pl);}).join('')+'</div>';
+  var todos=todosPlats.filter(_blingNaPlat);
   todos.sort(function(a,b){return (b.id||0)-(a.id||0);});
   var cnt={todos:todos.length,Pendente:0,Comprado:0,Recebido:0,Cancelado:0};
   todos.forEach(function(c){if(cnt[c.status]!=null)cnt[c.status]++;});
   var lista=_blingFiltro==='todos'?todos:todos.filter(function(c){return c.status===_blingFiltro;});
   var chip=function(f,l){return '<button class="'+(_blingFiltro===f?'on':'')+'" onclick="blingFiltrar(\''+f+'\')">'+l+' · '+cnt[f]+'</button>';};
-  var h='<div class="zchips">'+chip('Pendente','🕓 A comprar')+chip('Comprado','🛒 Comprados')+chip('Recebido','📦 Recebidos')+chip('Cancelado','✕ Cancelados')+chip('todos','Todos')+'</div>';
+  var h=hp+'<div class="zchips">'+chip('Pendente','🕓 A comprar')+chip('Comprado','🛒 Comprados')+chip('Recebido','📦 Recebidos')+chip('Cancelado','✕ Cancelados')+chip('todos','Todos')+'</div>';
   if(!lista.length){
-    return h+'<div class="panel"><div class="empty" style="padding:28px;font-size:12px;color:var(--t3)">'+(todos.length?'Nenhum pedido nesse filtro.':'Nenhum pedido importado ainda — os pedidos do Bling aparecem aqui em até 1 minuto.')+'</div></div>';
+    return h+'<div class="panel"><div class="empty" style="padding:28px;font-size:12px;color:var(--t3)">'+(todosPlats.length?'Nenhum pedido nesse filtro.':'Nenhum pedido importado ainda — os pedidos do Bling aparecem aqui em até 1 minuto.')+'</div></div>';
   }
   var totVenda=0,totCusto=0;
   h+='<div class="zped">';
