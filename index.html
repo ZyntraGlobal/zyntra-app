@@ -2156,7 +2156,6 @@ function blingSalvarCusto(id){
   if(!v||v<=0){alert('Digite o valor de compra (custo por unidade).');if(el)el.focus();return;}
   var c=(DB.compras||[]).find(function(x){return x.id===id;});if(!c)return;
   c.valorCompra=Math.round(v*100)/100;c.valorSugerido=false;
-  if(!c.impostoPct)c.impostoPct=Math.round((RTU_CONFIG.aliqFed+RTU_CONFIG.aliqEst)*100);
   save();badges();pCompras();
 }
 
@@ -2209,7 +2208,7 @@ function blingMudarStatus(id,st){
     var v=prompt('Quanto custou cada unidade? (R$)\n'+c.produto);
     if(v===null){pCompras();return;}
     v=Number(String(v).replace(',','.'));
-    if(v>0){c.valorCompra=Math.round(v*100)/100;c.valorSugerido=false;if(!c.impostoPct)c.impostoPct=Math.round((RTU_CONFIG.aliqFed+RTU_CONFIG.aliqEst)*100);}
+    if(v>0){c.valorCompra=Math.round(v*100)/100;c.valorSugerido=false;}
   }
   c.status=st;
   if(st==='Comprado')c.dataCompra=hoje();
@@ -2574,7 +2573,8 @@ function _formCompra(vals){
   var catsOpts=EST_CATS.map(function(c){return '<option value="'+c+'"'+(vals.cat===c?' selected':'')+'>'+c+'</option>';}).join('');
   var stOpts=COMPRA_STATUS.map(function(s){return '<option value="'+s+'"'+(vals.status===s?' selected':'')+'>'+s+'</option>';}).join('');
   var platOpts='<option value="">— Selecionar —</option>'+COMPRA_PLATAFORMAS.map(function(p){return '<option value="'+p+'"'+(vals.plataforma===p?' selected':'')+'>'+p+'</option>';}).join('');
-  var impostoDefault=vals.impostoPct!=null&&vals.impostoPct!==0?vals.impostoPct:Math.round((RTU_CONFIG.aliqFed+RTU_CONFIG.aliqEst)*100);
+  // Imposto começa em 0 — o dono prefere informar à mão quando quiser
+  var impostoDefault=Number(vals.impostoPct)||0;
   return '<div class="fg f2">'+
     '<div style="grid-column:1/-1"><label>Produto *</label><input id="nc-produto" value="'+(vals.produto||'')+'" placeholder="Ex: MOUSE GAMER REDRAGON M913 IMPACT ELITE" autofocus></div>'+
     '<div><label>Fornecedor Cadastrado</label><select id="nc-forn-sel" onchange="document.getElementById(\'nc-forn\').value=this.value">'+fornOpts+'</select></div>'+
