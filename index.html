@@ -976,6 +976,25 @@ function pDash(){
     ['Prazo vencido',gwVenc,gwVenc>0?'var(--amb)':'var(--t3)']
   ]);
   h+='</div>';
+  // Card Investimentos — linha própria (só pra quem pode ver a aba)
+  if(_paginaPermitida('investimentos')){
+    var invTodos=DB.investimentos||[];
+    var invAplic=invTodos.reduce(function(a,i){return a+(Number(i.valorAplicado)||0);},0);
+    var invAtual=invTodos.reduce(function(a,i){return a+(Number(i.valorAtual)||0);},0);
+    var invRend=invAtual-invAplic;
+    var invContas={};invTodos.forEach(function(i){if(i.conta)invContas[i.conta]=1;});
+    var invNContas=Object.keys(invContas).length;
+    var invDesat=invTodos.filter(function(i){return i.atualizadoEm&&_diasEmAberto(i.atualizadoEm)>=30;}).length;
+    var invStatus=invDesat>0?'amb':'grn';
+    var invLabel=invDesat>0?invDesat+' desatualizado'+(invDesat>1?'s':''):invTodos.length?'Tudo em dia':'Nenhum investimento lançado';
+    h+='<div style="display:grid;grid-template-columns:1fr;gap:16px;margin-top:16px">';
+    h+=modCard('📊','Investimentos',R(invAtual),'gold',invTodos.length+' aplicaç'+(invTodos.length!==1?'ões':'ão')+' em '+invNContas+' conta'+(invNContas!==1?'s':''),invStatus,invLabel,"ir('investimentos')",[
+      ['Total aplicado',R(invAplic),'var(--t)'],
+      ['Rendimento',R(invRend)+' ('+_invPctTxt(_invPct(invAplic,invRend))+')',invRend>0?'var(--grn)':invRend<0?'var(--red)':'var(--t3)'],
+      ['Desatualizados',invDesat,invDesat>0?'var(--amb)':'var(--t3)']
+    ]);
+    h+='</div>';
+  }
 
   h+='<div style="margin-top:16px;padding:12px 16px;background:var(--w);border:1px solid var(--bdr);border-radius:8px;display:flex;align-items:center;gap:8px;font-size:11px;color:var(--t3)">💡 Clique em qualquer módulo acima para abrir e gerenciar.</div>';
   setPage(h);
