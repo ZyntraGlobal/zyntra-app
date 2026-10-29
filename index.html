@@ -286,6 +286,8 @@ tfoot td{font-weight:700;border-top:2px solid var(--bdr2);border-bottom:none!imp
   <div class="ni" onclick="ir('marketplaces',this)"><span class="ico">🏪</span><span class="lbl">Saldo & A Receber</span></div>
   <div class="sb-sec">Gateways</div>
   <div class="ni" onclick="ir('gateways',this)"><span class="ico">💳</span><span class="lbl">Saldo & Retenções</span><span class="bdg" id="b-gw" style="display:none">0</span></div>
+  <div class="sb-sec">Investimentos</div>
+  <div class="ni" onclick="ir('investimentos',this)"><span class="ico">📊</span><span class="lbl">Investimentos</span></div>
   <div class="sb-sec">Sistema</div>
   <div class="ni" id="ni-usuarios" onclick="ir('usuarios',this)"><span class="ico">👥</span><span class="lbl">Usuários</span></div>
   <div class="ni" onclick="fazerBackupG()" id="ni-backup"><span class="ico">💾</span><span class="lbl">Backup</span></div>
@@ -507,6 +509,14 @@ function _normSaque(s){
     data:s.data||hoje(), status:s.status||'Aguardando', dataCaiu:s.dataCaiu||''
   };
 }
+function _normInv(i){
+  return {
+    id:i.id, conta:i.conta||'', tipo:i.tipo||'Outro', descricao:i.descricao||'',
+    valorAplicado:Number(i.valorAplicado)||0, valorAtual:Number(i.valorAtual)||0,
+    taxa:i.taxa||'', liquidez:i.liquidez||'', dataAplicacao:i.dataAplicacao||'', vencimento:i.vencimento||'',
+    obs:i.obs||'', atualizadoEm:i.atualizadoEm||''
+  };
+}
 function _normUsuario(u){
   return {
     id:u.id, nome:u.nome||'', login:(u.login||'').toLowerCase().trim(),
@@ -514,7 +524,7 @@ function _normUsuario(u){
   };
 }
 function loadDB(){
-  try{var s=localStorage.getItem('zyntra_gestao_v1');if(s){var d=JSON.parse(s);d.produtos=d.produtos.map(_normProd);if(!d.fornecedores)d.fornecedores=[];if(!d.nForn)d.nForn=1;if(!d.compras)d.compras=[];else d.compras=d.compras.map(_normCompra);if(!d.nCompras)d.nCompras=1;if(!d.pendencias)d.pendencias=[];else d.pendencias=d.pendencias.map(_normPendencia);if(!d.nPendencias)d.nPendencias=1;if(!d.marketplaces)d.marketplaces=[];else d.marketplaces=d.marketplaces.map(_normMkt);if(!d.nMkt)d.nMkt=1;if(!d.saques)d.saques=[];else d.saques=d.saques.map(_normSaque);if(!d.nSaque)d.nSaque=1;if(!d.gateways)d.gateways=[];else d.gateways=d.gateways.map(_normGw);if(!d.nGw)d.nGw=1;if(!d.gwRet)d.gwRet=[];else d.gwRet=d.gwRet.map(_normGwRet);if(!d.nGwRet)d.nGwRet=1;if(!d.usuarios)d.usuarios=[];else d.usuarios=d.usuarios.map(_normUsuario);if(!d.nUsuarios)d.nUsuarios=1;return d;}}catch(e){}
+  try{var s=localStorage.getItem('zyntra_gestao_v1');if(s){var d=JSON.parse(s);d.produtos=d.produtos.map(_normProd);if(!d.fornecedores)d.fornecedores=[];if(!d.nForn)d.nForn=1;if(!d.compras)d.compras=[];else d.compras=d.compras.map(_normCompra);if(!d.nCompras)d.nCompras=1;if(!d.pendencias)d.pendencias=[];else d.pendencias=d.pendencias.map(_normPendencia);if(!d.nPendencias)d.nPendencias=1;if(!d.marketplaces)d.marketplaces=[];else d.marketplaces=d.marketplaces.map(_normMkt);if(!d.nMkt)d.nMkt=1;if(!d.saques)d.saques=[];else d.saques=d.saques.map(_normSaque);if(!d.nSaque)d.nSaque=1;if(!d.gateways)d.gateways=[];else d.gateways=d.gateways.map(_normGw);if(!d.nGw)d.nGw=1;if(!d.gwRet)d.gwRet=[];else d.gwRet=d.gwRet.map(_normGwRet);if(!d.nGwRet)d.nGwRet=1;if(!d.investimentos)d.investimentos=[];else d.investimentos=d.investimentos.map(_normInv);if(!d.nInv)d.nInv=1;if(!d.usuarios)d.usuarios=[];else d.usuarios=d.usuarios.map(_normUsuario);if(!d.nUsuarios)d.nUsuarios=1;return d;}}catch(e){}
   return{
     produtos:JSON.parse(JSON.stringify(PRODUTOS_BASE)).map(_normProd),
     mov:[],
@@ -528,6 +538,7 @@ function loadDB(){
     saques:[],nSaque:1,
     gateways:[],nGw:1,
     gwRet:[],nGwRet:1,
+    investimentos:[],nInv:1,
     usuarios:[],nUsuarios:1
   };
 }
@@ -633,6 +644,7 @@ function _resumoSalvo(antes, depois){
   _diffLista(antes.marketplaces,depois.marketplaces,'Marketplace',function(x){return x.plataforma;},function(x){return R(x.saldo);});
   _diffLista(antes.gateways,depois.gateways,'Gateway',function(x){return x.gateway;},function(x){return R(x.disponivel);});
   _diffLista(antes.gwRet,depois.gwRet,'Retenção',function(x){return x.gateway+' · '+R(x.valor)+' D+'+x.dias;});
+  _diffLista(antes.investimentos,depois.investimentos,'Investimento',function(x){return x.descricao||x.tipo;},function(x){return R(x.valorAtual);},function(x){return x.conta||'';});
   _diffLista(antes.saques,depois.saques,'Saque',function(x){return x.plataforma+' · '+R(x.valor);},function(x){return x.status;});
   _diffLista(antes.mov,depois.mov,'Movimentação',function(x){return (x.prodNome||'')+' ('+x.tipo+' '+x.qty+')';});
   if(!L.length)L.push('Dados sincronizados com sucesso');
@@ -765,7 +777,7 @@ function ir(tipo,arg,el){
     if(tipo==='dash'&&_isFuncionario()){document.getElementById('ptitle').textContent='Início';pInicioFunc();return;}
     _bloqueadoFunc();document.getElementById('ptitle').textContent='Acesso Restrito';return;
   }
-  var titulos={dash:'Dashboard',est_produtos:'Estoque — Produtos',est_fin:'Estoque — Financeiro',est_mov:'Estoque — Movimentações',est_alertas:'Estoque — Alertas',rtu_lanc:'Controle RTU — Lançamentos',rtu_resumo:'Controle RTU — Resumo Anual',notif:'Alertas & Notificações',fornecedores:'Fornecedores',compras:'Compras — Lista de Compras',pendencias:'Avisos & Pendências',marketplaces:'Marketplaces — Saldo & A Receber',gateways:'Gateways — Saldo & Retenções',usuarios:'Usuários & Acessos',inicio:'Início'};
+  var titulos={dash:'Dashboard',est_produtos:'Estoque — Produtos',est_fin:'Estoque — Financeiro',est_mov:'Estoque — Movimentações',est_alertas:'Estoque — Alertas',rtu_lanc:'Controle RTU — Lançamentos',rtu_resumo:'Controle RTU — Resumo Anual',notif:'Alertas & Notificações',fornecedores:'Fornecedores',compras:'Compras — Lista de Compras',pendencias:'Avisos & Pendências',marketplaces:'Marketplaces — Saldo & A Receber',gateways:'Gateways — Saldo & Retenções',investimentos:'Investimentos — Aplicações por Conta',usuarios:'Usuários & Acessos',inicio:'Início'};
   document.getElementById('ptitle').textContent=titulos[tipo]||(tipo==='pag'?'Pagamentos — '+MFULL[(arg||1)-1]+' 2026':tipo);
   if(tipo==='dash')pDash();
   else if(tipo==='est_produtos')pEstProdutos();
@@ -781,6 +793,7 @@ function ir(tipo,arg,el){
   else if(tipo==='pendencias')pPendencias();
   else if(tipo==='marketplaces')pMarketplaces();
   else if(tipo==='gateways')pGateways();
+  else if(tipo==='investimentos')pInvestimentos();
   else if(tipo==='usuarios')pUsuarios();
   else if(tipo==='inicio')pInicioFunc();
 }
@@ -3186,6 +3199,176 @@ function delGwRet(id){
   save();pGateways();
 }
 
+// ── INVESTIMENTOS — aplicações por conta (valor aplicado × valor atual) ──
+var INV_CONTAS=['SICOOB','BTG PACTUAL','MERCADO PAGO','CRESOL','ITAÚ','C6 EMPRESAS','STARK BANK','BESTFY'];
+var INV_TIPOS=['CDB','LCI','LCA','Tesouro Direto','Fundo de Investimento','Caixinha / Cofrinho','Poupança','Ações','FII','Cripto','Outro'];
+var INV_LIQUIDEZ=['Diária','No vencimento','D+30','D+60','D+90','Outra'];
+var _invFiltConta='';
+function _invEsc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function _invRend(i){return (Number(i.valorAtual)||0)-(Number(i.valorAplicado)||0);}
+function _invPct(aplic,rend){return aplic>0?(rend/aplic*100):0;}
+function _invPctTxt(p){return (p>=0?'+':'')+p.toFixed(2).replace('.',',')+'%';}
+function _invContas(){
+  // Contas padrão + qualquer outra que já tenha sido usada num lançamento
+  var l=INV_CONTAS.slice();
+  (DB.investimentos||[]).forEach(function(i){if(i.conta&&l.indexOf(i.conta)<0)l.push(i.conta);});
+  return l;
+}
+
+function pInvestimentos(){
+  if(!_paginaPermitida('investimentos')){_bloqueadoFunc();return;}
+  if(!DB.investimentos)DB.investimentos=[];
+  var todos=DB.investimentos;
+  var totAplic=todos.reduce(function(a,i){return a+(Number(i.valorAplicado)||0);},0);
+  var totAtual=todos.reduce(function(a,i){return a+(Number(i.valorAtual)||0);},0);
+  var totRend=totAtual-totAplic;
+  var desat=todos.filter(function(i){return i.atualizadoEm&&_diasEmAberto(i.atualizadoEm)>=30;}).length;
+
+  var h='<div class="g4">';
+  h+='<div class="card hl"><div class="lbl">Patrimônio Investido</div><div class="val gld">'+R(totAtual)+'</div><div class="sub">valor atual somado</div></div>';
+  h+='<div class="card"><div class="lbl">Total Aplicado</div><div class="val">'+R(totAplic)+'</div><div class="sub">'+todos.length+' aplicaç'+(todos.length!==1?'ões':'ão')+'</div></div>';
+  h+='<div class="card"><div class="lbl">Rendimento</div><div class="val" style="color:'+(totRend>=0?'var(--grn)':'var(--red)')+'">'+R(totRend)+'</div><div class="sub">'+_invPctTxt(_invPct(totAplic,totRend))+' sobre o aplicado</div></div>';
+  h+='<div class="card '+(desat?'warn':'')+'"><div class="lbl">Desatualizados</div><div class="val '+(desat?'amb':'grn')+'">'+desat+'</div><div class="sub">valor não revisado há 30+ dias</div></div>';
+  h+='</div>';
+
+  h+='<div class="panel" style="margin-bottom:12px"><div style="padding:10px 16px;font-size:11px;color:var(--t3)">📊 Lance cada aplicação com o valor que você colocou e o valor que está hoje no app do banco. Toque numa linha para editar, ou em 🔄 para só atualizar o valor atual.</div></div>';
+
+  // Resumo por conta
+  var porConta={};
+  todos.forEach(function(i){
+    var c=i.conta||'Sem conta';
+    if(!porConta[c])porConta[c]={aplic:0,atual:0,n:0};
+    porConta[c].aplic+=Number(i.valorAplicado)||0;
+    porConta[c].atual+=Number(i.valorAtual)||0;
+    porConta[c].n++;
+  });
+  var contasUsadas=Object.keys(porConta).sort(function(a,b){return porConta[b].atual-porConta[a].atual;});
+  if(contasUsadas.length){
+    h+='<div class="sec">🏦 Por Conta</div><div class="g4">';
+    contasUsadas.forEach(function(c){
+      var p=porConta[c];var rend=p.atual-p.aplic;var sel=_invFiltConta===c;
+      var cJs=c.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+      h+='<div class="card'+(sel?' hl':'')+'" style="cursor:pointer" onclick="_invFiltrar(\''+_invEsc(cJs)+'\')" title="Filtrar a lista por esta conta">';
+      h+='<div class="lbl">'+_invEsc(c)+'</div>';
+      h+='<div class="val gld">'+R(p.atual)+'</div>';
+      h+='<div class="sub">'+p.n+' aplicaç'+(p.n!==1?'ões':'ão')+' · <span style="color:'+(rend>=0?'var(--grn)':'var(--red)')+'">'+R(rend)+' ('+_invPctTxt(_invPct(p.aplic,rend))+')</span></div>';
+      h+='<div class="sub">'+(totAtual>0?(p.atual/totAtual*100).toFixed(1).replace('.',','):'0')+'% do total</div>';
+      h+='</div>';
+    });
+    h+='</div>';
+  }
+
+  // Lista
+  var lista=_invFiltConta?todos.filter(function(i){return (i.conta||'Sem conta')===_invFiltConta;}):todos.slice();
+  lista.sort(function(a,b){return (a.conta||'').localeCompare(b.conta||'')||(Number(b.valorAtual)||0)-(Number(a.valorAtual)||0);});
+  h+='<div class="brow" style="margin:14px 0 10px;align-items:center">';
+  h+='<button class="btn btnp" onclick="modalAddInv()">+ Novo Investimento</button>';
+  if(_invFiltConta)h+=' <button class="btn bsm" onclick="_invFiltrar(\'\')">✕ Limpar filtro: '+_invEsc(_invFiltConta)+'</button>';
+  h+='</div>';
+
+  if(!lista.length){
+    h+='<div class="panel" style="padding:36px 16px;text-align:center">';
+    h+='<div style="font-size:34px;margin-bottom:10px">📊</div>';
+    h+='<div style="font-size:14px;font-weight:600;color:var(--t2);margin-bottom:6px">Nenhum investimento lançado</div>';
+    h+='<div style="font-size:12px;color:var(--t3);margin-bottom:16px">Cadastre suas aplicações (CDB, caixinha, Tesouro…) em cada conta para acompanhar quanto rende</div>';
+    h+='<button class="btn btnp" onclick="modalAddInv()">+ Lançar Primeiro Investimento</button>';
+    h+='</div>';
+  } else {
+    h+='<div class="panel"><div class="ts tw"><table><thead><tr><th>CONTA</th><th>TIPO</th><th>DESCRIÇÃO</th><th class="tr">APLICADO</th><th class="tr">VALOR ATUAL</th><th class="tr">RENDIMENTO</th><th>TAXA</th><th>LIQUIDEZ</th><th>VENCIMENTO</th><th>ATUALIZADO</th><th></th></tr></thead><tbody>';
+    lista.forEach(function(i){
+      var rend=_invRend(i);var pct=_invPct(Number(i.valorAplicado)||0,rend);
+      var dias=i.atualizadoEm?_diasEmAberto(i.atualizadoEm):null;
+      var venc=i.vencimento?diasAte(i.vencimento):null;
+      h+='<tr onclick="modalEditInv('+i.id+')" style="cursor:pointer" title="Toque para editar">';
+      h+='<td style="font-weight:600">'+_invEsc(i.conta||'—')+'</td>';
+      h+='<td><span class="pill pn" style="font-size:10px">'+_invEsc(i.tipo)+'</span></td>';
+      h+='<td>'+(i.descricao?_invEsc(i.descricao):'<span style="color:var(--t3)">—</span>')+(i.obs?'<div style="font-size:10px;color:var(--t3);font-style:italic;margin-top:2px">💬 '+_invEsc(i.obs)+'</div>':'')+'</td>';
+      h+='<td class="tr">'+R(i.valorAplicado)+'</td>';
+      h+='<td class="tr" style="font-weight:700;color:var(--gold)">'+R(i.valorAtual)+'</td>';
+      h+='<td class="tr" style="color:'+(rend>=0?'var(--grn)':'var(--red)')+'">'+R(rend)+'<div style="font-size:10px">'+_invPctTxt(pct)+'</div></td>';
+      h+='<td style="font-size:12px">'+(_invEsc(i.taxa)||'<span style="color:var(--t3)">—</span>')+'</td>';
+      h+='<td style="font-size:12px">'+(_invEsc(i.liquidez)||'<span style="color:var(--t3)">—</span>')+'</td>';
+      h+='<td style="font-size:12px;white-space:nowrap'+(venc!==null&&venc<=30?';color:var(--amb)':'')+'">'+(i.vencimento?_invEsc(i.vencimento)+(venc!==null?'<div style="font-size:10px">'+(venc>0?'em '+venc+' dia'+(venc!==1?'s':''):(venc===0?'hoje':'venceu'))+'</div>':''):'<span style="color:var(--t3)">—</span>')+'</td>';
+      h+='<td style="font-size:11px;white-space:nowrap;color:'+(dias!==null&&dias>=30?'var(--amb)':'var(--t3)')+'">'+(i.atualizadoEm?(dias===0?'hoje':'há '+dias+' dia'+(dias!==1?'s':'')):'—')+'</td>';
+      h+='<td style="white-space:nowrap" onclick="event.stopPropagation()"><button class="btn bsm" onclick="modalAtualizarInv('+i.id+')" title="Atualizar valor atual">🔄</button> <button class="btn bsm btnd" onclick="delInv('+i.id+')" title="Excluir">✕</button></td>';
+      h+='</tr>';
+    });
+    h+='</tbody></table></div></div>';
+  }
+  setPage(h);
+}
+function _invFiltrar(c){_invFiltConta=(_invFiltConta===c)?'':c;pInvestimentos();}
+
+function _formInv(v){
+  v=v||{};
+  var opt=function(lista,sel){return lista.map(function(x){return '<option'+(x===sel?' selected':'')+'>'+_invEsc(x)+'</option>';}).join('');};
+  return '<div class="fg f2">'+
+    '<div><label>Conta *</label><input id="iv-conta" list="iv-contas" value="'+_invEsc(v.conta)+'" placeholder="Ex: STARK BANK" autofocus><datalist id="iv-contas">'+_invContas().map(function(c){return '<option value="'+_invEsc(c)+'">';}).join('')+'</datalist></div>'+
+    '<div><label>Tipo</label><select id="iv-tipo">'+opt(INV_TIPOS,v.tipo||'CDB')+'</select></div>'+
+    '<div style="grid-column:1/-1"><label>Descrição</label><input id="iv-desc" value="'+_invEsc(v.descricao)+'" placeholder="Ex: CDB 110% CDI — reserva de caixa"></div>'+
+    '<div><label>Valor Aplicado (R$) *</label><input id="iv-aplic" type="number" min="0" step="0.01" value="'+(v.valorAplicado||'')+'" placeholder="0,00"></div>'+
+    '<div><label>Valor Atual (R$)</label><input id="iv-atual" type="number" min="0" step="0.01" value="'+(v.valorAtual||'')+'" placeholder="se vazio, usa o aplicado"></div>'+
+    '<div><label>Taxa / Rentabilidade</label><input id="iv-taxa" value="'+_invEsc(v.taxa)+'" placeholder="Ex: 110% CDI, IPCA+6%"></div>'+
+    '<div><label>Liquidez</label><select id="iv-liq"><option value="">—</option>'+opt(INV_LIQUIDEZ,v.liquidez)+'</select></div>'+
+    '<div><label>Data da Aplicação</label><input id="iv-data" value="'+_invEsc(v.dataAplicacao||hoje())+'" placeholder="DD/MM/AAAA"></div>'+
+    '<div><label>Vencimento</label><input id="iv-venc" value="'+_invEsc(v.vencimento)+'" placeholder="DD/MM/AAAA (opcional)"></div>'+
+    '<div style="grid-column:1/-1"><label>Observação</label><input id="iv-obs" value="'+_invEsc(v.obs)+'" placeholder="Opcional"></div>'+
+    '</div>';
+}
+function _lerFormInv(){
+  var g=function(id){return (document.getElementById(id).value||'').trim();};
+  var aplic=Number(g('iv-aplic'))||0;
+  var atualTxt=g('iv-atual');
+  return {
+    conta:g('iv-conta').toUpperCase(), tipo:g('iv-tipo')||'Outro', descricao:g('iv-desc'),
+    valorAplicado:aplic, valorAtual:atualTxt===''?aplic:(Number(atualTxt)||0),
+    taxa:g('iv-taxa'), liquidez:g('iv-liq'),
+    dataAplicacao:g('iv-data')?_normalizarData(g('iv-data')):'',
+    vencimento:g('iv-venc')?_normalizarData(g('iv-venc')):'',
+    obs:g('iv-obs')
+  };
+}
+function modalAddInv(){
+  abrirM('Novo Investimento',_formInv(_invFiltConta?{conta:_invFiltConta}:null),function(){
+    var v=_lerFormInv();
+    if(!v.conta){_notif('Informe a conta','','red');return;}
+    if(!v.valorAplicado){_notif('Informe o valor aplicado','','red');return;}
+    if(!DB.investimentos)DB.investimentos=[];if(!DB.nInv)DB.nInv=1;
+    v.id=DB.nInv++;v.atualizadoEm=hoje();
+    DB.investimentos.push(v);
+    save();fecharM();pInvestimentos();
+  });
+}
+function modalEditInv(id){
+  var i=(DB.investimentos||[]).find(function(x){return x.id===id;});if(!i)return;
+  abrirM('Editar Investimento — '+i.conta,_formInv(i),function(){
+    var v=_lerFormInv();
+    if(!v.conta){_notif('Informe a conta','','red');return;}
+    if(!v.valorAplicado){_notif('Informe o valor aplicado','','red');return;}
+    var mudouValor=v.valorAtual!==i.valorAtual;
+    Object.assign(i,v);
+    if(mudouValor||!i.atualizadoEm)i.atualizadoEm=hoje();
+    save();fecharM();pInvestimentos();
+  });
+}
+function modalAtualizarInv(id){
+  var i=(DB.investimentos||[]).find(function(x){return x.id===id;});if(!i)return;
+  abrirM('Atualizar Valor — '+i.conta+(i.descricao?' · '+i.descricao:''),'<div class="fg f2">'+
+    '<div style="grid-column:1/-1;font-size:12px;color:var(--t3)">Aplicado: <b style="color:var(--t)">'+R(i.valorAplicado)+'</b> · Último valor: <b style="color:var(--t)">'+R(i.valorAtual)+'</b>'+(i.atualizadoEm?' ('+i.atualizadoEm+')':'')+'</div>'+
+    '<div style="grid-column:1/-1"><label>Valor Atual (R$)</label><input id="iv-novo" type="number" min="0" step="0.01" value="'+(i.valorAtual||'')+'" autofocus></div>'+
+    '</div>',function(){
+    i.valorAtual=Number(document.getElementById('iv-novo').value)||0;
+    i.atualizadoEm=hoje();
+    save();fecharM();pInvestimentos();
+  });
+}
+function delInv(id){
+  var i=(DB.investimentos||[]).find(function(x){return x.id===id;});if(!i)return;
+  if(!confirm('Excluir o investimento '+(i.descricao||i.tipo)+' ('+i.conta+' · '+R(i.valorAtual)+')?'))return;
+  DB.investimentos=DB.investimentos.filter(function(x){return x.id!==id;});
+  save();pInvestimentos();
+}
+
 // ── SAQUES — lançamentos diários de saque solicitado até confirmar queda ──
 function _pillSaqueStatus(s){
   return s==='Caiu'?'<span class="pill ppago">✅ Caiu na conta</span>':'<span class="pill ppendente">⏳ Aguardando</span>';
@@ -3338,6 +3521,7 @@ var PAGINAS_RESTRITAS=[
   {tipo:'notif',label:'Alertas & Notificações'},
   {tipo:'marketplaces',label:'Marketplaces — Saldo & A Receber'},
   {tipo:'gateways',label:'Gateways — Saldo & Retenções'},
+  {tipo:'investimentos',label:'Investimentos'},
   {tipo:'pag',label:'Pagamentos Empresa'}
 ];
 function _sessaoAtual(){
