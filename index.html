@@ -889,6 +889,8 @@ function pDash(){
   var blingSemCusto=blingAComprar.filter(function(c){return !c.valorCompra;}).length;
   var blingComprados=blingItens.filter(function(c){return c.status==='Comprado';}).length;
   var blingInvestir=blingAComprar.reduce(function(a,c){return a+_calcCompraCalc(c).custoTotal;},0);
+  // Já investido = custo dos itens Comprado + Recebido (mesmo cálculo da aba Pedidos Bling)
+  var blingInvestido=blingItens.filter(function(c){return c.status==='Comprado'||c.status==='Recebido';}).reduce(function(a,c){return a+_calcCompraCalc(c).custoTotal;},0);
   var comprasStatus=blingSemCusto>0?'amb':'grn';
   var comprasLabel=blingNPedidos===0?'Nenhum pedido em aberto':blingSemCusto>0?blingSemCusto+' sem custo':'Custos informados';
 
@@ -949,7 +951,8 @@ function pDash(){
     ['Pedidos',blingNPedidos,'var(--gold)'],
     ['Comprados',blingComprados,blingComprados>0?'var(--grn)':'var(--t3)'],
     ['Sem custo',blingSemCusto,blingSemCusto>0?'var(--amb)':'var(--t3)'],
-    ['Investir',R(blingInvestir),blingInvestir>0?'var(--t)':'var(--t3)']
+    ['Investir',R(blingInvestir),blingInvestir>0?'var(--t)':'var(--t3)'],
+    ['Total investido',R(blingInvestido),blingInvestido>0?'var(--grn)':'var(--t3)']
   ]);
 
   h+='</div>';
