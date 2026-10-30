@@ -492,6 +492,8 @@ function _normCompra(c){
     status:c.status||'Pendente', obs:c.obs||'', data:c.data||hoje(), dataCompra:c.dataCompra||c.data||hoje(),
     // Campos dos itens importados automaticamente do Bling (relay → src/bling.js)
     sku:c.sku||'', origem:c.origem||'', valorSugerido:!!c.valorSugerido,
+    // Custo digitado de propósito, mesmo que seja 0 (ex: brinde, já tinha no estoque)
+    custoInformado:!!c.custoInformado,
     blingPedidoId:c.blingPedidoId||null, blingPedidoNum:c.blingPedidoNum||null, blingLojaId:c.blingLojaId||'', blingImportadoEm:c.blingImportadoEm||0
   };
 }
@@ -902,7 +904,7 @@ function pDash(){
   var blingPedidos={};blingAComprar.forEach(function(c){blingPedidos[c.blingPedidoId]=1;});
   var blingNPedidos=Object.keys(blingPedidos).length;
   var blingValorTotal=blingAComprar.reduce(function(a,c){return a+c.precoVenda*c.qtd;},0);
-  var blingSemCusto=blingAComprar.filter(function(c){return !c.valorCompra;}).length;
+  var blingSemCusto=blingAComprar.filter(function(c){return !_temCusto(c);}).length;
   var blingComprados=blingItens.filter(function(c){return c.status==='Comprado';}).length;
   var blingInvestir=blingAComprar.reduce(function(a,c){return a+_calcCompraCalc(c).custoTotal;},0);
   // Já investido = custo dos itens Comprado + Recebido (mesmo cálculo da aba Pedidos Bling)
@@ -1709,8 +1711,8 @@ function _resumoMes(m){
   r.blVendido=bl.reduce(function(a,c){return a+c.precoVenda*c.qtd;},0);
   r.blTaxas=bl.reduce(function(a,c){return a+c.taxaUnit*c.qtd;},0);
   r.blInvestido=bl.filter(function(c){return c.status==='Comprado'||c.status==='Recebido';}).reduce(function(a,c){return a+_calcCompraCalc(c).custoTotal;},0);
-  r.blLucro=bl.filter(function(c){return c.valorCompra;}).reduce(function(a,c){return a+_calcCompraCalc(c).lucroTotal;},0);
-  r.blSemCusto=bl.filter(function(c){return !c.valorCompra;}).length;
+  r.blLucro=bl.filter(_temCusto).reduce(function(a,c){return a+_calcCompraCalc(c).lucroTotal;},0);
+  r.blSemCusto=bl.filter(function(c){return !_temCusto(c);}).length;
   var cm=(DB.compras||[]).filter(function(c){return c.origem!=='bling'&&(c.status==='Comprado'||c.status==='Recebido')&&_mesDaData(c.dataCompra)===m;});
   r.cmItens=cm.length;r.cmValor=cm.reduce(function(a,c){return a+_calcCompraCalc(c).custoTotal;},0);
   r.investidoTotal=r.blInvestido+r.cmValor;
@@ -2132,6 +2134,8 @@ function delForn(id){
 }
 
 // ── COMPRAS ───────────────────────────────────────────
+// Tem custo = valor maior que 0, ou 0 digitado de propósito (custoInformado)
+function _temCusto(c){return Number(c.valorCompra)>0||!!c.custoInformado;}
 function _calcCompraCalc(c){
   var custoBase=Number(c.valorCompra)||0;
   var frete=Number(c.freteUnit)||0;
@@ -2147,7 +2151,7 @@ function _calcCompraCalc(c){
   var lucroTotal=lucroUnit*qtd;
   // Sem preço de venda OU sem valor de compra (item importado do Bling que ainda
   // não foi preenchido) não dá pra estimar lucro — fica fora dos totais.
-  var viavel=(precoVenda<=0||custoBase<=0)?'semdados':(margemPct>=COMPRA_MARGEM_MIN?'bom':(margemPct>=0?'baixo':'ruim'));
+  var viavel=(precoVenda<=0||!_temCusto(c))?'semdados':(margemPct>=COMPRA_MARGEM_MIN?'bom':(margemPct>=0?'baixo':'ruim'));
   return {custoUnit:custoUnit,custoTotal:custoTotal,lucroUnit:lucroUnit,margemPct:margemPct,lucroTotal:lucroTotal,viavel:viavel,impostoValor:impostoValor};
 }
 
@@ -2208,7 +2212,7 @@ function _tabelaCompras(lista,titulo){
     h+='<td style="font-size:12px">'+(c.fornecedor||'<span style="color:var(--t3)">—</span>')+'</td>';
     h+='<td class="tc">'+(c.plataforma?'<span class="pill pn">'+c.plataforma+'</span>':'<span style="color:var(--t3);font-size:11px">—</span>')+'</td>';
     h+='<td class="tr tnw">'+c.qtd+'</td>';
-    h+='<td class="tr tnw">'+(c.valorCompra?R(c.valorCompra)+(c.valorSugerido?' <span title="Custo do Estoque — confira" style="color:var(--amb)">●</span>':''):'<button class="btn bsm" style="color:var(--amb)" onclick="editCompra('+c.id+')" title="Preencher valor de compra">💲 Informar</button>')+'</td>';
+    h+='<td class="tr tnw">'+(_temCusto(c)?R(c.valorCompra)+(c.valorSugerido?' <span title="Custo do Estoque — confira" style="color:var(--amb)">●</span>':''):'<button class="btn bsm" style="color:var(--amb)" onclick="editCompra('+c.id+')" title="Preencher valor de compra">💲 Informar</button>')+'</td>';
     h+='<td class="tr tnw">'+R(r.custoUnit)+'</td>';
     h+='<td class="tr tnw" style="font-weight:700">'+R(r.custoTotal)+'</td>';
     h+='<td class="tr tnw">'+(c.precoVenda?R(c.precoVenda)+(c.taxaUnit?'<div style="font-size:10px;color:var(--t3)">− '+R(c.taxaUnit)+' taxa</div>':''):'<span style="color:var(--t3)">—</span>')+'</td>';
@@ -2327,11 +2331,12 @@ function _numBR(s){
   var v=Number(s);return isFinite(v)?v:0;
 }
 function blingSalvarCusto(id){
-  var el=document.getElementById('bc-'+id),v=el?_numBR(el.value):0;
-  // Sem alert(): no app desktop ele travava a digitação até reabrir o app
-  if(!v||v<=0){_notif('Digite o custo','Valor de compra por unidade (ex: 12,50)','red');if(el)el.focus();return;}
+  var el=document.getElementById('bc-'+id),txt=el?el.value.trim():'',v=_numBR(txt);
+  // Sem alert(): no app desktop ele travava a digitação até reabrir o app.
+  // 0 vale (brinde, item que já tinha) — só campo vazio ou negativo é recusado.
+  if(txt===''||v<0){_notif('Digite o custo','Valor de compra por unidade (ex: 12,50 — pode ser 0)','red');if(el)el.focus();return;}
   var c=(DB.compras||[]).find(function(x){return x.id===id;});if(!c)return;
-  c.valorCompra=Math.round(v*100)/100;c.valorSugerido=false;
+  c.valorCompra=Math.round(v*100)/100;c.valorSugerido=false;c.custoInformado=true;
   save();badges();_blingRedesenhar();
 }
 // Redesenha a lista sem voltar pro topo e sem perder custos digitados em outras linhas
@@ -2360,7 +2365,7 @@ function _blingResumoMeses(itens){
     m.peds[c.blingPedidoId||c.id]=1;m.itens++;
     m.vendido+=c.precoVenda*c.qtd;m.taxas+=(Number(c.taxaUnit)||0)*c.qtd;
     if(c.status==='Comprado'||c.status==='Recebido')m.investido+=r.custoTotal;
-    if(c.valorCompra)m.lucro+=r.lucroTotal;else m.semCusto++;
+    if(_temCusto(c))m.lucro+=r.lucroTotal;else m.semCusto++;
   });
   return Object.keys(por).sort().reverse().map(function(k){var m=por[k];m.pedidos=Object.keys(m.peds).length;return m;});
 }
@@ -2387,7 +2392,7 @@ function _renderSecaoBling(){
   var itens=doPlat.filter(_blingNoMes);
   var aComprar=itens.filter(function(c){return c.status==='Pendente';});
   var vendidoAberto=aComprar.reduce(function(a,c){return a+c.precoVenda*c.qtd;},0);
-  var semCusto=aComprar.filter(function(c){return !c.valorCompra;}).length;
+  var semCusto=aComprar.filter(function(c){return !_temCusto(c);}).length;
   var investir=aComprar.reduce(function(a,c){return a+_calcCompraCalc(c).custoTotal;},0);
   // Já investido = custo dos itens que já foram comprados (Comprado + Recebido)
   var jaComprados=itens.filter(function(c){return c.status==='Comprado'||c.status==='Recebido';});
@@ -2432,13 +2437,13 @@ var _BLING_STATUS_LABEL={Pendente:'A comprar',Comprado:'Comprado',Recebido:'Rece
 function blingFiltrar(f){_blingFiltro=f;pCompras();}
 function blingMudarStatus(id,st){
   var c=(DB.compras||[]).find(function(x){return x.id===id;});if(!c||c.status===st)return;
-  if(st==='Comprado'&&!c.valorCompra){
+  if(st==='Comprado'&&!_temCusto(c)){
     // Janela própria em vez de prompt(): o prompt não existe no app desktop
     // (Electron) e o status nunca mudava; no Windows ainda travava a digitação.
     var aplicar=function(comCusto){
       if(comCusto){
-        var v=_numBR((document.getElementById('bm-custo')||{}).value);
-        if(v>0){c.valorCompra=Math.round(v*100)/100;c.valorSugerido=false;}
+        var txt=String((document.getElementById('bm-custo')||{}).value||'').trim(),v=_numBR(txt);
+        if(txt!==''&&v>=0){c.valorCompra=Math.round(v*100)/100;c.valorSugerido=false;c.custoInformado=true;}
       }
       _blingAplicarStatus(c,st);fecharM();
     };
@@ -2490,7 +2495,7 @@ function _renderBlingPedidos(){
     h+='<div class="zday"><b>'+(rot?rot+' · ':'')+_escH(d.slice(0,5))+'</b><span>'+its.length+' pedido'+(its.length!==1?'s':'')+' · '+R(somaDia)+'</span></div>';
     its.forEach(function(c){
       var r=_calcCompraCalc(c);totVenda+=c.precoVenda*c.qtd;totCusto+=r.custoTotal;
-      var semCusto=!c.valorCompra;
+      var semCusto=!_temCusto(c);
       var stOpts=COMPRA_STATUS.map(function(st){return '<option value="'+st+'"'+(c.status===st?' selected':'')+'>'+_BLING_STATUS_LABEL[st]+'</option>';}).join('');
       h+='<div class="zrow'+(c.status==='Cancelado'?' canc':'')+'">';
       h+='<div class="c-ped"><span class="plat '+_classePlat(c.plataforma)+'">'+_escH(c.plataforma==='Site Zyntra'?'Site':(c.plataforma||'Outro'))+'</span><span class="num">#'+_escH(c.blingPedidoNum||c.blingPedidoId)+'</span></div>';
@@ -2836,7 +2841,7 @@ function _formCompra(vals){
     '<div><label>Data que Vou Comprar *</label><input id="nc-datacompra" value="'+(vals.dataCompra||hoje())+'" placeholder="DD/MM/AAAA"></div>'+
     '<div><label>Status</label><select id="nc-status">'+stOpts+'</select></div>'+
     '<div><label>Quantidade *</label><input id="nc-qtd" type="number" min="1" step="1" value="'+(vals.qtd||1)+'" oninput="_atualizarPreviewCompra()"></div>'+
-    '<div><label>Valor Unitário do Fornecedor (R$) *</label><input id="nc-valor" type="number" min="0" step="0.01" value="'+(vals.valorCompra||'')+'" placeholder="0,00" oninput="_atualizarPreviewCompra()"></div>'+
+    '<div><label>Valor Unitário do Fornecedor (R$) *</label><input id="nc-valor" type="number" min="0" step="0.01" value="'+(vals.valorCompra||(vals.custoInformado?0:''))+'" placeholder="0,00" oninput="_atualizarPreviewCompra()"></div>'+
     '<div><label>Frete Rateado por Unidade (R$)</label><input id="nc-frete" type="number" min="0" step="0.01" value="'+(vals.freteUnit||0)+'" oninput="_atualizarPreviewCompra()"></div>'+
     '<div><label>Imposto Estimado (%)</label><input id="nc-imposto" type="number" min="0" step="0.1" value="'+impostoDefault+'" oninput="_atualizarPreviewCompra()"></div>'+
     '<div><label>Preço de Venda Estimado (R$)</label><input id="nc-preco" type="number" min="0" step="0.01" value="'+(vals.precoVenda||'')+'" placeholder="0,00" oninput="_atualizarPreviewCompra()"></div>'+
@@ -2856,6 +2861,8 @@ function _lerFormCompra(){
     status:document.getElementById('nc-status').value,
     qtd:Number(document.getElementById('nc-qtd').value)||1,
     valorCompra:Number(document.getElementById('nc-valor').value)||0,
+    // Campo preenchido (mesmo com 0) conta como custo informado
+    custoInformado:document.getElementById('nc-valor').value.trim()!=='',
     freteUnit:Number(document.getElementById('nc-frete').value)||0,
     impostoPct:Number(document.getElementById('nc-imposto').value)||0,
     precoVenda:Number(document.getElementById('nc-preco').value)||0,
@@ -2868,7 +2875,7 @@ function modalAddCompra(){
   abrirM('Novo Item de Compra',_formCompra({status:'Pendente'}),function(){
     var dados=_lerFormCompra();
     if(!dados.produto){alert('Informe o nome do produto.');return;}
-    if(!dados.valorCompra){alert('Informe o valor unitário do fornecedor.');return;}
+    if(!dados.custoInformado){alert('Informe o valor unitário do fornecedor (pode ser 0).');return;}
     if(!dados.dataCompra){alert('Informe a data que vai comprar.');return;}
     if(!DB.compras)DB.compras=[];
     if(!DB.nCompras)DB.nCompras=1;
@@ -2885,7 +2892,7 @@ function editCompra(id){
   abrirM('Editar Item — '+c.produto,_formCompra(c),function(){
     var dados=_lerFormCompra();
     if(!dados.produto){alert('Informe o nome do produto.');return;}
-    if(!dados.valorCompra){alert('Informe o valor unitário do fornecedor.');return;}
+    if(!dados.custoInformado){alert('Informe o valor unitário do fornecedor (pode ser 0).');return;}
     if(!dados.dataCompra){alert('Informe a data que vai comprar.');return;}
     Object.assign(c,dados);
     c.valorSugerido=false;
