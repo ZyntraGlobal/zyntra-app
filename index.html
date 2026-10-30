@@ -151,6 +151,20 @@ tfoot td{font-weight:700;border-top:2px solid var(--bdr2);border-bottom:none!imp
 .zseg button.on .n{background:rgba(0,0,0,.18);color:#16130c}
 .zkpi{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:12px}
 .zkpi.k4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.zmes{background:var(--w);border:1px solid var(--bdr);border-radius:12px;padding:12px 14px;margin-bottom:12px}
+.zmes-t{font-size:12px;font-weight:700;color:var(--t);margin-bottom:8px}
+.zmes-t span{font-weight:500;color:var(--t3);font-size:11px;margin-left:6px}
+.zmes-sc{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.zmes table{width:100%;border-collapse:collapse;font-size:12px;white-space:nowrap}
+.zmes th{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--t3);text-align:left;padding:6px 8px;border-bottom:1px solid var(--bdr)}
+.zmes td{padding:8px;border-bottom:1px solid var(--bdr);color:var(--t2)}
+.zmes .r{text-align:right}
+.zmes tr[onclick]{cursor:pointer}
+.zmes tr[onclick]:hover td{background:var(--w2)}
+.zmes tr.on td{background:var(--gl)}
+.zmes tr.on td:first-child b{color:var(--gold)}
+.zmes tr.tot td{font-weight:800;color:var(--t);border-bottom:0}
+.zmes-n{font-size:11px;color:var(--t3);margin-top:6px}
 @media(max-width:560px){.zkpi.k4{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .zkpi>div{background:var(--w);border:1px solid var(--bdr);border-radius:10px;padding:10px 12px;min-width:0}
 .zkpi .l{font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -2233,8 +2247,48 @@ function _blingRedesenhar(){
   if(sc)sc.scrollTop=top;
 }
 
+// ── Pedidos do Bling: visão mês a mês (pelo mês da venda) ──
+var _blingMes='todos'; // 'todos' ou 'AAAA-MM'
+var _MESES_NOME=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+function _blingMesDe(c){var p=String(c.data||'').split('/');return p.length===3?p[2]+'-'+p[1]:'';}
+function _blingMesNome(k){var p=k.split('-');return (_MESES_NOME[Number(p[1])-1]||k)+' '+p[0];}
+function _blingNoMes(c){return _blingMes==='todos'||_blingMesDe(c)===_blingMes;}
+function blingFiltrarMes(m){_blingMes=m;pCompras();}
+function _blingResumoMeses(itens){
+  var por={};
+  itens.forEach(function(c){
+    var k=_blingMesDe(c);if(!k)return;
+    var m=por[k]||(por[k]={k:k,peds:{},itens:0,vendido:0,taxas:0,investido:0,lucro:0,semCusto:0,canc:0});
+    if(c.status==='Cancelado'){m.canc++;return;}
+    var r=_calcCompraCalc(c);
+    m.peds[c.blingPedidoId||c.id]=1;m.itens++;
+    m.vendido+=c.precoVenda*c.qtd;m.taxas+=(Number(c.taxaUnit)||0)*c.qtd;
+    if(c.status==='Comprado'||c.status==='Recebido')m.investido+=r.custoTotal;
+    if(c.valorCompra)m.lucro+=r.lucroTotal;else m.semCusto++;
+  });
+  return Object.keys(por).sort().reverse().map(function(k){var m=por[k];m.pedidos=Object.keys(m.peds).length;return m;});
+}
+function _renderBlingMeses(itens){
+  var meses=_blingResumoMeses(itens);
+  if(!meses.length)return '';
+  var ch=function(k,l){return '<button class="'+(_blingMes===k?'on':'')+'" onclick="blingFiltrarMes(\''+k+'\')">'+l+'</button>';};
+  var h='<div class="zchips">'+ch('todos','📅 Todos os meses')+meses.map(function(m){return ch(m.k,_blingMesNome(m.k));}).join('')+'</div>';
+  h+='<div class="zmes"><div class="zmes-t">Resumo por mês <span>pelo mês da venda · sem cancelados · toque no mês pra filtrar</span></div><div class="zmes-sc"><table>';
+  h+='<tr><th>Mês</th><th class="r">Pedidos</th><th class="r">Vendido</th><th class="r">Taxas</th><th class="r">Investido</th><th class="r">Lucro</th><th class="r">Sem custo</th></tr>';
+  var t={pedidos:0,vendido:0,taxas:0,investido:0,lucro:0,semCusto:0};
+  meses.forEach(function(m){
+    Object.keys(t).forEach(function(k){t[k]+=m[k];});
+    h+='<tr class="'+(_blingMes===m.k?'on':'')+'" onclick="blingFiltrarMes(\''+(_blingMes===m.k?'todos':m.k)+'\')"><td><b>'+_blingMesNome(m.k)+'</b></td><td class="r">'+m.pedidos+'</td><td class="r">'+R(m.vendido)+'</td><td class="r" style="color:var(--t3)">−'+R(m.taxas)+'</td><td class="r">'+R(m.investido)+'</td>'
+      +'<td class="r" style="color:'+(m.lucro>=0?'var(--grn)':'var(--red)')+'">'+R(m.lucro)+'</td><td class="r" style="color:'+(m.semCusto?'var(--amb)':'var(--t3)')+'">'+m.semCusto+'</td></tr>';
+  });
+  if(meses.length>1)h+='<tr class="tot"><td>Total</td><td class="r">'+t.pedidos+'</td><td class="r">'+R(t.vendido)+'</td><td class="r">−'+R(t.taxas)+'</td><td class="r">'+R(t.investido)+'</td><td class="r">'+R(t.lucro)+'</td><td class="r">'+t.semCusto+'</td></tr>';
+  h+='</table></div>'+(t.semCusto?'<div class="zmes-n">Lucro conta só os itens com custo informado.</div>':'')+'</div>';
+  return h;
+}
+
 function _renderSecaoBling(){
-  var itens=(DB.compras||[]).filter(function(c){return _ehBling(c)&&_blingNaPlat(c);});
+  var doPlat=(DB.compras||[]).filter(function(c){return _ehBling(c)&&_blingNaPlat(c);});
+  var itens=doPlat.filter(_blingNoMes);
   var aComprar=itens.filter(function(c){return c.status==='Pendente';});
   var vendidoAberto=aComprar.reduce(function(a,c){return a+c.precoVenda*c.qtd;},0);
   var semCusto=aComprar.filter(function(c){return !c.valorCompra;}).length;
@@ -2242,7 +2296,7 @@ function _renderSecaoBling(){
   // Já investido = custo dos itens que já foram comprados (Comprado + Recebido)
   var jaComprados=itens.filter(function(c){return c.status==='Comprado'||c.status==='Recebido';});
   var investido=jaComprados.reduce(function(a,c){return a+_calcCompraCalc(c).custoTotal;},0);
-  var h='<div class="zkpi k4">';
+  var h=_renderBlingMeses(doPlat)+'<div class="zkpi k4">';
   h+='<div><div class="l">A comprar</div><div class="v" style="color:var(--gold)">'+aComprar.length+'</div><div class="s">'+R(vendidoAberto)+'</div></div>';
   h+='<div><div class="l">Sem custo</div><div class="v" style="color:'+(semCusto?'var(--amb)':'var(--grn)')+'">'+semCusto+'</div><div class="s">'+(semCusto?'informar':'tudo certo')+'</div></div>';
   h+='<div><div class="l">Investir</div><div class="v">'+R(investir)+'</div><div class="s">custo informado</div></div>';
@@ -2309,7 +2363,7 @@ function _blingAplicarStatus(c,st){
 }
 function _classePlat(p){return {'Amazon':'amazon','Shopee':'shopee','Mercado Livre':'ml','TikTok Shop':'tiktok','Site Zyntra':'site'}[p]||'';}
 function _renderBlingPedidos(){
-  var todosPlats=(DB.compras||[]).filter(_ehBling);
+  var todosPlats=(DB.compras||[]).filter(function(c){return _ehBling(c)&&_blingNoMes(c);});
   // contagem por plataforma dentro do status escolhido
   var noStatus=_blingFiltro==='todos'?todosPlats:todosPlats.filter(function(c){return c.status===_blingFiltro;});
   var cntPlat={todas:noStatus.length};
