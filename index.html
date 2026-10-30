@@ -150,6 +150,8 @@ tfoot td{font-weight:700;border-top:2px solid var(--bdr2);border-bottom:none!imp
 .zseg .n{display:inline-block;min-width:20px;padding:1px 6px;border-radius:10px;font-size:11px;background:var(--w3);color:var(--t)}
 .zseg button.on .n{background:rgba(0,0,0,.18);color:#16130c}
 .zkpi{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:12px}
+.zkpi.k4{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media(max-width:560px){.zkpi.k4{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .zkpi>div{background:var(--w);border:1px solid var(--bdr);border-radius:10px;padding:10px 12px;min-width:0}
 .zkpi .l{font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .zkpi .v{font-size:20px;font-weight:800;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -2205,12 +2207,27 @@ function blingSincronizarAgora(){
     _blingAtualizarStatus();
   }).catch(function(e){alert('Bling: '+(e.message||e));});
 }
+// Aceita "12,50", "12.50" e "1.234,56" (teclado brasileiro)
+function _numBR(s){
+  s=String(s==null?'':s).replace(/[^\d.,-]/g,'');
+  if(s.indexOf(',')>=0)s=s.replace(/\./g,'').replace(',','.');
+  var v=Number(s);return isFinite(v)?v:0;
+}
 function blingSalvarCusto(id){
-  var el=document.getElementById('bc-'+id),v=el?Number(el.value):0;
-  if(!v||v<=0){alert('Digite o valor de compra (custo por unidade).');if(el)el.focus();return;}
+  var el=document.getElementById('bc-'+id),v=el?_numBR(el.value):0;
+  // Sem alert(): no app desktop ele travava a digitação até reabrir o app
+  if(!v||v<=0){_notif('Digite o custo','Valor de compra por unidade (ex: 12,50)','red');if(el)el.focus();return;}
   var c=(DB.compras||[]).find(function(x){return x.id===id;});if(!c)return;
   c.valorCompra=Math.round(v*100)/100;c.valorSugerido=false;
-  save();badges();pCompras();
+  save();badges();_blingRedesenhar();
+}
+// Redesenha a lista sem voltar pro topo e sem perder custos digitados em outras linhas
+function _blingRedesenhar(){
+  var sc=document.querySelector('.pg'),top=sc?sc.scrollTop:0,vals={};
+  document.querySelectorAll('#pg input[id^="bc-"]').forEach(function(i){if(i.value)vals[i.id]=i.value;});
+  pCompras();
+  Object.keys(vals).forEach(function(k){var i=document.getElementById(k);if(i)i.value=vals[k];});
+  if(sc)sc.scrollTop=top;
 }
 
 function _renderSecaoBling(){
@@ -2219,10 +2236,14 @@ function _renderSecaoBling(){
   var vendidoAberto=aComprar.reduce(function(a,c){return a+c.precoVenda*c.qtd;},0);
   var semCusto=aComprar.filter(function(c){return !c.valorCompra;}).length;
   var investir=aComprar.reduce(function(a,c){return a+_calcCompraCalc(c).custoTotal;},0);
-  var h='<div class="zkpi">';
+  // Já investido = custo dos itens que já foram comprados (Comprado + Recebido)
+  var jaComprados=itens.filter(function(c){return c.status==='Comprado'||c.status==='Recebido';});
+  var investido=jaComprados.reduce(function(a,c){return a+_calcCompraCalc(c).custoTotal;},0);
+  var h='<div class="zkpi k4">';
   h+='<div><div class="l">A comprar</div><div class="v" style="color:var(--gold)">'+aComprar.length+'</div><div class="s">'+R(vendidoAberto)+'</div></div>';
   h+='<div><div class="l">Sem custo</div><div class="v" style="color:'+(semCusto?'var(--amb)':'var(--grn)')+'">'+semCusto+'</div><div class="s">'+(semCusto?'informar':'tudo certo')+'</div></div>';
   h+='<div><div class="l">Investir</div><div class="v">'+R(investir)+'</div><div class="s">custo informado</div></div>';
+  h+='<div><div class="l">Total investido</div><div class="v" style="color:var(--grn)">'+R(investido)+'</div><div class="s">'+jaComprados.length+' ite'+(jaComprados.length!==1?'ns':'m')+' comprado'+(jaComprados.length!==1?'s':'')+'</div></div>';
   h+='</div>';
   return h+_renderComprasBling();
 }
@@ -2259,14 +2280,29 @@ function blingFiltrar(f){_blingFiltro=f;pCompras();}
 function blingMudarStatus(id,st){
   var c=(DB.compras||[]).find(function(x){return x.id===id;});if(!c||c.status===st)return;
   if(st==='Comprado'&&!c.valorCompra){
-    var v=prompt('Quanto custou cada unidade? (R$)\n'+c.produto);
-    if(v===null){pCompras();return;}
-    v=Number(String(v).replace(',','.'));
-    if(v>0){c.valorCompra=Math.round(v*100)/100;c.valorSugerido=false;}
+    // Janela própria em vez de prompt(): o prompt não existe no app desktop
+    // (Electron) e o status nunca mudava; no Windows ainda travava a digitação.
+    var aplicar=function(comCusto){
+      if(comCusto){
+        var v=_numBR((document.getElementById('bm-custo')||{}).value);
+        if(v>0){c.valorCompra=Math.round(v*100)/100;c.valorSugerido=false;}
+      }
+      _blingAplicarStatus(c,st);fecharM();
+    };
+    abrirM('Quanto custou cada unidade?','<div style="font-size:12px;color:var(--t2);margin-bottom:10px">'+_escH(c.produto)+'</div>'
+      +'<input class="inp" id="bm-custo" type="text" inputmode="decimal" placeholder="Custo R$ (ex: 12,50)" style="width:100%">'
+      +'<div style="font-size:11px;color:var(--t3);margin-top:8px">Pode deixar em branco e informar depois.</div>',function(){aplicar(true);});
+    var inp=document.getElementById('bm-custo');
+    if(inp){inp.onkeydown=function(e){if(e.key==='Enter')aplicar(true);};setTimeout(function(){inp.focus();},50);}
+    _blingRedesenhar(); // volta o select pro status atual até confirmar
+    return;
   }
+  _blingAplicarStatus(c,st);
+}
+function _blingAplicarStatus(c,st){
   c.status=st;
   if(st==='Comprado')c.dataCompra=hoje();
-  save();badges();pCompras();
+  save();badges();_blingRedesenhar();
 }
 function _classePlat(p){return {'Amazon':'amazon','Shopee':'shopee','Mercado Livre':'ml','TikTok Shop':'tiktok','Site Zyntra':'site'}[p]||'';}
 function _renderBlingPedidos(){
@@ -2309,7 +2345,7 @@ function _renderBlingPedidos(){
       h+='<div class="c-val r"><i>Venda</i>'+R(c.precoVenda)+'</div>';
       h+='<div class="c-val r tx"><i>Taxa</i>'+(c.taxaUnit?'−'+R(c.taxaUnit):'—')+'</div>';
       h+='<div class="c-custo">'+(semCusto
-        ?'<div class="custo"><input id="bc-'+c.id+'" type="number" inputmode="decimal" min="0" step="0.01" placeholder="Custo R$" onkeydown="if(event.key===\'Enter\')blingSalvarCusto('+c.id+')"><button onclick="blingSalvarCusto('+c.id+')" title="Salvar custo">✓</button></div>'
+        ?'<div class="custo"><input id="bc-'+c.id+'" type="text" inputmode="decimal" autocomplete="off" placeholder="Custo R$" onkeydown="if(event.key===\'Enter\')blingSalvarCusto('+c.id+')"><button onclick="blingSalvarCusto('+c.id+')" title="Salvar custo">✓</button></div>'
         :'<span class="custook" onclick="editCompra('+c.id+')" title="Editar"><i class="lb">Custo </i>'+R(c.valorCompra)+' <span class="ed">✏️</span></span>')+'</div>';
       h+='<div class="c-val r luc"><i>'+(semCusto?'Recebe':'Lucro')+'</i>'+(semCusto
         ?'<span style="color:var(--t2)">'+R((c.precoVenda-c.taxaUnit)*c.qtd)+'</span><small>recebe</small>'
@@ -3499,6 +3535,10 @@ function _atualizarTelaComDadosNovos(){
   try{
     var mbg=document.getElementById('mbg');
     if(mbg&&mbg.classList.contains('open')){window._pendingSyncApply=true;return;}
+    // Mesmo cuidado pra campos digitáveis na própria página (ex: custo nos Pedidos
+    // Bling): redesenhar no meio da digitação apagava o valor e tirava o foco do
+    // campo a cada sincronização de 10s. Aplica quando o campo perder o foco.
+    if(_digitandoNaPagina()){window._pendingSyncApply=true;return;}
     var novo=loadDB();
     // Trocar de papel no mesmo aparelho (funcionário -> dono) não muda o
     // _savedAt (é o mesmo dado, só com campos a menos) — sem essa exceção, o
@@ -3516,6 +3556,22 @@ function _atualizarTelaComDadosNovos(){
   }catch(e){}
 }
 window.addEventListener('zyntra-sync', _atualizarTelaComDadosNovos);
+function _digitandoNaPagina(){
+  var a=document.activeElement,pg=document.getElementById('pg');
+  return !!(a&&pg&&pg.contains(a)&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName));
+}
+document.addEventListener('focusout',function(){
+  // Espera o foco chegar no próximo elemento (ex: Tab de um custo pro outro)
+  setTimeout(function(){
+    if(!window._pendingSyncApply||_digitandoNaPagina())return;
+    var mbg=document.getElementById('mbg');if(mbg&&mbg.classList.contains('open'))return;
+    window._pendingSyncApply=false;_atualizarTelaComDadosNovos();
+  },300);
+});
+// No app desktop (Electron/Windows), depois de um alert() nativo os campos de texto
+// param de aceitar digitação até sair e entrar de novo no app. Troca o alert por um
+// aviso na própria tela, que não rouba o foco da janela.
+if(window.zyntraElectron){window.alert=function(m){_notif('⚠️ Atenção',_escH(String(m==null?'':m)).replace(/\n/g,'<br>'),'red');};}
 
 function _notif(t,m,tipo){var n=document.createElement('div');var c=tipo==='grn'?'var(--grn)':'var(--red)';n.style.cssText='position:fixed;bottom:20px;right:20px;background:#1a1917;border:1px solid #302e28;border-left:4px solid '+c+';border-radius:10px;padding:14px 18px;max-width:300px;box-shadow:0 8px 32px rgba(0,0,0,.6);z-index:9000;animation:slideIn .3s ease';n.innerHTML='<div style="font-size:13px;font-weight:700;color:#f0ede8;margin-bottom:3px">'+t+'</div><div style="font-size:11px;color:#a09c92">'+m+'</div>';document.body.appendChild(n);setTimeout(function(){n.style.opacity='0';n.style.transition='opacity .3s';setTimeout(function(){n.remove();},300);},4000);}
 
