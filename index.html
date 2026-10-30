@@ -271,6 +271,7 @@ tfoot td{font-weight:700;border-top:2px solid var(--bdr2);border-bottom:none!imp
   </div>
   <div class="sb-sec">Visão Geral</div>
   <div class="ni" onclick="ir('dash',this)"><span class="ico">📊</span><span class="lbl">Dashboard</span></div>
+  <div class="ni" onclick="ir('mensal',this)"><span class="ico">📅</span><span class="lbl">Resumo Mensal</span></div>
   <div class="sb-sec">Estoque</div>
   <div class="ni" onclick="ir('est_produtos',this)"><span class="ico">📦</span><span class="lbl">Produtos</span><span class="bdg" id="b-est">0</span></div>
   <div class="ni" onclick="ir('est_fin',this)"><span class="ico">💰</span><span class="lbl">Financeiro Est.</span></div>
@@ -788,12 +789,12 @@ function ir(tipo,arg,el){
   if(el)el.classList.add('on');
   _curPage=tipo;_curMes=arg||0;
   // 'usuarios' é sempre exclusivo do dono, nunca liberável por permissão
-  if(tipo==='usuarios'&&_isFuncionario()){_bloqueadoFunc();document.getElementById('ptitle').textContent='Acesso Restrito';return;}
+  if((tipo==='usuarios'||tipo==='mensal')&&_isFuncionario()){_bloqueadoFunc();document.getElementById('ptitle').textContent='Acesso Restrito';return;}
   if(!_paginaPermitida(tipo)){
     if(tipo==='dash'&&_isFuncionario()){document.getElementById('ptitle').textContent='Início';pInicioFunc();return;}
     _bloqueadoFunc();document.getElementById('ptitle').textContent='Acesso Restrito';return;
   }
-  var titulos={dash:'Dashboard',est_produtos:'Estoque — Produtos',est_fin:'Estoque — Financeiro',est_mov:'Estoque — Movimentações',est_alertas:'Estoque — Alertas',rtu_lanc:'Controle RTU — Lançamentos',rtu_resumo:'Controle RTU — Resumo Anual',notif:'Alertas & Notificações',fornecedores:'Fornecedores',compras:'Compras — Lista de Compras',pendencias:'Avisos & Pendências',marketplaces:'Marketplaces — Saldo & A Receber',gateways:'Gateways — Saldo & Retenções',investimentos:'Investimentos — Aplicações por Conta',usuarios:'Usuários & Acessos',inicio:'Início'};
+  var titulos={dash:'Dashboard',est_produtos:'Estoque — Produtos',est_fin:'Estoque — Financeiro',est_mov:'Estoque — Movimentações',est_alertas:'Estoque — Alertas',rtu_lanc:'Controle RTU — Lançamentos',rtu_resumo:'Controle RTU — Resumo Anual',notif:'Alertas & Notificações',fornecedores:'Fornecedores',compras:'Compras — Lista de Compras',pendencias:'Avisos & Pendências',marketplaces:'Marketplaces — Saldo & A Receber',gateways:'Gateways — Saldo & Retenções',investimentos:'Investimentos — Aplicações por Conta',usuarios:'Usuários & Acessos',inicio:'Início',mensal:'Resumo Mensal'};
   document.getElementById('ptitle').textContent=titulos[tipo]||(tipo==='pag'?'Pagamentos — '+MFULL[(arg||1)-1]+' 2026':tipo);
   if(tipo==='dash')pDash();
   else if(tipo==='est_produtos')pEstProdutos();
@@ -811,6 +812,7 @@ function ir(tipo,arg,el){
   else if(tipo==='gateways')pGateways();
   else if(tipo==='investimentos')pInvestimentos();
   else if(tipo==='usuarios')pUsuarios();
+  else if(tipo==='mensal')pMensal();
   else if(tipo==='inicio')pInicioFunc();
 }
 
@@ -1690,6 +1692,100 @@ function pRtuResumo(){
   Object.entries(cats).forEach(function(e){h+='<tr><td>'+e[0]+'</td><td class="tr">'+e[1].n+'</td><td class="tr gld">'+R(e[1].val)+'</td><td class="tr pur">'+R(e[1].imp)+'</td><td class="tr" style="font-weight:700">'+R(e[1].val+e[1].imp)+'</td></tr>';});
   h+='</tbody></table></div>';
   setPage(h);
+}
+
+// ── RESUMO MENSAL — todas as áreas, mês a mês ─────────
+// Pagamentos e RTU são guardados por número do mês (ano corrente); o resto pela
+// data DD/MM/AAAA de cada registro. Pedidos Bling contam pelo mês da venda e
+// compras manuais pelo mês da compra.
+var _mensalMes=new Date().getMonth()+1;
+function mensalMes(m){_mensalMes=m;pMensal();}
+function _mesDaData(s){var p=String(s||'').split('/');return p.length===3&&Number(p[2])===new Date().getFullYear()?Number(p[1]):0;}
+function _resumoMes(m){
+  var r={m:m};
+  var bl=(DB.compras||[]).filter(function(c){return c.origem==='bling'&&c.status!=='Cancelado'&&_mesDaData(c.data)===m;});
+  var peds={};bl.forEach(function(c){peds[c.blingPedidoId||c.id]=1;});
+  r.blPedidos=Object.keys(peds).length;
+  r.blVendido=bl.reduce(function(a,c){return a+c.precoVenda*c.qtd;},0);
+  r.blTaxas=bl.reduce(function(a,c){return a+c.taxaUnit*c.qtd;},0);
+  r.blInvestido=bl.filter(function(c){return c.status==='Comprado'||c.status==='Recebido';}).reduce(function(a,c){return a+_calcCompraCalc(c).custoTotal;},0);
+  r.blLucro=bl.filter(function(c){return c.valorCompra;}).reduce(function(a,c){return a+_calcCompraCalc(c).lucroTotal;},0);
+  r.blSemCusto=bl.filter(function(c){return !c.valorCompra;}).length;
+  var cm=(DB.compras||[]).filter(function(c){return c.origem!=='bling'&&(c.status==='Comprado'||c.status==='Recebido')&&_mesDaData(c.dataCompra)===m;});
+  r.cmItens=cm.length;r.cmValor=cm.reduce(function(a,c){return a+_calcCompraCalc(c).custoTotal;},0);
+  r.investidoTotal=r.blInvestido+r.cmValor;
+  var pg=(DB.pag&&DB.pag[m-1])||[];
+  r.pgN=pg.length;r.pgTotal=pg.reduce(function(a,p){return a+(p.valor||0);},0);
+  r.pgPago=pg.filter(function(p){return p.status==='Pago';}).reduce(function(a,p){return a+(p.valor||0);},0);
+  r.pgAtrasado=pg.filter(function(p){return p.status==='Atrasado';}).reduce(function(a,p){return a+(p.valor||0);},0);
+  r.pgAPagar=r.pgTotal-r.pgPago-r.pgAtrasado;
+  var rt=(DB.rtu||[]).filter(function(x){return x.mes===m&&x.valor;});
+  r.rtN=rt.length;r.rtValor=rt.reduce(function(a,x){return a+(x.valor||0);},0);r.rtImp=rt.reduce(function(a,x){return a+(x.totalImp||0);},0);
+  var sq=(DB.saques||[]).filter(function(s){return _mesDaData(s.data)===m;});
+  r.sqN=sq.length;r.sqTotal=sq.reduce(function(a,s){return a+s.valor;},0);
+  r.sqAguardando=sq.filter(function(s){return s.status==='Aguardando';}).reduce(function(a,s){return a+s.valor;},0);
+  var gr=(DB.gwRet||[]).filter(function(x){return _mesDaData(x.data)===m;});
+  r.grN=gr.length;r.grTotal=gr.reduce(function(a,x){return a+x.valor;},0);
+  var iv=(DB.investimentos||[]).filter(function(x){return _mesDaData(x.dataAplicacao)===m;});
+  r.ivN=iv.length;r.ivAplicado=iv.reduce(function(a,x){return a+x.valorAplicado;},0);
+  var pd=(DB.pendencias||[]).filter(function(x){return _mesDaData(x.data)===m;});
+  r.pdN=pd.length;r.pdResolvidas=pd.filter(function(x){return x.status==='Resolvida';}).length;
+  var mv=(DB.mov||[]).filter(function(x){return _mesDaData(x.data)===m;});
+  r.mvEntradas=mv.filter(function(x){return x.tipo==='Entrada';}).reduce(function(a,x){return a+(Number(x.qty)||0);},0);
+  r.mvSaidas=mv.filter(function(x){return x.tipo!=='Entrada';}).reduce(function(a,x){return a+(Number(x.qty)||0);},0);
+  r.temDados=!!(bl.length||cm.length||pg.length||rt.length||sq.length||gr.length||iv.length||pd.length||mv.length);
+  return r;
+}
+function pMensal(){
+  var ano=new Date().getFullYear(),mesAtual=new Date().getMonth()+1;
+  var todos=[];for(var m=1;m<=12;m++)todos.push(_resumoMes(m));
+  var r=todos[_mensalMes-1];
+  var h='<div class="zchips">'+todos.map(function(x){
+    return '<button class="'+(x.m===_mensalMes?'on':'')+'" onclick="mensalMes('+x.m+')" style="'+(x.temDados||x.m===_mensalMes?'':'opacity:.45')+'">'+MFULL[x.m-1]+(x.m===mesAtual?' •':'')+'</button>';
+  }).join('')+'</div>';
+
+  // Cards do mês escolhido, por área
+  var card=function(lbl,val,cor,sub,ir_){return '<div class="card"'+(ir_?' style="cursor:pointer" onclick="'+ir_+'"':'')+'><div class="lbl">'+lbl+'</div><div class="val '+(cor||'')+'">'+val+'</div>'+(sub?'<div class="sub">'+sub+'</div>':'')+'</div>';};
+  h+='<div class="sec">🔗 Pedidos Bling — '+MFULL[_mensalMes-1]+' '+ano+'</div><div class="g5">';
+  h+=card('Vendido',R(r.blVendido),'gld',r.blPedidos+' pedido'+(r.blPedidos!==1?'s':''),"_comprasSecao='bling';_blingMes='"+ano+"-"+String(_mensalMes).padStart(2,'0')+"';ir('compras')");
+  h+=card('Taxas','−'+R(r.blTaxas),'','plataformas');
+  h+=card('Investido',R(r.blInvestido),'','itens comprados');
+  h+=card('Lucro',R(r.blLucro),r.blLucro>=0?'grn':'red',r.blSemCusto?r.blSemCusto+' sem custo (fora da conta)':'custos completos');
+  h+=card('Investido no mês',R(r.investidoTotal),'grn','Bling + minhas compras ('+r.cmItens+')');
+  h+='</div>';
+  h+='<div class="sec">📋 Pagamentos Empresa</div><div class="g4">';
+  h+=card('Total do mês',R(r.pgTotal),'gld',r.pgN+' conta'+(r.pgN!==1?'s':''),"ir('pag',"+_mensalMes+")");
+  h+=card('Pago',R(r.pgPago),'grn',r.pgTotal?(r.pgPago/r.pgTotal*100).toFixed(0)+'% do total':'');
+  h+=card('A pagar',R(r.pgAPagar),'amb','');
+  h+=card('Atrasado',R(r.pgAtrasado),r.pgAtrasado>0?'red':'grn','');
+  h+='</div>';
+  h+='<div class="sec">💼 Outras áreas</div><div class="g3">';
+  h+=card('Compras RTU',R(r.rtValor),'gld',r.rtN+' lançamento'+(r.rtN!==1?'s':'')+' · impostos '+R(r.rtImp),"ir('rtu_lanc')");
+  h+=card('Saques marketplaces',R(r.sqTotal),'',r.sqN+' saque'+(r.sqN!==1?'s':'')+(r.sqAguardando?' · '+R(r.sqAguardando)+' aguardando':''),"ir('marketplaces')");
+  h+=card('Retenções gateways',R(r.grTotal),r.grTotal>0?'amb':'',r.grN+' retenç'+(r.grN!==1?'ões':'ão'),"ir('gateways')");
+  h+=card('Novos investimentos',R(r.ivAplicado),'grn',r.ivN+' aplicaç'+(r.ivN!==1?'ões':'ão'),"ir('investimentos')");
+  h+=card('Estoque',r.mvEntradas+' ↑ / '+r.mvSaidas+' ↓','','unidades que entraram / saíram',"ir('est_mov')");
+  h+=card('Pendências',r.pdN,'',r.pdResolvidas+' resolvida'+(r.pdResolvidas!==1?'s':''),"ir('pendencias')");
+  h+='</div>';
+
+  // Comparação do ano, mês a mês
+  var lin=todos.filter(function(x){return x.temDados;});
+  h+='<div class="sec">📈 '+ano+' mês a mês</div>';
+  if(!lin.length){h+='<div class="panel"><div class="empty" style="padding:24px;font-size:12px;color:var(--t3)">Nenhum dado lançado neste ano ainda.</div></div>';setPage(h);return;}
+  var cols=[['Vendido Bling','blVendido'],['Lucro Bling','blLucro'],['Investido','investidoTotal'],['Pagamentos','pgTotal'],['Pago','pgPago'],['RTU','rtValor'],['Saques','sqTotal'],['Investimentos','ivAplicado']];
+  h+='<div class="zmes"><div class="zmes-sc"><table><tr><th>Mês</th>'+cols.map(function(c){return '<th class="r">'+c[0]+'</th>';}).join('')+'</tr>';
+  var tot={};
+  lin.forEach(function(x){
+    h+='<tr class="'+(x.m===_mensalMes?'on':'')+'" onclick="mensalMes('+x.m+')"><td><b>'+MFULL[x.m-1]+'</b></td>';
+    cols.forEach(function(c){tot[c[1]]=(tot[c[1]]||0)+x[c[1]];var v=x[c[1]];h+='<td class="r"'+(c[1]==='blLucro'&&v?' style="color:'+(v>=0?'var(--grn)':'var(--red)')+'"':'')+'>'+(v?R(v):'<span style="color:var(--t3)">—</span>')+'</td>';});
+    h+='</tr>';
+  });
+  if(lin.length>1){h+='<tr class="tot"><td>Total</td>'+cols.map(function(c){return '<td class="r">'+R(tot[c[1]])+'</td>';}).join('')+'</tr>';}
+  h+='</table></div><div class="zmes-n">Toque num mês pra ver os detalhes. Toque num card pra abrir a área.</div></div>';
+  setPage(h);
+  // Deixa o mês escolhido visível na fileira de meses (no celular ela rola de lado)
+  var on=document.querySelector('#pg .zchips button.on');
+  if(on)on.parentNode.scrollLeft=on.offsetLeft-on.parentNode.offsetLeft-16;
 }
 
 // ── BACKUP ────────────────────────────────────────────
