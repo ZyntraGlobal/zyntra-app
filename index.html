@@ -3514,8 +3514,8 @@ function _formInv(v){
     '<div><label>Conta *</label><input id="iv-conta" list="iv-contas" value="'+_invEsc(v.conta)+'" placeholder="Ex: STARK BANK" autofocus><datalist id="iv-contas">'+_invContas().map(function(c){return '<option value="'+_invEsc(c)+'">';}).join('')+'</datalist></div>'+
     '<div><label>Tipo</label><select id="iv-tipo">'+opt(INV_TIPOS,v.tipo||'CDB')+'</select></div>'+
     '<div style="grid-column:1/-1"><label>Descrição</label><input id="iv-desc" value="'+_invEsc(v.descricao)+'" placeholder="Ex: CDB 110% CDI — reserva de caixa"></div>'+
-    '<div><label>Valor Aplicado (R$) *</label><input id="iv-aplic" type="number" min="0" step="0.01" value="'+(v.valorAplicado||'')+'" placeholder="0,00"></div>'+
-    '<div><label>Valor Atual (R$)</label><input id="iv-atual" type="number" min="0" step="0.01" value="'+(v.valorAtual||'')+'" placeholder="se vazio, usa o aplicado"></div>'+
+    '<div><label>Valor Aplicado (R$) *</label><input id="iv-aplic" type="text" inputmode="decimal" autocomplete="off" value="'+(v.valorAplicado!=null?N(v.valorAplicado):'')+'" placeholder="0,00"></div>'+
+    '<div><label>Valor Atual (R$)</label><input id="iv-atual" type="text" inputmode="decimal" autocomplete="off" value="'+(v.valorAtual!=null?N(v.valorAtual):'')+'" placeholder="se vazio, usa o aplicado"></div>'+
     '<div><label>Taxa / Rentabilidade</label><input id="iv-taxa" value="'+_invEsc(v.taxa)+'" placeholder="Ex: 110% CDI, IPCA+6%"></div>'+
     '<div><label>Liquidez</label><select id="iv-liq"><option value="">—</option>'+opt(INV_LIQUIDEZ,v.liquidez)+'</select></div>'+
     '<div><label>Data da Aplicação</label><input id="iv-data" value="'+_invEsc(v.dataAplicacao||hoje())+'" placeholder="DD/MM/AAAA"></div>'+
@@ -3525,11 +3525,12 @@ function _formInv(v){
 }
 function _lerFormInv(){
   var g=function(id){return (document.getElementById(id).value||'').trim();};
-  var aplic=Number(g('iv-aplic'))||0;
+  // Texto em vez de type=number: aceita vírgula (12,50) e o 0 é um valor válido
+  var aplicTxt=g('iv-aplic'),aplic=_numBR(aplicTxt);
   var atualTxt=g('iv-atual');
   return {
     conta:g('iv-conta').toUpperCase(), tipo:g('iv-tipo')||'Outro', descricao:g('iv-desc'),
-    valorAplicado:aplic, valorAtual:atualTxt===''?aplic:(Number(atualTxt)||0),
+    valorAplicado:aplic, valorAtual:atualTxt===''?aplic:_numBR(atualTxt), _semAplicado:aplicTxt==='',
     taxa:g('iv-taxa'), liquidez:g('iv-liq'),
     dataAplicacao:g('iv-data')?_normalizarData(g('iv-data')):'',
     vencimento:g('iv-venc')?_normalizarData(g('iv-venc')):'',
@@ -3540,7 +3541,8 @@ function modalAddInv(){
   abrirM('Novo Investimento',_formInv(_invFiltConta?{conta:_invFiltConta}:null),function(){
     var v=_lerFormInv();
     if(!v.conta){_notif('Informe a conta','','red');return;}
-    if(!v.valorAplicado){_notif('Informe o valor aplicado','','red');return;}
+    if(v._semAplicado){_notif('Informe o valor aplicado','Pode ser 0','red');return;}
+    delete v._semAplicado;
     if(!DB.investimentos)DB.investimentos=[];if(!DB.nInv)DB.nInv=1;
     v.id=DB.nInv++;v.atualizadoEm=hoje();
     DB.investimentos.push(v);
@@ -3552,7 +3554,8 @@ function modalEditInv(id){
   abrirM('Editar Investimento — '+i.conta,_formInv(i),function(){
     var v=_lerFormInv();
     if(!v.conta){_notif('Informe a conta','','red');return;}
-    if(!v.valorAplicado){_notif('Informe o valor aplicado','','red');return;}
+    if(v._semAplicado){_notif('Informe o valor aplicado','Pode ser 0','red');return;}
+    delete v._semAplicado;
     var mudouValor=v.valorAtual!==i.valorAtual;
     Object.assign(i,v);
     if(mudouValor||!i.atualizadoEm)i.atualizadoEm=hoje();
