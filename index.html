@@ -3336,7 +3336,18 @@ function pChargebacks(){
     h+='</div></div>';
   }
 
-  h+='<div class="brow">';
+  h+='<div class="brow" style="margin-bottom:10px">';
+  h+=_cbTabBtn('geral','📋 Visão Geral')+_cbTabBtn('diario','📅 Diário')+_cbTabBtn('mensal','🗓 Mensal')+_cbTabBtn('anual','📆 Anual')+_cbTabBtn('conta','🏦 Conta Stark');
+  h+='</div>';
+  if(_cbView==='diario')h+=_cbRenderDiario();
+  else if(_cbView==='mensal')h+=_cbRenderMensal();
+  else if(_cbView==='anual')h+=_cbRenderAnual();
+  else if(_cbView==='conta')h+=_cbRenderConta();
+  else h+=_cbRenderGeral(todos,avisos);
+  setPage(h);
+}
+function _cbRenderGeral(todos,avisos){
+  var h='<div class="brow">';
   h+='<input class="inp" id="cb-s" style="width:220px" placeholder="Buscar processo, pedido ou cliente..." value="'+_escH(_cbFiltro.busca)+'" oninput="_refCb()">';
   h+='<select class="sel" id="cb-sit" onchange="_refCb()"><option value="">Todas as situações</option>';
   Object.keys(CB_SIT).forEach(function(k){h+='<option value="'+k+'"'+(_cbFiltro.sit===k?' selected':'')+'>'+CB_SIT[k].lbl+'</option>';});
@@ -3365,7 +3376,13 @@ function pChargebacks(){
   } else if(lista.length===0){
     h+='<div class="panel"><div class="empty" style="padding:36px"><div style="font-size:12px;color:var(--t3)">Nenhum chargeback encontrado com esses filtros.</div></div></div>';
   } else {
-    h+='<div class="panel"><div class="ts tw"><table><thead><tr><th>PROCESSO</th><th class="tr">VALOR</th><th class="tc">RECEBIDO</th><th class="tc">PRAZO DEFESA</th><th>TRATATIVA</th><th>STATUS STARK</th><th class="tc">SITUAÇÃO</th><th>PEDIDO / CLIENTE</th><th></th></tr></thead><tbody>';
+    h+=_cbTabela(lista);
+  }
+  h+='<div style="font-size:10px;color:var(--t3);margin-top:8px">Atualizado sozinho a cada ~15 min a partir da planilha de chargebacks da Stark Bank. Toque em 🕘 pra ver o histórico e todos os dados da planilha. Prazo padrão de defesa: '+CB_PRAZO_DIAS+' dias corridos.</div>';
+  return h;
+}
+function _cbTabela(lista){
+    var h='<div class="panel"><div class="ts tw"><table><thead><tr><th>PROCESSO</th><th class="tr">VALOR</th><th class="tc">RECEBIDO</th><th class="tc">PRAZO DEFESA</th><th>TRATATIVA</th><th>STATUS STARK</th><th class="tc">SITUAÇÃO</th><th>PEDIDO / CLIENTE</th><th></th></tr></thead><tbody>';
     lista.forEach(function(c){
       var p=_escH(c.processo);
       var sub=[c.pedido,c.cliente].filter(Boolean).map(_escH).join(' · ');
@@ -3382,10 +3399,137 @@ function pChargebacks(){
       h+='</tr>';
     });
     h+='</tbody></table></div></div>';
-  }
-  h+='<div style="font-size:10px;color:var(--t3);margin-top:8px">Atualizado sozinho a cada ~15 min a partir da planilha de chargebacks da Stark Bank. Toque em 🕘 pra ver o histórico e todos os dados da planilha. Prazo padrão de defesa: '+CB_PRAZO_DIAS+' dias corridos.</div>';
-  setPage(h);
+    return h;
 }
+// ── Visões por período (Diário / Mensal / Anual) e Conta Stark ──
+var _cbView='geral',_cbAno=new Date().getFullYear(),_cbMes=new Date().getMonth()+1;
+function cbIr(view,ano,mes){_cbView=view;if(ano)_cbAno=ano;if(mes)_cbMes=mes;pChargebacks();}
+function _cbTabBtn(view,label){return '<button class="btn bsm'+(_cbView===view?' btnp':'')+'" onclick="cbIr(\''+view+'\')">'+label+'</button>';}
+// Data de referência de cada chargeback = quando a Stark disponibilizou
+function _cbData(c){
+  var s=c.recebido||String(c.criadoEm||'').split(' ')[0];
+  var p=String(s||'').split('/');if(p.length!==3)return null;
+  var d=Number(p[0]),m=Number(p[1]),a=Number(p[2]);
+  return (d&&m&&a)?{d:d,m:m,a:a,txt:String(d).padStart(2,'0')+'/'+String(m).padStart(2,'0')+'/'+a}:null;
+}
+function _cbTotais(lista){
+  var t={qtd:0,valor:0,abertoQ:0,abertoV:0,defQ:0,perdQ:0,perdV:0,ganhoQ:0,ganhoV:0};
+  lista.forEach(function(c){
+    var v=Number(c.valor)||0,s=_cbSituacao(c);
+    t.qtd++;t.valor+=v;
+    if(s==='defender'||s==='analise'){t.abertoQ++;t.abertoV+=v;if(s==='defender')t.defQ++;}
+    else if(s==='perdido'||s==='naodef'){t.perdQ++;t.perdV+=v;}
+    else if(s==='ganho'){t.ganhoQ++;t.ganhoV+=v;}
+  });
+  return t;
+}
+function _cbCardsTotais(t,rotulo){
+  var h='<div class="g4" style="margin-bottom:12px">';
+  h+='<div class="card hl"><div class="lbl">Total '+rotulo+'</div><div class="val gld">'+R(t.valor)+'</div><div class="sub">'+t.qtd+' chargeback'+(t.qtd!==1?'s':'')+'</div></div>';
+  h+='<div class="card '+(t.defQ>0?'danger':'')+'"><div class="lbl">Em Aberto</div><div class="val amb">'+R(t.abertoV)+'</div><div class="sub">'+t.abertoQ+' ainda sem resultado'+(t.defQ?' · '+t.defQ+' precisam de defesa':'')+'</div></div>';
+  h+='<div class="card"><div class="lbl">Perdidos</div><div class="val red">'+R(t.perdV)+'</div><div class="sub">'+t.perdQ+' perdido'+(t.perdQ!==1?'s':'')+' ou não defendido'+(t.perdQ!==1?'s':'')+'</div></div>';
+  h+='<div class="card"><div class="lbl">Ganhos</div><div class="val grn">'+R(t.ganhoV)+'</div><div class="sub">'+t.ganhoQ+' a favor da Zyntra</div></div>';
+  return h+'</div>';
+}
+// Linha da tabela-resumo (Mensal/Anual); onclick abre o detalhe do período
+function _cbLinhaResumo(rotulo,t,onclick,destaque){
+  var vazio=t.qtd===0;
+  var h='<tr'+(onclick&&!vazio?' style="cursor:pointer" onclick="'+onclick+'"':'')+(vazio?' style="opacity:.45"':'')+'>';
+  h+='<td style="font-weight:'+(destaque?'800':'600')+';color:var(--t)">'+rotulo+'</td>';
+  h+='<td class="tc">'+t.qtd+'</td>';
+  h+='<td class="tr tnw" style="font-weight:700">'+R(t.valor)+'</td>';
+  h+='<td class="tr tnw" style="color:'+(t.abertoV?'var(--amb)':'var(--t3)')+'">'+R(t.abertoV)+(t.abertoQ?' <span style="font-size:10px">('+t.abertoQ+')</span>':'')+'</td>';
+  h+='<td class="tr tnw" style="color:'+(t.perdV?'var(--red)':'var(--t3)')+'">'+R(t.perdV)+(t.perdQ?' <span style="font-size:10px">('+t.perdQ+')</span>':'')+'</td>';
+  h+='<td class="tr tnw" style="color:'+(t.ganhoV?'var(--grn)':'var(--t3)')+'">'+R(t.ganhoV)+(t.ganhoQ?' <span style="font-size:10px">('+t.ganhoQ+')</span>':'')+'</td>';
+  h+='<td class="tc" style="color:var(--t3)">'+(onclick&&!vazio?'›':'')+'</td></tr>';
+  return h;
+}
+function _cbTabelaResumo(titulo,linhas){
+  return '<div class="panel"><div class="ts tw"><table><thead><tr><th>'+titulo+'</th><th class="tc">QTD</th><th class="tr">VALOR TOTAL</th><th class="tr">EM ABERTO</th><th class="tr">PERDIDOS</th><th class="tr">GANHOS</th><th></th></tr></thead><tbody>'+linhas+'</tbody></table></div></div>';
+}
+function _cbNavPeriodo(txt,prev,next){
+  return '<div class="brow" style="margin-bottom:10px;align-items:center"><button class="btn bsm" onclick="'+prev+'">‹</button><div style="font-size:14px;font-weight:700;color:var(--t);min-width:150px;text-align:center">'+txt+'</div><button class="btn bsm" onclick="'+next+'">›</button></div>';
+}
+function _cbRenderDiario(){
+  var a=_cbAno,m=_cbMes;
+  var pa=m===1?a-1:a,pm=m===1?12:m-1,na=m===12?a+1:a,nm=m===12?1:m+1;
+  var h=_cbNavPeriodo(MFULL[m-1]+' de '+a,"cbIr('diario',"+pa+","+pm+")","cbIr('diario',"+na+","+nm+")");
+  var doMes=_cbLista().filter(function(c){var d=_cbData(c);return d&&d.a===a&&d.m===m;});
+  h+=_cbCardsTotais(_cbTotais(doMes),'do mês');
+  if(!doMes.length)return h+'<div class="panel"><div class="empty" style="padding:36px"><div style="font-size:12px;color:var(--t3)">Nenhum chargeback disponibilizado em '+MFULL[m-1]+' de '+a+'.</div></div></div>';
+  var dias={};doMes.forEach(function(c){var d=_cbData(c).d;(dias[d]=dias[d]||[]).push(c);});
+  Object.keys(dias).map(Number).sort(function(x,y){return y-x;}).forEach(function(d){
+    var t=_cbTotais(dias[d]);
+    h+='<div class="sec">'+String(d).padStart(2,'0')+'/'+String(m).padStart(2,'0')+'/'+a+' <span style="color:var(--t3);font-weight:400;text-transform:none">· '+t.qtd+' chargeback'+(t.qtd!==1?'s':'')+' · <b style="color:var(--gold)">'+R(t.valor)+'</b>'+(t.perdV?' · <span style="color:var(--red)">'+R(t.perdV)+' perdidos</span>':'')+(t.abertoV?' · <span style="color:var(--amb)">'+R(t.abertoV)+' em aberto</span>':'')+'</span></div>';
+    h+=_cbTabela(dias[d]);
+  });
+  return h;
+}
+function _cbRenderMensal(){
+  var a=_cbAno;
+  var h=_cbNavPeriodo('Ano de '+a,"cbIr('mensal',"+(a-1)+")","cbIr('mensal',"+(a+1)+")");
+  var doAno=_cbLista().filter(function(c){var d=_cbData(c);return d&&d.a===a;});
+  var tAno=_cbTotais(doAno);
+  h+=_cbCardsTotais(tAno,'de '+a);
+  var linhas='';
+  for(var m=1;m<=12;m++){
+    var t=_cbTotais(doAno.filter(function(c){return _cbData(c).m===m;}));
+    linhas+=_cbLinhaResumo(MFULL[m-1],t,"cbIr('diario',"+a+","+m+")");
+  }
+  linhas+=_cbLinhaResumo('TOTAL '+a,tAno,null,true);
+  h+=_cbTabelaResumo('MÊS',linhas);
+  h+='<div style="font-size:10px;color:var(--t3);margin-top:8px">Pelo mês em que a Stark disponibilizou o chargeback. Toque num mês pra ver dia a dia.</div>';
+  return h;
+}
+function _cbRenderAnual(){
+  var todos=_cbLista(),anos={};
+  todos.forEach(function(c){var d=_cbData(c);if(d)(anos[d.a]=anos[d.a]||[]).push(c);});
+  var tTodos=_cbTotais(todos);
+  var h=_cbCardsTotais(tTodos,'geral');
+  var ks=Object.keys(anos).map(Number).sort(function(x,y){return y-x;});
+  if(!ks.length)return h+'<div class="panel"><div class="empty" style="padding:36px"><div style="font-size:12px;color:var(--t3)">Nenhum chargeback ainda.</div></div></div>';
+  var linhas='';
+  ks.forEach(function(a){linhas+=_cbLinhaResumo(String(a),_cbTotais(anos[a]),"cbIr('mensal',"+a+")");});
+  if(ks.length>1)linhas+=_cbLinhaResumo('TOTAL GERAL',tTodos,null,true);
+  h+=_cbTabelaResumo('ANO',linhas);
+  h+='<div style="font-size:10px;color:var(--t3);margin-top:8px">Toque num ano pra ver mês a mês.</div>';
+  return h;
+}
+// Conta Stark: usa o saldo e as retenções lançados em Gateways (gateway "Stark Bank")
+// e desconta o que está em disputa nos chargebacks, que ainda pode ser debitado.
+function _cbRenderConta(){
+  var gw='Stark Bank';
+  var reg=(DB.gateways||[]).find(function(g){return g.gateway===gw;})||{disponivel:0,atualizadoEm:''};
+  var rets=(DB.gwRet||[]).filter(function(r){return r.gateway===gw;}).sort(function(a,b){return (_gwFaltam(a)||0)-(_gwFaltam(b)||0);});
+  var disp=Number(reg.disponivel)||0;
+  var aReceber=rets.reduce(function(s,r){return s+(Number(r.valor)||0);},0);
+  var abertos=_cbLista().filter(function(c){var s=_cbSituacao(c);return s==='defender'||s==='analise';});
+  var risco=_cbSoma(abertos);
+  var total=disp+aReceber,liquido=total-risco;
+  var dias=reg.atualizadoEm?_diasEmAberto(reg.atualizadoEm):null;
+  var atual=!reg.atualizadoEm?'saldo nunca lançado':dias===0?'saldo atualizado hoje':'saldo atualizado há '+dias+' dia'+(dias!==1?'s':'')+' ('+_escH(reg.atualizadoEm)+')';
+
+  var h='<div class="card hl" style="margin-bottom:12px"><div class="lbl">🏦 Total estimado na Stark (em conta + a receber)</div><div class="val gld" style="font-size:30px">'+R(total)+'</div><div class="sub">'+atual+'</div></div>';
+  h+='<div class="g4" style="margin-bottom:12px">';
+  h+='<div class="card"><div class="lbl">Em Conta</div><div class="val">'+R(disp)+'</div><div class="sub">saldo disponível agora</div></div>';
+  h+='<div class="card"><div class="lbl">A Receber</div><div class="val" style="color:#8cc5c7">'+R(aReceber)+'</div><div class="sub">'+rets.length+' valor'+(rets.length!==1?'es':'')+' retido'+(rets.length!==1?'s':'')+' / a liberar</div></div>';
+  h+='<div class="card '+(risco>0?'warn':'')+'"><div class="lbl">Em Risco (chargebacks)</div><div class="val amb">− '+R(risco)+'</div><div class="sub">'+abertos.length+' em aberto, podem ser debitados</div></div>';
+  h+='<div class="card"><div class="lbl">Estimado Líquido</div><div class="val '+(liquido<0?'red':'grn')+'">'+R(liquido)+'</div><div class="sub">total − chargebacks em aberto</div></div>';
+  h+='</div>';
+  if(dias===null||dias>=3)h+='<div class="panel" style="margin-bottom:12px;border-left:4px solid var(--amb)"><div style="padding:10px 16px;font-size:12px;color:var(--t2)">⚠️ O saldo da Stark '+(dias===null?'ainda não foi lançado':'está desatualizado')+'. Os valores em conta e a receber vêm da aba <b>Gateways</b>.</div></div>';
+  if(rets.length){
+    h+='<div class="sec">A receber da Stark</div><div class="panel"><div class="ts tw"><table><thead><tr><th>MOTIVO</th><th class="tr">VALOR</th><th class="tc">LANÇADO EM</th><th class="tc">LIBERA EM</th></tr></thead><tbody>';
+    rets.forEach(function(r){
+      var f=_gwFaltam(r),lib=_gwSomarDias(r.data,r.dias);
+      h+='<tr><td style="font-size:12px">'+(_escH(r.motivo)||'<span style="color:var(--t3)">—</span>')+'</td><td class="tr tnw" style="font-weight:700">'+R(r.valor)+'</td><td class="tc tnw">'+_escH(r.data)+' <span style="font-size:10px;color:var(--t3)">(D+'+r.dias+')</span></td><td class="tc tnw">'+_escH(lib||'—')+(f!==null&&f!==undefined?'<div style="font-size:10px;color:'+(f<=0?'var(--grn)':'var(--t3)')+'">'+(f<=0?'já pode liberar':'faltam '+f+'d')+'</div>':'')+'</td></tr>';
+    });
+    h+='</tbody></table></div></div>';
+  }
+  h+='<div class="brow" style="margin-top:12px"><button class="btn btnp bsm" onclick="ir(\'gateways\',document.querySelector(\'.ni[onclick*=gateways]\'))">✏ Atualizar saldo e a receber da Stark</button></div>';
+  h+='<div style="font-size:10px;color:var(--t3);margin-top:8px">"Em risco" é a soma dos chargebacks ainda sem resultado (precisam de defesa ou em análise). Se a Stark der a favor do emissor, esse valor sai da conta.</div>';
+  return h;
+}
+
 function _refCb(){
   var b=document.getElementById('cb-s'),s=document.getElementById('cb-sit');
   var digitando=b&&b===document.activeElement;
