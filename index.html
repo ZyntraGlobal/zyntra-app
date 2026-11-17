@@ -3577,8 +3577,9 @@ function pRecebimentos(){
   var meses={},ordem=[],em30=0,em7=0;
   pd.forEach(function(d){
     var p=d.data.split('/'),k=p[2]+'-'+p[1];
-    if(!meses[k]){meses[k]={k:k,ano:Number(p[2]),mes:Number(p[1]),dias:[],liquido:0,bruto:0,taxas:0,qtd:0};ordem.push(k);}
-    var g=meses[k];g.dias.push(d);g.liquido+=Number(d.liquido)||0;g.bruto+=Number(d.bruto)||0;g.taxas+=Number(d.taxas)||((Number(d.bruto)||0)-(Number(d.liquido)||0));g.qtd+=d.qtd||0;
+    if(!meses[k]){meses[k]={k:k,ano:Number(p[2]),mes:Number(p[1]),dias:[],liquido:0,bruto:0,taxas:0,qtd:0,antecipado:0,original:0};ordem.push(k);}
+    var g=meses[k];g.dias.push(d);g.liquido+=Number(d.liquido)||0;
+    var ant=d.antecipado!==undefined?Number(d.antecipado)||0:0;g.antecipado+=ant;g.original+=(Number(d.liquido)||0)-ant;g.bruto+=Number(d.bruto)||0;g.taxas+=Number(d.taxas)||((Number(d.bruto)||0)-(Number(d.liquido)||0));g.qtd+=d.qtd||0;
     var x=diasAte(d.data);if(x!==null&&x<=30)em30+=Number(d.liquido)||0;if(x!==null&&x<=7)em7+=Number(d.liquido)||0;
   });
   ordem.sort();
@@ -3593,6 +3594,12 @@ function pRecebimentos(){
   h+='<div class="card"><div class="lbl">Resto de '+MFULL[hojeD.getMonth()]+'</div><div class="val">'+R(esteMes)+'</div><div class="sub">próximos 30 dias: '+R(em30)+'</div></div>';
   h+='<div class="card"><div class="lbl">'+MFULL[proxMesD.getMonth()]+'</div><div class="val">'+R(proxMes)+'</div><div class="sub">mês que vem</div></div>';
   h+='</div>';
+  if(api.aReceberAntecipado!==undefined){
+    h+='<div class="g2" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-bottom:12px">';
+    h+='<div class="card" style="border-left:4px solid var(--grn)"><div class="lbl">⚡ Antecipado (D+3)</div><div class="val grn">'+R(api.aReceberAntecipado)+'</div><div class="sub">vendas recentes que a Stark já agendou pra pagar em poucos dias</div></div>';
+    h+='<div class="card" style="border-left:4px solid #8cc5c7"><div class="lbl">📅 Na data original</div><div class="val" style="color:#8cc5c7">'+R(api.aReceberOriginal)+'</div><div class="sub">parcelas que ficaram fora da antecipação (≈ além de 6 meses) e caem no vencimento normal</div></div>';
+    h+='</div>';
+  }
   if(api.aReceberProtegido>0)h+='<div class="panel" style="margin-bottom:12px"><div style="padding:10px 16px;font-size:12px;color:var(--t2)">🔒 '+R(api.aReceberProtegido)+' estão <b>reservados pela Stark</b> pra cobrir possíveis estornos/chargebacks — podem não cair na data.</div></div>';
 
   if(!pd.length){
@@ -3601,10 +3608,13 @@ function pRecebimentos(){
   }
   // Resumo por mês
   var acum=0;
-  h+='<div class="sec">Por mês</div><div class="panel" style="margin-bottom:14px"><div class="ts tw"><table><thead><tr><th>MÊS</th><th class="tc">DIAS</th><th class="tc">PARCELAS</th><th class="tr">BRUTO</th><th class="tr">TAXAS</th><th class="tr">LÍQUIDO</th><th class="tr">ACUMULADO</th></tr></thead><tbody>';
+  var temAnt=api.aReceberAntecipado!==undefined;
+  var cAnt=function(v){return '<td class="tr tnw" style="color:'+(v>0?'var(--grn)':'var(--t3)')+'">'+(v>0?'⚡ '+R(v):'—')+'</td>';};
+  var cOri=function(v){return '<td class="tr tnw" style="color:'+(v>0?'#8cc5c7':'var(--t3)')+'">'+(v>0?'📅 '+R(v):'—')+'</td>';};
+  h+='<div class="sec">Por mês</div><div class="panel" style="margin-bottom:14px"><div class="ts tw"><table><thead><tr><th>MÊS</th><th class="tc">DIAS</th><th class="tc">PARCELAS</th>'+(temAnt?'<th class="tr">⚡ ANTECIPADO</th><th class="tr">📅 DATA ORIGINAL</th>':'<th class="tr">BRUTO</th>')+'<th class="tr">TAXAS</th><th class="tr">LÍQUIDO</th><th class="tr">ACUMULADO</th></tr></thead><tbody>';
   ordem.forEach(function(k){var g=meses[k];acum+=g.liquido;
-    h+='<tr style="cursor:pointer" onclick="recToggle(\''+k+'\')"><td style="font-weight:700;color:var(--t)">'+MFULL[g.mes-1]+' '+g.ano+'</td><td class="tc">'+g.dias.length+'</td><td class="tc">'+g.qtd+'</td><td class="tr tnw" style="color:var(--t3)">'+R(g.bruto)+'</td><td class="tr tnw" style="color:var(--t3)">− '+R(g.taxas)+'</td><td class="tr tnw" style="font-weight:700">'+R(g.liquido)+'</td><td class="tr tnw" style="color:#8cc5c7">'+R(acum)+'</td></tr>';});
-  h+='<tr><td style="font-weight:800">TOTAL</td><td></td><td class="tc" style="font-weight:700">'+api.qtdParcelas+'</td><td class="tr tnw">'+R(api.aReceberBruto)+'</td><td class="tr tnw">− '+R(api.aReceberTaxas)+'</td><td class="tr tnw" style="font-weight:800;color:var(--gold)">'+R(api.aReceberLiquido)+'</td><td></td></tr>';
+    h+='<tr style="cursor:pointer" onclick="recToggle(\''+k+'\')"><td style="font-weight:700;color:var(--t)">'+MFULL[g.mes-1]+' '+g.ano+'</td><td class="tc">'+g.dias.length+'</td><td class="tc">'+g.qtd+'</td>'+(temAnt?cAnt(g.antecipado)+cOri(g.original):'<td class="tr tnw" style="color:var(--t3)">'+R(g.bruto)+'</td>')+'<td class="tr tnw" style="color:var(--t3)">− '+R(g.taxas)+'</td><td class="tr tnw" style="font-weight:700">'+R(g.liquido)+'</td><td class="tr tnw" style="color:#8cc5c7">'+R(acum)+'</td></tr>';});
+  h+='<tr><td style="font-weight:800">TOTAL</td><td></td><td class="tc" style="font-weight:700">'+api.qtdParcelas+'</td>'+(temAnt?cAnt(api.aReceberAntecipado)+cOri(api.aReceberOriginal):'<td class="tr tnw">'+R(api.aReceberBruto)+'</td>')+'<td class="tr tnw">− '+R(api.aReceberTaxas)+'</td><td class="tr tnw" style="font-weight:800;color:var(--gold)">'+R(api.aReceberLiquido)+'</td><td></td></tr>';
   h+='</tbody></table></div></div>';
 
   // Dia a dia, por mês (abre/fecha tocando no mês)
@@ -3613,13 +3623,13 @@ function pRecebimentos(){
     var g=meses[k],aberto=!!_recAbertos[k];
     h+='<div class="sec" style="cursor:pointer" onclick="recToggle(\''+k+'\')">'+(aberto?'▾ ':'▸ ')+MFULL[g.mes-1]+' de '+g.ano+' <span style="color:var(--t3);font-weight:400;text-transform:none">· '+g.dias.length+' dia'+(g.dias.length!==1?'s':'')+' de recebimento · <b style="color:var(--gold)">'+R(g.liquido)+'</b></span></div>';
     if(!aberto){g.dias.forEach(function(d){acum+=Number(d.liquido)||0;});return;}
-    h+='<div class="panel" style="margin-bottom:12px"><div class="ts tw"><table><thead><tr><th class="tc">DATA</th><th class="tc">DIA</th><th class="tc">PARCELAS</th><th class="tr">CRÉDITO</th><th class="tr">DÉBITO</th><th class="tr">BRUTO</th><th class="tr">TAXAS</th><th class="tr">LÍQUIDO</th><th class="tr">ACUMULADO</th></tr></thead><tbody>';
+    h+='<div class="panel" style="margin-bottom:12px"><div class="ts tw"><table><thead><tr><th class="tc">DATA</th><th class="tc">DIA</th><th class="tc">PARCELAS</th>'+(temAnt?'<th class="tr">⚡ ANTECIPADO</th><th class="tr">📅 DATA ORIGINAL</th>':'<th class="tr">CRÉDITO</th><th class="tr">DÉBITO</th>')+'<th class="tr">BRUTO</th><th class="tr">TAXAS</th><th class="tr">LÍQUIDO</th><th class="tr">ACUMULADO</th></tr></thead><tbody>';
     g.dias.forEach(function(d){
       acum+=Number(d.liquido)||0;
       var p=d.data.split('/'),dt=new Date(Number(p[2]),Number(p[1])-1,Number(p[0])),x=diasAte(d.data);
       var tag=x!==null&&x<=0?' <span style="font-size:10px;color:var(--grn);font-weight:700">hoje</span>':x===1?' <span style="font-size:10px;color:var(--t3)">amanhã</span>':'';
       var tx=d.taxas!==undefined?d.taxas:(Number(d.bruto)||0)-(Number(d.liquido)||0);
-      h+='<tr><td class="tc tnw" style="font-weight:600">'+_escH(d.data)+tag+'</td><td class="tc" style="color:var(--t3)">'+SEM[dt.getDay()]+'</td><td class="tc">'+d.qtd+'</td><td class="tr tnw" style="color:var(--t3)">'+(d.credito!==undefined?R(d.credito):'—')+'</td><td class="tr tnw" style="color:var(--t3)">'+(d.debito!==undefined?R(d.debito):'—')+'</td><td class="tr tnw" style="color:var(--t3)">'+R(d.bruto)+'</td><td class="tr tnw" style="color:var(--t3)">− '+R(tx)+'</td><td class="tr tnw" style="font-weight:700">'+R(d.liquido)+(d.protegido>0?'<div style="font-size:10px;color:var(--amb)">🔒 '+R(d.protegido)+' reservado</div>':'')+'</td><td class="tr tnw" style="color:#8cc5c7">'+R(acum)+'</td></tr>';
+      h+='<tr><td class="tc tnw" style="font-weight:600">'+_escH(d.data)+tag+'</td><td class="tc" style="color:var(--t3)">'+SEM[dt.getDay()]+'</td><td class="tc">'+d.qtd+'</td>'+(temAnt?cAnt(Number(d.antecipado)||0)+cOri(Number(d.original)||0):'<td class="tr tnw" style="color:var(--t3)">'+(d.credito!==undefined?R(d.credito):'—')+'</td><td class="tr tnw" style="color:var(--t3)">'+(d.debito!==undefined?R(d.debito):'—')+'</td>')+'<td class="tr tnw" style="color:var(--t3)">'+R(d.bruto)+'</td><td class="tr tnw" style="color:var(--t3)">− '+R(tx)+'</td><td class="tr tnw" style="font-weight:700">'+R(d.liquido)+(d.protegido>0?'<div style="font-size:10px;color:var(--amb)">🔒 '+R(d.protegido)+' reservado</div>':'')+'</td><td class="tr tnw" style="color:#8cc5c7">'+R(acum)+'</td></tr>';
     });
     h+='</tbody></table></div></div>';
   });

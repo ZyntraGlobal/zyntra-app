@@ -68,17 +68,23 @@ async function lerStark() {
   const hojeIso = brt(new Date()).iso;
   const limiteIso = brt(Date.now() + DIAS_DETALHE * 86400000).iso;
   const porDia = {};
-  let bruto = 0, taxas = 0, protegido = 0, depois = 0;
+  let bruto = 0, taxas = 0, protegido = 0, depois = 0, antecipado = 0;
   for (const p of parcelas) {
     const valor = Number(p.amount) || 0, fee = Number(p.fee) || 0;
     bruto += valor; taxas += fee;
     if (p.isProtected) protegido += valor - fee;
     const due = p.due ? brt(p.due) : null;
+    // Antecipada = a Stark agendou o pagamento antes do vencimento original
+    // da parcela (o D+3 das vendas recentes). Senão, cai na data original.
+    const nominal = p.nominalDue ? brt(p.nominalDue) : null;
+    const ehAntecipada = !!(due && nominal && due.iso < nominal.iso);
+    if (ehAntecipada) antecipado += valor - fee;
     const k = !due || due.iso < hojeIso ? hojeIso : due.iso;     // atrasada/sem data conta como hoje
     if (k > limiteIso) depois += valor - fee;
-    if (!porDia[k]) porDia[k] = { iso: k, data: k.split('-').reverse().join('/'), liquido: 0, bruto: 0, taxas: 0, qtd: 0, credito: 0, debito: 0, protegido: 0 };
+    if (!porDia[k]) porDia[k] = { iso: k, data: k.split('-').reverse().join('/'), liquido: 0, bruto: 0, taxas: 0, qtd: 0, credito: 0, debito: 0, protegido: 0, antecipado: 0, original: 0, qtdAntecipada: 0 };
     const d = porDia[k];
     d.liquido += valor - fee; d.bruto += valor; d.taxas += fee; d.qtd++;
+    if (ehAntecipada) { d.antecipado += valor - fee; d.qtdAntecipada++; } else d.original += valor - fee;
     if (p.fundingType === 'debit') d.debito += valor - fee; else d.credito += valor - fee;
     if (p.isProtected) d.protegido += valor - fee;
   }
@@ -94,8 +100,11 @@ async function lerStark() {
     qtdParcelas: parcelas.length,
     porDia: Object.values(porDia).sort((a, b) => a.iso.localeCompare(b.iso)).map(d => ({
       data: d.data, liquido: reais(d.liquido), bruto: reais(d.bruto), taxas: reais(d.taxas), qtd: d.qtd,
-      credito: reais(d.credito), debito: reais(d.debito), protegido: reais(d.protegido)
+      credito: reais(d.credito), debito: reais(d.debito), protegido: reais(d.protegido),
+      antecipado: reais(d.antecipado), original: reais(d.original), qtdAntecipada: d.qtdAntecipada
     })),
+    aReceberAntecipado: reais(antecipado),
+    aReceberOriginal: reais(bruto - taxas - antecipado),
     diasDetalhe: DIAS_DETALHE,
     consultadoEm: agora.data + ' ' + agora.hora,
     consultadoMs: Date.now()
