@@ -1029,6 +1029,26 @@ function pDash(){
     ['Prazo vencido',gwVenc,gwVenc>0?'var(--amb)':'var(--t3)']
   ]);
   h+='</div>';
+  // Card Chargebacks — linha própria (só pra quem pode ver a aba)
+  if(_paginaPermitida('chargebacks')){
+    var cbTodos=DB.chargebacks||[];
+    var cbSit=function(s){return cbTodos.filter(function(c){return _cbSituacao(c)===s;});};
+    var cbDef=cbSit('defender'),cbAna=cbSit('analise'),cbPerd=cbSit('perdido').concat(cbSit('naodef'));
+    var cbSemCad=(DB.cbAvisos||[]).reduce(function(a,x){return a+(x.resolvido?0:_cbFaltamCadastrar(x));},0);
+    var cbUrg=cbDef.filter(function(c){var d=c.prazo?diasAte(c.prazo):null;return d!==null&&d<=2;});
+    var cbProx=cbDef.filter(function(c){return c.prazo&&diasAte(c.prazo)>=0;}).sort(function(a,b){return diasAte(a.prazo)-diasAte(b.prazo);})[0];
+    var cbN=cbDef.length+cbSemCad;
+    var cbStatus=cbUrg.length>0?'red':cbN>0?'amb':'grn';
+    var cbLabel=cbUrg.length>0?cbUrg.length+' com prazo acabando':cbN>0?cbN+' precisa'+(cbN>1?'m':'')+' de defesa':cbTodos.length?'Nada a defender':'Nenhum chargeback';
+    var cbSub=cbN+' precisa'+(cbN!==1?'m':'')+' de defesa'+(cbProx?' · próximo prazo '+cbProx.prazo+' ('+_cbTxtPrazo(cbProx.prazo).txt+')':'');
+    h+='<div style="display:grid;grid-template-columns:1fr;gap:16px;margin-top:16px">';
+    h+=modCard('⚖️','Chargebacks Stark',R(_cbSoma(cbDef)),cbN>0?'red':'gold',cbSub,cbStatus,cbLabel,"ir('chargebacks',document.querySelector('.ni[onclick*=chargebacks]'))",[
+      ['Precisam de defesa',cbN,cbN>0?'var(--red)':'var(--t3)'],
+      ['Em análise',cbAna.length+' · '+R(_cbSoma(cbAna)),cbAna.length>0?'var(--amb)':'var(--t3)'],
+      ['Perdidos',cbPerd.length+' · '+R(_cbSoma(cbPerd)),cbPerd.length>0?'var(--red)':'var(--t3)']
+    ]);
+    h+='</div>';
+  }
   // Card Investimentos — linha própria (só pra quem pode ver a aba)
   if(_paginaPermitida('investimentos')){
     var invTodos=DB.investimentos||[];
