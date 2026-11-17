@@ -3501,13 +3501,36 @@ function _cbRenderConta(){
   var gw='Stark Bank';
   var reg=(DB.gateways||[]).find(function(g){return g.gateway===gw;})||{disponivel:0,atualizadoEm:''};
   var rets=(DB.gwRet||[]).filter(function(r){return r.gateway===gw;}).sort(function(a,b){return (_gwFaltam(a)||0)-(_gwFaltam(b)||0);});
-  var disp=Number(reg.disponivel)||0;
-  var aReceber=rets.reduce(function(s,r){return s+(Number(r.valor)||0);},0);
+  // Automático (API da Stark, via GitHub Actions) quando existir; senão, o lançado à mão
+  var api=DB.starkConta&&DB.starkConta.origem==='api'?DB.starkConta:null;
+  var disp=api?Number(api.saldo)||0:Number(reg.disponivel)||0;
+  var aReceber=api?Number(api.aReceberLiquido)||0:rets.reduce(function(s,r){return s+(Number(r.valor)||0);},0);
   var abertos=_cbLista().filter(function(c){var s=_cbSituacao(c);return s==='defender'||s==='analise';});
   var risco=_cbSoma(abertos);
   var total=disp+aReceber,liquido=total-risco;
-  var dias=reg.atualizadoEm?_diasEmAberto(reg.atualizadoEm):null;
-  var atual=!reg.atualizadoEm?'saldo nunca lançado':dias===0?'saldo atualizado hoje':'saldo atualizado há '+dias+' dia'+(dias!==1?'s':'')+' ('+_escH(reg.atualizadoEm)+')';
+  var dias=api?0:reg.atualizadoEm?_diasEmAberto(reg.atualizadoEm):null;
+  var atual=api?'🔄 automático pela API da Stark · consultado em '+_escH(api.consultadoEm):!reg.atualizadoEm?'saldo nunca lançado':dias===0?'saldo atualizado hoje':'saldo atualizado há '+dias+' dia'+(dias!==1?'s':'')+' ('+_escH(reg.atualizadoEm)+')';
+  if(api){
+    var hh='<div class="card hl" style="margin-bottom:12px"><div class="lbl">🏦 Total estimado na Stark (em conta + a receber)</div><div class="val gld" style="font-size:30px">'+R(total)+'</div><div class="sub">'+atual+'</div></div>';
+    hh+='<div class="g4" style="margin-bottom:12px">';
+    hh+='<div class="card"><div class="lbl">Em Conta</div><div class="val">'+R(disp)+'</div><div class="sub">saldo disponível agora</div></div>';
+    hh+='<div class="card"><div class="lbl">A Receber (líquido)</div><div class="val" style="color:#8cc5c7">'+R(aReceber)+'</div><div class="sub">'+api.qtdParcelas+' parcela'+(api.qtdParcelas!==1?'s':'')+' de cartão · bruto '+R(api.aReceberBruto)+' − taxas '+R(api.aReceberTaxas)+'</div></div>';
+    hh+='<div class="card '+(risco>0?'warn':'')+'"><div class="lbl">Em Risco (chargebacks)</div><div class="val amb">− '+R(risco)+'</div><div class="sub">'+abertos.length+' em aberto, podem ser debitados</div></div>';
+    hh+='<div class="card"><div class="lbl">Estimado Líquido</div><div class="val '+(liquido<0?'red':'grn')+'">'+R(liquido)+'</div><div class="sub">total − chargebacks em aberto</div></div>';
+    hh+='</div>';
+    if(api.aReceberProtegido>0)hh+='<div class="panel" style="margin-bottom:12px"><div style="padding:10px 16px;font-size:12px;color:var(--t2)">🔒 '+R(api.aReceberProtegido)+' do a receber está <b>reservado pela Stark</b> pra cobrir possíveis estornos/chargebacks.</div></div>';
+    var pd=api.porDia||[];
+    if(pd.length){
+      var acum=0;
+      hh+='<div class="sec">Próximos recebimentos (dia a dia, '+(api.diasDetalhe||60)+' dias)</div><div class="panel"><div class="ts tw"><table><thead><tr><th class="tc">DATA</th><th class="tc">PARCELAS</th><th class="tr">BRUTO</th><th class="tr">LÍQUIDO</th><th class="tr">ACUMULADO</th></tr></thead><tbody>';
+      pd.forEach(function(d){acum+=Number(d.liquido)||0;var dd=diasAte(d.data);
+        hh+='<tr><td class="tc tnw" style="font-weight:600">'+_escH(d.data)+(dd===0?' <span style="font-size:10px;color:var(--grn)">hoje</span>':dd===1?' <span style="font-size:10px;color:var(--t3)">amanhã</span>':'')+'</td><td class="tc">'+d.qtd+'</td><td class="tr tnw" style="color:var(--t3)">'+R(d.bruto)+'</td><td class="tr tnw" style="font-weight:700">'+R(d.liquido)+'</td><td class="tr tnw" style="color:#8cc5c7">'+R(acum)+'</td></tr>';});
+      if(api.aReceberDepois>0)hh+='<tr style="opacity:.7"><td class="tc">depois</td><td></td><td></td><td class="tr tnw" style="font-weight:700">'+R(api.aReceberDepois)+'</td><td class="tr tnw" style="color:#8cc5c7">'+R(acum+api.aReceberDepois)+'</td></tr>';
+      hh+='</tbody></table></div></div>';
+    }
+    hh+='<div style="font-size:10px;color:var(--t3);margin-top:8px">Saldo e parcelas a receber vêm direto da Stark a cada ~15 min. "Em risco" é a soma dos chargebacks ainda sem resultado: se a Stark der a favor do emissor, esse valor sai da conta.</div>';
+    return hh;
+  }
 
   var h='<div class="card hl" style="margin-bottom:12px"><div class="lbl">🏦 Total estimado na Stark (em conta + a receber)</div><div class="val gld" style="font-size:30px">'+R(total)+'</div><div class="sub">'+atual+'</div></div>';
   h+='<div class="g4" style="margin-bottom:12px">';
