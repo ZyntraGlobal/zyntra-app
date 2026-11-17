@@ -14,7 +14,7 @@ const PROJECT_ID = process.env.STARK_PROJECT_ID;
 const PRIVATE_KEY = process.env.STARK_PRIVATE_KEY;
 const GH_DATA_TOKEN = process.env.GH_DATA_TOKEN;
 const DATA_REPO = 'ZyntraGlobal/zyntra-app-data';
-const DIAS_DETALHE = 60;                 // recebimentos dia a dia nos próximos N dias
+const DIAS_DETALHE = 60;                 // a visão Conta Stark mostra só os próximos N dias
 const REGRAVAR_HORAS = 3;                // regrava mesmo sem mudança (mostra "consultado às")
 
 async function ghGetJSON(caminho) {
@@ -63,6 +63,8 @@ async function lerStark() {
   const parcelas = [];
   for await (const p of await starkbank.merchantInstallment.query({ status: 'created' })) parcelas.push(p);
 
+  // Agenda completa de recebimentos: um item por dia, todas as datas futuras
+  // (vendas parceladas vão até 12+ meses). Crédito e débito separados.
   const hojeIso = brt(new Date()).iso;
   const limiteIso = brt(Date.now() + DIAS_DETALHE * 86400000).iso;
   const porDia = {};
@@ -72,10 +74,13 @@ async function lerStark() {
     bruto += valor; taxas += fee;
     if (p.isProtected) protegido += valor - fee;
     const due = p.due ? brt(p.due) : null;
-    if (!due || due.iso > limiteIso) { depois += valor - fee; continue; }
-    const k = due.iso < hojeIso ? hojeIso : due.iso;     // atrasada conta como hoje
-    if (!porDia[k]) porDia[k] = { iso: k, data: k.split('-').reverse().join('/'), liquido: 0, bruto: 0, qtd: 0 };
-    porDia[k].liquido += valor - fee; porDia[k].bruto += valor; porDia[k].qtd++;
+    const k = !due || due.iso < hojeIso ? hojeIso : due.iso;     // atrasada/sem data conta como hoje
+    if (k > limiteIso) depois += valor - fee;
+    if (!porDia[k]) porDia[k] = { iso: k, data: k.split('-').reverse().join('/'), liquido: 0, bruto: 0, taxas: 0, qtd: 0, credito: 0, debito: 0, protegido: 0 };
+    const d = porDia[k];
+    d.liquido += valor - fee; d.bruto += valor; d.taxas += fee; d.qtd++;
+    if (p.fundingType === 'debit') d.debito += valor - fee; else d.credito += valor - fee;
+    if (p.isProtected) d.protegido += valor - fee;
   }
   const agora = brt(new Date());
   return {
@@ -87,7 +92,10 @@ async function lerStark() {
     aReceberProtegido: reais(protegido),
     aReceberDepois: reais(depois),
     qtdParcelas: parcelas.length,
-    porDia: Object.values(porDia).sort((a, b) => a.iso.localeCompare(b.iso)).map(d => ({ data: d.data, liquido: reais(d.liquido), bruto: reais(d.bruto), qtd: d.qtd })),
+    porDia: Object.values(porDia).sort((a, b) => a.iso.localeCompare(b.iso)).map(d => ({
+      data: d.data, liquido: reais(d.liquido), bruto: reais(d.bruto), taxas: reais(d.taxas), qtd: d.qtd,
+      credito: reais(d.credito), debito: reais(d.debito), protegido: reais(d.protegido)
+    })),
     diasDetalhe: DIAS_DETALHE,
     consultadoEm: agora.data + ' ' + agora.hora,
     consultadoMs: Date.now()

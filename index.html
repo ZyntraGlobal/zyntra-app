@@ -329,6 +329,7 @@ tfoot td{font-weight:700;border-top:2px solid var(--bdr2);border-bottom:none!imp
   <div class="sb-sec">Gateways</div>
   <div class="ni" onclick="ir('gateways',this)"><span class="ico">💳</span><span class="lbl">Saldo & Retenções</span><span class="bdg" id="b-gw" style="display:none">0</span></div>
   <div class="ni" onclick="ir('chargebacks',this)"><span class="ico">⚖️</span><span class="lbl">Chargebacks</span><span class="bdg" id="b-cb" style="display:none">0</span></div>
+  <div class="ni" onclick="ir('recebimentos',this)"><span class="ico">💰</span><span class="lbl">Recebimentos Stark</span></div>
   <div class="sb-sec">Investimentos</div>
   <div class="ni" onclick="ir('investimentos',this)"><span class="ico">📊</span><span class="lbl">Investimentos</span></div>
   <div class="sb-sec">Sistema</div>
@@ -825,7 +826,7 @@ function ir(tipo,arg,el){
     if(tipo==='dash'&&_isFuncionario()){document.getElementById('ptitle').textContent='Início';pInicioFunc();return;}
     _bloqueadoFunc();document.getElementById('ptitle').textContent='Acesso Restrito';return;
   }
-  var titulos={dash:'Dashboard',est_produtos:'Estoque — Produtos',est_fin:'Estoque — Financeiro',est_mov:'Estoque — Movimentações',est_alertas:'Estoque — Alertas',rtu_lanc:'Controle RTU — Lançamentos',rtu_resumo:'Controle RTU — Resumo Anual',notif:'Alertas & Notificações',fornecedores:'Fornecedores',compras:'Compras — Lista de Compras',pendencias:'Avisos & Pendências',marketplaces:'Marketplaces — Saldo & A Receber',gateways:'Gateways — Saldo & Retenções',investimentos:'Investimentos — Aplicações por Conta',usuarios:'Usuários & Acessos',inicio:'Início',mensal:'Resumo Mensal',chargebacks:'Chargebacks — Stark Bank'};
+  var titulos={dash:'Dashboard',est_produtos:'Estoque — Produtos',est_fin:'Estoque — Financeiro',est_mov:'Estoque — Movimentações',est_alertas:'Estoque — Alertas',rtu_lanc:'Controle RTU — Lançamentos',rtu_resumo:'Controle RTU — Resumo Anual',notif:'Alertas & Notificações',fornecedores:'Fornecedores',compras:'Compras — Lista de Compras',pendencias:'Avisos & Pendências',marketplaces:'Marketplaces — Saldo & A Receber',gateways:'Gateways — Saldo & Retenções',investimentos:'Investimentos — Aplicações por Conta',usuarios:'Usuários & Acessos',inicio:'Início',mensal:'Resumo Mensal',chargebacks:'Chargebacks — Stark Bank',recebimentos:'Recebimentos — Stark Bank'};
   document.getElementById('ptitle').textContent=titulos[tipo]||(tipo==='pag'?'Pagamentos — '+MFULL[(arg||1)-1]+' 2026':tipo);
   if(tipo==='dash')pDash();
   else if(tipo==='est_produtos')pEstProdutos();
@@ -845,6 +846,7 @@ function ir(tipo,arg,el){
   else if(tipo==='usuarios')pUsuarios();
   else if(tipo==='mensal')pMensal();
   else if(tipo==='chargebacks')pChargebacks();
+  else if(tipo==='recebimentos')pRecebimentos();
   else if(tipo==='inicio')pInicioFunc();
 }
 
@@ -3519,7 +3521,7 @@ function _cbRenderConta(){
     hh+='<div class="card"><div class="lbl">Estimado Líquido</div><div class="val '+(liquido<0?'red':'grn')+'">'+R(liquido)+'</div><div class="sub">total − chargebacks em aberto</div></div>';
     hh+='</div>';
     if(api.aReceberProtegido>0)hh+='<div class="panel" style="margin-bottom:12px"><div style="padding:10px 16px;font-size:12px;color:var(--t2)">🔒 '+R(api.aReceberProtegido)+' do a receber está <b>reservado pela Stark</b> pra cobrir possíveis estornos/chargebacks.</div></div>';
-    var pd=api.porDia||[];
+    var pd=(api.porDia||[]).filter(function(d){var x=diasAte(d.data);return x===null||x<=(api.diasDetalhe||60);});
     if(pd.length){
       var acum=0;
       hh+='<div class="sec">Próximos recebimentos (dia a dia, '+(api.diasDetalhe||60)+' dias)</div><div class="panel"><div class="ts tw"><table><thead><tr><th class="tc">DATA</th><th class="tc">PARCELAS</th><th class="tr">BRUTO</th><th class="tr">LÍQUIDO</th><th class="tr">ACUMULADO</th></tr></thead><tbody>';
@@ -3528,6 +3530,7 @@ function _cbRenderConta(){
       if(api.aReceberDepois>0)hh+='<tr style="opacity:.7"><td class="tc">depois</td><td></td><td></td><td class="tr tnw" style="font-weight:700">'+R(api.aReceberDepois)+'</td><td class="tr tnw" style="color:#8cc5c7">'+R(acum+api.aReceberDepois)+'</td></tr>';
       hh+='</tbody></table></div></div>';
     }
+    hh+='<div class="brow" style="margin-top:12px"><button class="btn btnp bsm" onclick="ir(\'recebimentos\',document.querySelector(\'.ni[onclick*=recebimentos]\'))">💰 Ver agenda completa de recebimentos</button></div>';
     hh+='<div style="font-size:10px;color:var(--t3);margin-top:8px">Saldo e parcelas a receber vêm direto da Stark a cada ~15 min. "Em risco" é a soma dos chargebacks ainda sem resultado: se a Stark der a favor do emissor, esse valor sai da conta.</div>';
     return hh;
   }
@@ -3551,6 +3554,77 @@ function _cbRenderConta(){
   h+='<div class="brow" style="margin-top:12px"><button class="btn btnp bsm" onclick="ir(\'gateways\',document.querySelector(\'.ni[onclick*=gateways]\'))">✏ Atualizar saldo e a receber da Stark</button></div>';
   h+='<div style="font-size:10px;color:var(--t3);margin-top:8px">"Em risco" é a soma dos chargebacks ainda sem resultado (precisam de defesa ou em análise). Se a Stark der a favor do emissor, esse valor sai da conta.</div>';
   return h;
+}
+
+// ── RECEBIMENTOS STARK — agenda das parcelas de cartão a receber ──
+// Vem de DB.starkConta.porDia (scripts/stark-conta.js, API da Stark, ~15 min).
+var _recAbertos=null; // meses com o detalhe dia a dia aberto
+function recToggle(k){if(!_recAbertos)_recAbertos={};_recAbertos[k]=!_recAbertos[k];pRecebimentos();}
+function pRecebimentos(){
+  var api=DB.starkConta&&DB.starkConta.origem==='api'?DB.starkConta:null;
+  if(!api){
+    setPage('<div class="panel"><div class="empty" style="padding:56px 36px"><div style="font-size:32px;margin-bottom:12px">💰</div><div style="font-size:14px;font-weight:600;color:var(--t2);margin-bottom:6px">Ainda sem dados da Stark</div><div style="font-size:12px;color:var(--t3)">A agenda de recebimentos aparece aqui assim que a conexão com a API da Stark fizer a primeira leitura.</div></div></div>');
+    return;
+  }
+  var pd=api.porDia||[];
+  var SEM=['dom','seg','ter','qua','qui','sex','sáb'];
+  var hojeD=new Date();hojeD.setHours(0,0,0,0);
+  var mesAtualK=hojeD.getFullYear()+'-'+String(hojeD.getMonth()+1).padStart(2,'0');
+  var proxMesD=new Date(hojeD.getFullYear(),hojeD.getMonth()+1,1);
+  var proxMesK=proxMesD.getFullYear()+'-'+String(proxMesD.getMonth()+1).padStart(2,'0');
+  if(!_recAbertos){_recAbertos={};_recAbertos[mesAtualK]=true;_recAbertos[proxMesK]=true;}
+
+  var meses={},ordem=[],em30=0,em7=0;
+  pd.forEach(function(d){
+    var p=d.data.split('/'),k=p[2]+'-'+p[1];
+    if(!meses[k]){meses[k]={k:k,ano:Number(p[2]),mes:Number(p[1]),dias:[],liquido:0,bruto:0,taxas:0,qtd:0};ordem.push(k);}
+    var g=meses[k];g.dias.push(d);g.liquido+=Number(d.liquido)||0;g.bruto+=Number(d.bruto)||0;g.taxas+=Number(d.taxas)||((Number(d.bruto)||0)-(Number(d.liquido)||0));g.qtd+=d.qtd||0;
+    var x=diasAte(d.data);if(x!==null&&x<=30)em30+=Number(d.liquido)||0;if(x!==null&&x<=7)em7+=Number(d.liquido)||0;
+  });
+  ordem.sort();
+  var prox=pd[0],xProx=prox?diasAte(prox.data):null;
+  var quando=function(x){return x===null?'':x<=0?'hoje':x===1?'amanhã':'em '+x+' dias';};
+  var esteMes=meses[mesAtualK]?meses[mesAtualK].liquido:0,proxMes=meses[proxMesK]?meses[proxMesK].liquido:0;
+
+  var h='<div class="card hl" style="margin-bottom:12px"><div class="lbl">💰 Total a receber da Stark (líquido)</div><div class="val gld" style="font-size:30px">'+R(api.aReceberLiquido)+'</div><div class="sub">'+api.qtdParcelas+' parcela'+(api.qtdParcelas!==1?'s':'')+' de cartão · bruto '+R(api.aReceberBruto)+' − taxas '+R(api.aReceberTaxas)+' · 🔄 consultado em '+_escH(api.consultadoEm)+'</div></div>';
+  h+='<div class="g4" style="margin-bottom:12px">';
+  h+='<div class="card '+(prox?'':'')+'"><div class="lbl">Próximo Recebimento</div><div class="val grn">'+(prox?R(prox.liquido):'—')+'</div><div class="sub">'+(prox?_escH(prox.data)+' ('+quando(xProx)+') · '+prox.qtd+' parcela'+(prox.qtd!==1?'s':''):'nenhum agendado')+'</div></div>';
+  h+='<div class="card"><div class="lbl">Próximos 7 dias</div><div class="val">'+R(em7)+'</div><div class="sub">líquido a cair na conta</div></div>';
+  h+='<div class="card"><div class="lbl">Resto de '+MFULL[hojeD.getMonth()]+'</div><div class="val">'+R(esteMes)+'</div><div class="sub">próximos 30 dias: '+R(em30)+'</div></div>';
+  h+='<div class="card"><div class="lbl">'+MFULL[proxMesD.getMonth()]+'</div><div class="val">'+R(proxMes)+'</div><div class="sub">mês que vem</div></div>';
+  h+='</div>';
+  if(api.aReceberProtegido>0)h+='<div class="panel" style="margin-bottom:12px"><div style="padding:10px 16px;font-size:12px;color:var(--t2)">🔒 '+R(api.aReceberProtegido)+' estão <b>reservados pela Stark</b> pra cobrir possíveis estornos/chargebacks — podem não cair na data.</div></div>';
+
+  if(!pd.length){
+    h+='<div class="panel"><div class="empty" style="padding:36px"><div style="font-size:12px;color:var(--t3)">Nenhuma parcela a receber no momento.</div></div></div>';
+    setPage(h);return;
+  }
+  // Resumo por mês
+  var acum=0;
+  h+='<div class="sec">Por mês</div><div class="panel" style="margin-bottom:14px"><div class="ts tw"><table><thead><tr><th>MÊS</th><th class="tc">DIAS</th><th class="tc">PARCELAS</th><th class="tr">BRUTO</th><th class="tr">TAXAS</th><th class="tr">LÍQUIDO</th><th class="tr">ACUMULADO</th></tr></thead><tbody>';
+  ordem.forEach(function(k){var g=meses[k];acum+=g.liquido;
+    h+='<tr style="cursor:pointer" onclick="recToggle(\''+k+'\')"><td style="font-weight:700;color:var(--t)">'+MFULL[g.mes-1]+' '+g.ano+'</td><td class="tc">'+g.dias.length+'</td><td class="tc">'+g.qtd+'</td><td class="tr tnw" style="color:var(--t3)">'+R(g.bruto)+'</td><td class="tr tnw" style="color:var(--t3)">− '+R(g.taxas)+'</td><td class="tr tnw" style="font-weight:700">'+R(g.liquido)+'</td><td class="tr tnw" style="color:#8cc5c7">'+R(acum)+'</td></tr>';});
+  h+='<tr><td style="font-weight:800">TOTAL</td><td></td><td class="tc" style="font-weight:700">'+api.qtdParcelas+'</td><td class="tr tnw">'+R(api.aReceberBruto)+'</td><td class="tr tnw">− '+R(api.aReceberTaxas)+'</td><td class="tr tnw" style="font-weight:800;color:var(--gold)">'+R(api.aReceberLiquido)+'</td><td></td></tr>';
+  h+='</tbody></table></div></div>';
+
+  // Dia a dia, por mês (abre/fecha tocando no mês)
+  acum=0;
+  ordem.forEach(function(k){
+    var g=meses[k],aberto=!!_recAbertos[k];
+    h+='<div class="sec" style="cursor:pointer" onclick="recToggle(\''+k+'\')">'+(aberto?'▾ ':'▸ ')+MFULL[g.mes-1]+' de '+g.ano+' <span style="color:var(--t3);font-weight:400;text-transform:none">· '+g.dias.length+' dia'+(g.dias.length!==1?'s':'')+' de recebimento · <b style="color:var(--gold)">'+R(g.liquido)+'</b></span></div>';
+    if(!aberto){g.dias.forEach(function(d){acum+=Number(d.liquido)||0;});return;}
+    h+='<div class="panel" style="margin-bottom:12px"><div class="ts tw"><table><thead><tr><th class="tc">DATA</th><th class="tc">DIA</th><th class="tc">PARCELAS</th><th class="tr">CRÉDITO</th><th class="tr">DÉBITO</th><th class="tr">BRUTO</th><th class="tr">TAXAS</th><th class="tr">LÍQUIDO</th><th class="tr">ACUMULADO</th></tr></thead><tbody>';
+    g.dias.forEach(function(d){
+      acum+=Number(d.liquido)||0;
+      var p=d.data.split('/'),dt=new Date(Number(p[2]),Number(p[1])-1,Number(p[0])),x=diasAte(d.data);
+      var tag=x!==null&&x<=0?' <span style="font-size:10px;color:var(--grn);font-weight:700">hoje</span>':x===1?' <span style="font-size:10px;color:var(--t3)">amanhã</span>':'';
+      var tx=d.taxas!==undefined?d.taxas:(Number(d.bruto)||0)-(Number(d.liquido)||0);
+      h+='<tr><td class="tc tnw" style="font-weight:600">'+_escH(d.data)+tag+'</td><td class="tc" style="color:var(--t3)">'+SEM[dt.getDay()]+'</td><td class="tc">'+d.qtd+'</td><td class="tr tnw" style="color:var(--t3)">'+(d.credito!==undefined?R(d.credito):'—')+'</td><td class="tr tnw" style="color:var(--t3)">'+(d.debito!==undefined?R(d.debito):'—')+'</td><td class="tr tnw" style="color:var(--t3)">'+R(d.bruto)+'</td><td class="tr tnw" style="color:var(--t3)">− '+R(tx)+'</td><td class="tr tnw" style="font-weight:700">'+R(d.liquido)+(d.protegido>0?'<div style="font-size:10px;color:var(--amb)">🔒 '+R(d.protegido)+' reservado</div>':'')+'</td><td class="tr tnw" style="color:#8cc5c7">'+R(acum)+'</td></tr>';
+    });
+    h+='</tbody></table></div></div>';
+  });
+  h+='<div style="font-size:10px;color:var(--t3);margin-top:8px">Valores líquidos = já descontadas as taxas da Stark. Atualizado sozinho a cada ~15 min pela API da Stark. Toque num mês pra abrir ou fechar os dias.</div>';
+  setPage(h);
 }
 
 function _refCb(){
@@ -4240,6 +4314,7 @@ var PAGINAS_RESTRITAS=[
   {tipo:'marketplaces',label:'Marketplaces — Saldo & A Receber'},
   {tipo:'gateways',label:'Gateways — Saldo & Retenções'},
   {tipo:'chargebacks',label:'Chargebacks'},
+  {tipo:'recebimentos',label:'Recebimentos Stark'},
   {tipo:'investimentos',label:'Investimentos'},
   {tipo:'pag',label:'Pagamentos Empresa'}
 ];
