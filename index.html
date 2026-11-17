@@ -3251,6 +3251,7 @@ function _cbSituacao(c){
   if(st.indexOf('EMISSOR')>=0)return 'perdido';
   if(st.indexOf('FAVOR')>=0)return 'ganho';
   if(tr.indexOf('NAO DEFENDIDO')>=0||tr.indexOf('ACEITO')>=0)return 'naodef';
+  if(c.defesaEnviada)return 'analise'; // defesa já foi mandada pra Stark
   if(tr.indexOf('AGUARDANDO CLIENTE')>=0||st.indexOf('AGUARDANDO CLIENTE')>=0||(!tr&&!st))return 'defender';
   return 'analise';
 }
@@ -3355,7 +3356,7 @@ function pChargebacks(){
       h+='<td class="tc tnw">'+_cbPrazoHtml(c)+'</td>';
       h+='<td style="font-size:11px">'+(_escH(c.tratativa)||'<span style="color:var(--t3)">—</span>')+'</td>';
       h+='<td style="font-size:11px">'+(_escH(c.status)||'<span style="color:var(--t3)">—</span>')+'</td>';
-      h+='<td class="tc">'+_cbPill(c)+'</td>';
+      h+='<td class="tc">'+_cbPill(c)+(c.defesaEnviada?'<div style="font-size:10px;color:var(--t3);margin-top:2px">defesa enviada '+_escH(c.defesaEnviada)+'</div>':'')+'</td>';
       h+='<td style="font-size:11px">'+(sub||'<span style="color:var(--t3)">—</span>')+(c.motivo?'<div style="font-size:10px;color:var(--t3)">'+_escH(c.motivo)+'</div>':'')+'</td>';
       h+='<td class="tnw"><button class="btn bsm" onclick="cbHistorico(\''+p+'\')" title="Histórico">🕘</button> <button class="btn bsm" onclick="editCb(\''+p+'\')" title="Editar">✏</button> <button class="btn bsm btnd" onclick="delCb(\''+p+'\')" title="Excluir">✕</button></td>';
       h+='</tr>';

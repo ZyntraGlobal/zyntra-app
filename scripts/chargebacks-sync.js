@@ -109,7 +109,7 @@ async function lerPlanilhaRemota() {
   return lida;
 }
 
-const CAMPOS_PLANILHA = ['valor', 'recebido', 'prazo', 'tratativa', 'status', 'pedido', 'cliente', 'motivo', 'dataVenda'];
+const CAMPOS_PLANILHA = ['valor', 'recebido', 'prazo', 'tratativa', 'status', 'pedido', 'cliente', 'motivo', 'dataVenda', 'defesaEnviada'];
 
 // Aplica a planilha no data.json. Devolve { alteracoes, novidades } —
 // novidades são frases pro push (só o que mudou de verdade nesta execução).
@@ -264,6 +264,7 @@ function precisaDefesa(c) {
   const st = (c.status || '').toUpperCase(), tr = (c.tratativa || '').toUpperCase();
   if (/EMISSOR|FAVOR/.test(st)) return false;
   if (/N[AÃ]O DEFENDIDO|ACEITO/.test(tr)) return false;
+  if (c.defesaEnviada) return false;
   return /AGUARDANDO CLIENTE/.test(tr) || /AGUARDANDO CLIENTE/.test(st) || (!tr && !st);
 }
 

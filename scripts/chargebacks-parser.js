@@ -122,11 +122,13 @@ const COLUNAS = [
   ['status',    [/^status/, /situacao/]],
   ['prazo',     [/prazo/, /data limite/, /limite (de|para) defesa/, /vencimento/]],
   ['recebido',  [/disponibiliza/, /data (de |do )?(abertura|recebimento|chargeback|contestacao|notificacao)/]],
-  ['valor',     [/valor (do |da )?(chargeback|contesta|disputa)/, /^valor$/, /valor/]],
-  ['pedido',    [/pedido/, /^nsu/, /\bnsu\b/, /transac/, /autoriza/, /^tid$/, /order/]],
-  ['cliente',   [/cliente/, /portador/, /comprador/, /^nome/]],
+  ['valor',     [/valor (do |da )?(chargeback|contesta|disputa)/, /^valor ?transac/, /^valor$/, /valor/]],
+  ['pedido',    [/pedido/, /^order/]],
+  ['tags',      [/^tags$/]],           // "woocommerce, wc-site-..., wc-order-5968" -> pedido
+  ['cliente',   [/holder ?name/, /portador/, /comprador/, /^cliente$/, /^nome/]],
   ['motivo',    [/motivo/, /razao/, /reason/]],
-  ['dataVenda', [/data (da )?(venda|compra|transac)/]]
+  ['dataVenda', [/^data ?(da )?(venda|compra|transac)/]],
+  ['defesaEnviada', [/envio da defesa/]]
 ];
 
 function mapearCabecalho(cab) {
@@ -181,6 +183,7 @@ function lerPlanilha(linhas) {
     const proc = String(l[mapa.processo] || '').replace(/\s+/g, '');
     if (!proc || !/\d/.test(proc)) continue;
     const g = campo => mapa[campo] === undefined ? '' : String(l[mapa[campo]] == null ? '' : l[mapa[campo]]).trim();
+    const mPed = g('tags').match(/wc-order-(\d+)/i);
     const r = {
       processo: proc,
       valor: valorPlanilha(g('valor')),
@@ -188,10 +191,11 @@ function lerPlanilha(linhas) {
       prazo: dataPlanilha(g('prazo')),
       tratativa: g('tratativa'),
       status: g('status'),
-      pedido: g('pedido'),
+      pedido: g('pedido') || (mPed ? 'Pedido #' + mPed[1] : ''),
       cliente: g('cliente'),
       motivo: g('motivo'),
       dataVenda: dataPlanilha(g('dataVenda')),
+      defesaEnviada: dataPlanilha(g('defesaEnviada')),
       planilha: {}
     };
     cab.forEach((c, idx) => { if (c && l[idx] !== undefined && String(l[idx]).trim() !== '') r.planilha[c] = String(l[idx]).trim(); });
