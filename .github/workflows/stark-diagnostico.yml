@@ -1,0 +1,17 @@
+name: Stark diagnóstico (temporário)
+on:
+  workflow_dispatch: {}
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install starkbank@2.44.0 --no-save
+      - env:
+          STARK_PROJECT_ID: ${{ secrets.STARK_PROJECT_ID }}
+          STARK_PRIVATE_KEY: ${{ secrets.STARK_PRIVATE_KEY }}
+        run: node scripts/stark-diagnostico.js
