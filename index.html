@@ -1051,6 +1051,24 @@ function pDash(){
     ]);
     h+='</div>';
   }
+  // Card Recebimentos Stark — agenda de parcelas a receber (API da Stark)
+  if(_paginaPermitida('recebimentos')){
+    var rcApi=DB.starkConta&&DB.starkConta.origem==='api'?DB.starkConta:null;
+    var rcPd=rcApi?(rcApi.porDia||[]):[];
+    var rcProx=rcPd[0],rcX=rcProx?diasAte(rcProx.data):null;
+    var rcQuando=rcX===null?'':rcX<=0?'hoje':rcX===1?'amanhã':'em '+rcX+' dias';
+    var rc7=rcPd.reduce(function(a,d){var x=diasAte(d.data);return a+(x!==null&&x<=7?Number(d.liquido)||0:0);},0);
+    var rcStatus=!rcApi?'amb':'grn';
+    var rcLabel=!rcApi?'Sem dados da Stark':rcProx?'Próximo: '+rcProx.data+' ('+rcQuando+')':'Nada agendado';
+    var rcSub=rcApi?(rcProx?'próximo recebimento '+R(rcProx.liquido)+' em '+rcProx.data+' ('+rcQuando+') · '+R(rc7)+' nos próximos 7 dias':'nenhuma parcela agendada')+' · em conta '+R(rcApi.saldo):'conecte a API da Stark pra ver a agenda';
+    h+='<div style="display:grid;grid-template-columns:1fr;gap:16px;margin-top:16px">';
+    h+=modCard('💰','Recebimentos Stark',rcApi?R(rcApi.aReceberLiquido):'—','gold',rcSub,rcStatus,rcLabel,"ir('recebimentos',document.querySelector('.ni[onclick*=recebimentos]'))",[
+      ['⚡ Antecipado (D+3)',rcApi&&rcApi.aReceberAntecipado!==undefined?R(rcApi.aReceberAntecipado):'—','var(--grn)'],
+      ['📅 Data original',rcApi&&rcApi.aReceberOriginal!==undefined?R(rcApi.aReceberOriginal):'—','#8cc5c7'],
+      ['Parcelas',rcApi?rcApi.qtdParcelas:'—','var(--t)']
+    ]);
+    h+='</div>';
+  }
   // Card Investimentos — linha própria (só pra quem pode ver a aba)
   if(_paginaPermitida('investimentos')){
     var invTodos=DB.investimentos||[];
