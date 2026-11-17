@@ -328,6 +328,7 @@ tfoot td{font-weight:700;border-top:2px solid var(--bdr2);border-bottom:none!imp
   <div class="ni" onclick="ir('marketplaces',this)"><span class="ico">🏪</span><span class="lbl">Saldo & A Receber</span></div>
   <div class="sb-sec">Gateways</div>
   <div class="ni" onclick="ir('gateways',this)"><span class="ico">💳</span><span class="lbl">Saldo & Retenções</span><span class="bdg" id="b-gw" style="display:none">0</span></div>
+  <div class="ni" onclick="ir('chargebacks',this)"><span class="ico">⚖️</span><span class="lbl">Chargebacks</span><span class="bdg" id="b-cb" style="display:none">0</span></div>
   <div class="sb-sec">Investimentos</div>
   <div class="ni" onclick="ir('investimentos',this)"><span class="ico">📊</span><span class="lbl">Investimentos</span></div>
   <div class="sb-sec">Sistema</div>
@@ -806,6 +807,9 @@ function badges(){
   // Pendências
   var bp=document.getElementById('b-pend');
   if(bp){var nPd=(DB.pendencias||[]).filter(function(p){return p.status==='Aberta'||p.status==='Em Andamento';}).length;bp.textContent=nPd;bp.style.display=nPd>0?'inline':'none';}
+  // Chargebacks: precisam de defesa + avisos de email ainda não cadastrados
+  var bcb=document.getElementById('b-cb');
+  if(bcb){var nCb=_cbPrecisamAtencao();bcb.textContent=nCb;bcb.style.display=nCb>0?'inline':'none';}
 }
 
 // ── NAVEGAÇÃO ─────────────────────────────────────────
@@ -821,7 +825,7 @@ function ir(tipo,arg,el){
     if(tipo==='dash'&&_isFuncionario()){document.getElementById('ptitle').textContent='Início';pInicioFunc();return;}
     _bloqueadoFunc();document.getElementById('ptitle').textContent='Acesso Restrito';return;
   }
-  var titulos={dash:'Dashboard',est_produtos:'Estoque — Produtos',est_fin:'Estoque — Financeiro',est_mov:'Estoque — Movimentações',est_alertas:'Estoque — Alertas',rtu_lanc:'Controle RTU — Lançamentos',rtu_resumo:'Controle RTU — Resumo Anual',notif:'Alertas & Notificações',fornecedores:'Fornecedores',compras:'Compras — Lista de Compras',pendencias:'Avisos & Pendências',marketplaces:'Marketplaces — Saldo & A Receber',gateways:'Gateways — Saldo & Retenções',investimentos:'Investimentos — Aplicações por Conta',usuarios:'Usuários & Acessos',inicio:'Início',mensal:'Resumo Mensal'};
+  var titulos={dash:'Dashboard',est_produtos:'Estoque — Produtos',est_fin:'Estoque — Financeiro',est_mov:'Estoque — Movimentações',est_alertas:'Estoque — Alertas',rtu_lanc:'Controle RTU — Lançamentos',rtu_resumo:'Controle RTU — Resumo Anual',notif:'Alertas & Notificações',fornecedores:'Fornecedores',compras:'Compras — Lista de Compras',pendencias:'Avisos & Pendências',marketplaces:'Marketplaces — Saldo & A Receber',gateways:'Gateways — Saldo & Retenções',investimentos:'Investimentos — Aplicações por Conta',usuarios:'Usuários & Acessos',inicio:'Início',mensal:'Resumo Mensal',chargebacks:'Chargebacks — Stark Bank'};
   document.getElementById('ptitle').textContent=titulos[tipo]||(tipo==='pag'?'Pagamentos — '+MFULL[(arg||1)-1]+' 2026':tipo);
   if(tipo==='dash')pDash();
   else if(tipo==='est_produtos')pEstProdutos();
@@ -840,6 +844,7 @@ function ir(tipo,arg,el){
   else if(tipo==='investimentos')pInvestimentos();
   else if(tipo==='usuarios')pUsuarios();
   else if(tipo==='mensal')pMensal();
+  else if(tipo==='chargebacks')pChargebacks();
   else if(tipo==='inicio')pInicioFunc();
 }
 
@@ -3220,6 +3225,268 @@ function delPendencia(id){
   });
 }
 
+// ── CHARGEBACKS — STARK BANK ──────────────────────────
+// Os resumos que a Stark manda por email são lidos por scripts/chargebacks-email.js
+// (GitHub Actions, a cada 15 min), que grava aqui:
+//   DB.chargebacks — um item por processo. Criado/atualizado pelas "Alterações de
+//                    Tratativa/Status" do email, ou cadastrado à mão aqui.
+//   DB.cbAvisos    — o bloco "N novos chargebacks" do email. Ele não traz número
+//                    nem valor de cada um, então vira um aviso até alguém cadastrar
+//                    os itens (olhando a planilha da Stark).
+// O processo é a chave de cada chargeback (é o que liga o email ao cadastro).
+var CB_PRAZO_DIAS=5;
+var CB_TRATATIVAS=['AGUARDANDO CLIENTE STARK','DEFESA ENVIADA','NÃO DEFENDIDO','ACEITO (NÃO CONTESTAR)'];
+var CB_STATUS=['Em análise','A favor do estabelecimento','A favor do emissor'];
+var CB_SIT={
+  defender:{lbl:'Precisa de defesa',cls:'palerta',ico:'🔴',ord:0},
+  analise:{lbl:'Em análise',cls:'ppendente',ico:'🟡',ord:1},
+  naodef:{lbl:'Não defendido',cls:'patrasado',ico:'⚠️',ord:2},
+  perdido:{lbl:'Perdido',cls:'patrasado',ico:'✕',ord:3},
+  ganho:{lbl:'Ganho',cls:'ppago',ico:'✅',ord:4}
+};
+function _cbNorm(s){return String(s||'').toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'');}
+// "A favor do emissor" = o banco do comprador ganhou = a Zyntra perdeu o valor.
+function _cbSituacao(c){
+  var st=_cbNorm(c.status),tr=_cbNorm(c.tratativa);
+  if(st.indexOf('EMISSOR')>=0)return 'perdido';
+  if(st.indexOf('FAVOR')>=0)return 'ganho';
+  if(tr.indexOf('NAO DEFENDIDO')>=0||tr.indexOf('ACEITO')>=0)return 'naodef';
+  if(tr.indexOf('AGUARDANDO CLIENTE')>=0||st.indexOf('AGUARDANDO CLIENTE')>=0||(!tr&&!st))return 'defender';
+  return 'analise';
+}
+function _cbSomarDias(dataStr,n){
+  var p=String(dataStr||'').split('/');if(p.length!==3)return '';
+  var d=new Date(Number(p[2]),Number(p[1])-1,Number(p[0])+n);
+  if(isNaN(d.getTime()))return '';
+  return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear();
+}
+function _cbLista(){if(!DB.chargebacks)DB.chargebacks=[];return DB.chargebacks;}
+function _cbAvisos(){if(!DB.cbAvisos)DB.cbAvisos=[];return DB.cbAvisos;}
+function _cbFaltamCadastrar(a){return Math.max(0,(a.qtd||0)-(a.cadastrados||0));}
+function _cbAvisosAbertos(){return _cbAvisos().filter(function(a){return !a.resolvido&&_cbFaltamCadastrar(a)>0;});}
+function _cbPrecisamAtencao(){
+  var n=(DB.chargebacks||[]).filter(function(c){return _cbSituacao(c)==='defender';}).length;
+  (DB.cbAvisos||[]).forEach(function(a){if(!a.resolvido)n+=_cbFaltamCadastrar(a);});
+  return n;
+}
+function _cbTxtPrazo(prazo){
+  var d=diasAte(prazo);if(d===null||isNaN(d))return {txt:'',cor:'var(--t3)'};
+  return {txt:d<0?'venceu há '+(-d)+'d':d===0?'vence HOJE':d===1?'falta 1 dia':'faltam '+d+' dias',cor:d<=2?'var(--red)':'var(--amb)'};
+}
+function _cbPrazoHtml(c){
+  if(!c.prazo)return '<span style="color:var(--t3)">—</span>';
+  var h=_escH(c.prazo);
+  if(_cbSituacao(c)!=='defender')return h;
+  var t=_cbTxtPrazo(c.prazo);
+  return h+'<div style="font-size:10px;font-weight:700;color:'+t.cor+'">'+t.txt+'</div>';
+}
+function _cbPill(c){var s=CB_SIT[_cbSituacao(c)];return '<span class="pill '+s.cls+'">'+s.ico+' '+s.lbl+'</span>';}
+function _cbSoma(l){return l.reduce(function(a,c){return a+(Number(c.valor)||0);},0);}
+
+var _cbFiltro={busca:'',sit:''};
+function pChargebacks(){
+  var todos=_cbLista();
+  var avisos=_cbAvisosAbertos();
+  var porSit=function(s){return todos.filter(function(c){return _cbSituacao(c)===s;});};
+  var defender=porSit('defender'),analise=porSit('analise');
+  var perdidos=porSit('perdido').concat(porSit('naodef')),ganhos=porSit('ganho');
+  var urgentes=defender.filter(function(c){var d=c.prazo?diasAte(c.prazo):null;return d!==null&&d>=0&&d<=2;});
+  var semCadastro=avisos.reduce(function(a,x){return a+_cbFaltamCadastrar(x);},0);
+
+  var h='<div class="g4" style="margin-bottom:12px">';
+  h+='<div class="card '+(defender.length+semCadastro>0?'danger':'')+'"><div class="lbl">Precisam de Defesa</div><div class="val '+(defender.length+semCadastro>0?'red':'grn')+'">'+(defender.length+semCadastro)+'</div><div class="sub">'+R(_cbSoma(defender))+(semCadastro?' · '+semCadastro+' sem cadastro':'')+'</div></div>';
+  h+='<div class="card '+(urgentes.length>0?'danger':'')+'"><div class="lbl">Prazo Acabando</div><div class="val '+(urgentes.length>0?'red':'grn')+'">'+urgentes.length+'</div><div class="sub">vencem em até 2 dias</div></div>';
+  h+='<div class="card"><div class="lbl">Em Análise</div><div class="val amb">'+analise.length+'</div><div class="sub">'+R(_cbSoma(analise))+' aguardando resultado</div></div>';
+  h+='<div class="card"><div class="lbl">Perdidos / Ganhos</div><div class="val"><span style="color:var(--red)">'+perdidos.length+'</span> / <span style="color:var(--grn)">'+ganhos.length+'</span></div><div class="sub">'+R(_cbSoma(perdidos))+' perdidos</div></div>';
+  h+='</div>';
+
+  if(avisos.length){
+    h+='<div class="panel" style="margin-bottom:12px;border-left:4px solid var(--red)"><div style="padding:12px 16px">';
+    h+='<div style="font-size:12px;font-weight:700;color:var(--t);margin-bottom:8px">📩 Chargebacks novos que chegaram por email e ainda não foram cadastrados</div>';
+    avisos.forEach(function(a){
+      var falta=_cbFaltamCadastrar(a),t=_cbTxtPrazo(a.prazo);
+      h+='<div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--bdr)">';
+      h+='<div style="flex:1;min-width:220px;font-size:12px;color:var(--t2)"><b>'+falta+' de '+a.qtd+' novo'+(a.qtd>1?'s':'')+'</b> · email de '+_escH(a.data)+' · total '+R(a.total)+'<br><span style="font-size:11px">Prazo de defesa: <b>'+_escH(a.prazo||'—')+'</b>'+(t.txt?' <span style="color:'+t.cor+';font-weight:700">('+t.txt+')</span>':'')+'</span></div>';
+      if(a.link)h+='<a class="btn bsm" href="'+_escH(a.link)+'" target="_blank" rel="noopener">📄 Abrir planilha</a>';
+      h+='<button class="btn btnp bsm" onclick="modalAddCb(\''+_escH(a.id)+'\')">+ Cadastrar</button>';
+      h+='<button class="btn bsm" onclick="cbAvisoResolver(\''+_escH(a.id)+'\')">Já cadastrei</button>';
+      h+='</div>';
+    });
+    h+='</div></div>';
+  }
+
+  h+='<div class="brow">';
+  h+='<input class="inp" id="cb-s" style="width:220px" placeholder="Buscar processo, pedido ou cliente..." value="'+_escH(_cbFiltro.busca)+'" oninput="_refCb()">';
+  h+='<select class="sel" id="cb-sit" onchange="_refCb()"><option value="">Todas as situações</option>';
+  Object.keys(CB_SIT).forEach(function(k){h+='<option value="'+k+'"'+(_cbFiltro.sit===k?' selected':'')+'>'+CB_SIT[k].lbl+'</option>';});
+  h+='</select>';
+  if(_cbFiltro.busca||_cbFiltro.sit)h+='<button class="btn bsm" onclick="_cbFiltro={busca:\'\',sit:\'\'};pChargebacks()">✕ Limpar</button>';
+  h+='<button class="btn btnp bsm" style="margin-left:auto" onclick="modalAddCb()">+ Novo Chargeback</button>';
+  h+='</div>';
+
+  var lista=todos.slice();
+  if(_cbFiltro.busca){var b=_cbFiltro.busca.toLowerCase();lista=lista.filter(function(c){return [c.processo,c.pedido,c.cliente].join(' ').toLowerCase().indexOf(b)>=0;});}
+  if(_cbFiltro.sit)lista=lista.filter(function(c){return _cbSituacao(c)===_cbFiltro.sit;});
+  lista.sort(function(a,b){
+    var oa=CB_SIT[_cbSituacao(a)].ord,ob=CB_SIT[_cbSituacao(b)].ord;
+    if(oa!==ob)return oa-ob;
+    if(oa===0){var da=a.prazo?diasAte(a.prazo):999,db=b.prazo?diasAte(b.prazo):999;if(da!==db)return da-db;}
+    return String(b.atualizadoEm||'').localeCompare(String(a.atualizadoEm||''));
+  });
+
+  if(todos.length===0&&!avisos.length){
+    h+='<div class="panel"><div class="empty" style="padding:56px 36px">';
+    h+='<div style="font-size:32px;margin-bottom:12px">⚖️</div>';
+    h+='<div style="font-size:14px;font-weight:600;color:var(--t2);margin-bottom:6px">Nenhum chargeback por aqui</div>';
+    h+='<div style="font-size:12px;color:var(--t3);margin-bottom:16px">Os chargebacks da planilha da Stark Bank entram aqui sozinhos assim que a conexão estiver ativa.</div>';
+    h+='<button class="btn btnp" onclick="modalAddCb()">+ Cadastrar Chargeback</button>';
+    h+='</div></div>';
+  } else if(lista.length===0){
+    h+='<div class="panel"><div class="empty" style="padding:36px"><div style="font-size:12px;color:var(--t3)">Nenhum chargeback encontrado com esses filtros.</div></div></div>';
+  } else {
+    h+='<div class="panel"><div class="ts tw"><table><thead><tr><th>PROCESSO</th><th class="tr">VALOR</th><th class="tc">RECEBIDO</th><th class="tc">PRAZO DEFESA</th><th>TRATATIVA</th><th>STATUS STARK</th><th class="tc">SITUAÇÃO</th><th>PEDIDO / CLIENTE</th><th></th></tr></thead><tbody>';
+    lista.forEach(function(c){
+      var p=_escH(c.processo);
+      var sub=[c.pedido,c.cliente].filter(Boolean).map(_escH).join(' · ');
+      h+='<tr>';
+      h+='<td class="tnw"><div style="font-weight:700;color:var(--t);font-size:12px">'+p+'</div>'+(c.origem==='email'?'<div style="font-size:10px;color:var(--t3)">via email</div>':c.origem==='planilha'?'<div style="font-size:10px;color:var(--t3)">planilha Stark</div>':'')+'</td>';
+      h+='<td class="tr tnw">'+(c.valor?R(c.valor):'<span style="color:var(--amb);font-size:11px">preencher</span>')+'</td>';
+      h+='<td class="tc tnw">'+(_escH(c.recebido)||'<span style="color:var(--t3)">—</span>')+'</td>';
+      h+='<td class="tc tnw">'+_cbPrazoHtml(c)+'</td>';
+      h+='<td style="font-size:11px">'+(_escH(c.tratativa)||'<span style="color:var(--t3)">—</span>')+'</td>';
+      h+='<td style="font-size:11px">'+(_escH(c.status)||'<span style="color:var(--t3)">—</span>')+'</td>';
+      h+='<td class="tc">'+_cbPill(c)+'</td>';
+      h+='<td style="font-size:11px">'+(sub||'<span style="color:var(--t3)">—</span>')+(c.motivo?'<div style="font-size:10px;color:var(--t3)">'+_escH(c.motivo)+'</div>':'')+'</td>';
+      h+='<td class="tnw"><button class="btn bsm" onclick="cbHistorico(\''+p+'\')" title="Histórico">🕘</button> <button class="btn bsm" onclick="editCb(\''+p+'\')" title="Editar">✏</button> <button class="btn bsm btnd" onclick="delCb(\''+p+'\')" title="Excluir">✕</button></td>';
+      h+='</tr>';
+    });
+    h+='</tbody></table></div></div>';
+  }
+  h+='<div style="font-size:10px;color:var(--t3);margin-top:8px">Atualizado sozinho a cada ~15 min a partir da planilha de chargebacks da Stark Bank. Toque em 🕘 pra ver o histórico e todos os dados da planilha. Prazo padrão de defesa: '+CB_PRAZO_DIAS+' dias corridos.</div>';
+  setPage(h);
+}
+function _refCb(){
+  var b=document.getElementById('cb-s'),s=document.getElementById('cb-sit');
+  var digitando=b&&b===document.activeElement;
+  _cbFiltro.busca=b?b.value:'';_cbFiltro.sit=s?s.value:'';
+  pChargebacks();
+  // A página é redesenhada inteira — devolve o foco pro campo de busca
+  var nb=document.getElementById('cb-s');
+  if(nb&&digitando){nb.focus();nb.setSelectionRange(nb.value.length,nb.value.length);}
+}
+function _cbBuscar(processo){return _cbLista().find(function(c){return String(c.processo)===String(processo);});}
+function _cbAgora(){var d=new Date();return hoje()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}
+
+function _formCb(v){
+  v=v||{};
+  var dl=function(id,arr){return '<datalist id="'+id+'">'+arr.map(function(x){return '<option value="'+_escH(x)+'">';}).join('')+'</datalist>';};
+  return '<div class="fg f2">'+
+    '<div><label>Nº do processo *</label><input id="cb-processo" value="'+_escH(v.processo)+'" placeholder="Ex: 61099602"'+(v._editando?' disabled':'')+'></div>'+
+    '<div><label>Valor (R$)</label><input id="cb-valor" type="number" min="0" step="0.01" value="'+_escH(v.valor||'')+'" placeholder="0,00"></div>'+
+    '<div><label>Recebido em</label><input id="cb-recebido" value="'+_escH(v.recebido)+'" placeholder="DD/MM/AAAA" oninput="_cbSugerirPrazo()"></div>'+
+    '<div><label>Prazo de defesa</label><input id="cb-prazo" value="'+_escH(v.prazo)+'" placeholder="recebido + '+CB_PRAZO_DIAS+' dias"></div>'+
+    '<div><label>Pedido / venda</label><input id="cb-pedido" value="'+_escH(v.pedido)+'" placeholder="Nº do pedido ou transação"></div>'+
+    '<div><label>Cliente</label><input id="cb-cliente" value="'+_escH(v.cliente)+'" placeholder="Nome do comprador"></div>'+
+    '<div style="grid-column:1/-1"><label>Motivo</label><input id="cb-motivo" value="'+_escH(v.motivo)+'" placeholder="Ex: fraude, produto não recebido"></div>'+
+    '<div><label>Tratativa</label><input id="cb-tratativa" list="cb-dl-tr" value="'+_escH(v.tratativa)+'" placeholder="AGUARDANDO CLIENTE STARK">'+dl('cb-dl-tr',CB_TRATATIVAS)+'</div>'+
+    '<div><label>Status Stark</label><input id="cb-status" list="cb-dl-st" value="'+_escH(v.status)+'" placeholder="Em análise">'+dl('cb-dl-st',CB_STATUS)+'</div>'+
+    '<div style="grid-column:1/-1"><label>Observações</label><textarea id="cb-obs" style="width:100%;resize:vertical;min-height:50px;padding:7px 9px;font-size:12px;font-family:Inter,sans-serif;border:1px solid var(--bdr2);border-radius:6px;background:var(--w2);color:var(--t);outline:none">'+_escH(v.obs)+'</textarea></div>'+
+    '</div>';
+}
+var _cbPrazoAuto=true;
+function _cbSugerirPrazo(){
+  var r=document.getElementById('cb-recebido'),p=document.getElementById('cb-prazo');
+  if(!r||!p||(!_cbPrazoAuto&&p.value))return;
+  var s=_cbSomarDias(_normalizarData(r.value),CB_PRAZO_DIAS);if(s){p.value=s;_cbPrazoAuto=true;}
+}
+function _lerFormCb(){
+  var g=function(id){var e=document.getElementById(id);return e?(e.value||'').trim():'';};
+  var d={processo:g('cb-processo').replace(/\s+/g,''),valor:Number(g('cb-valor'))||0,recebido:_normalizarData(g('cb-recebido')),prazo:_normalizarData(g('cb-prazo')),
+    pedido:g('cb-pedido'),cliente:g('cb-cliente'),motivo:g('cb-motivo'),tratativa:g('cb-tratativa'),status:g('cb-status'),obs:g('cb-obs')};
+  if(!d.prazo&&d.recebido)d.prazo=_cbSomarDias(d.recebido,CB_PRAZO_DIAS);
+  return d;
+}
+// Aplica os dados do formulário num chargeback, registrando no histórico o que
+// mudou de tratativa/status (o email faz o mesmo do lado do script).
+function _cbAplicar(c,d){
+  ['tratativa','status'].forEach(function(k){
+    if((c[k]||'')!==(d[k]||'')){
+      if(!c.historico)c.historico=[];
+      c.historico.push({quando:_cbAgora(),campo:k==='tratativa'?'Tratativa':'Status',de:c[k]||'',para:d[k]||'',origem:'manual'});
+    }
+  });
+  Object.keys(d).forEach(function(k){if(k!=='processo')c[k]=d[k];});
+  c.atualizadoEm=_cbAgora();
+}
+function modalAddCb(avisoId){
+  var aviso=avisoId?_cbAvisos().find(function(a){return a.id===avisoId;}):null;
+  _cbPrazoAuto=true;
+  var ini={recebido:aviso?aviso.data:hoje(),tratativa:'AGUARDANDO CLIENTE STARK',status:'Em análise'};
+  ini.prazo=aviso&&aviso.prazo?aviso.prazo:_cbSomarDias(ini.recebido,CB_PRAZO_DIAS);
+  abrirM(aviso?'Cadastrar chargeback do email de '+aviso.data:'Novo Chargeback',_formCb(ini),function(){
+    var d=_lerFormCb();
+    if(!d.processo){alert('Informe o número do processo (está na planilha da Stark).');return;}
+    var ex=_cbBuscar(d.processo);
+    if(ex){
+      // Já existe (normalmente criado pelo email, sem valor) — completa em vez de duplicar
+      _cbAplicar(ex,d);
+    } else {
+      var c={processo:d.processo,origem:'manual',criadoEm:_cbAgora(),historico:[]};
+      _cbAplicar(c,d);c.historico=[{quando:_cbAgora(),campo:'Cadastro',de:'',para:'Cadastrado manualmente',origem:'manual'}];
+      _cbLista().push(c);
+    }
+    if(aviso){aviso.cadastrados=(aviso.cadastrados||0)+1;if(_cbFaltamCadastrar(aviso)===0)aviso.resolvido=true;}
+    save();badges();fecharM();pChargebacks();
+    if(ex)_notif('Chargeback atualizado','O processo '+_escH(d.processo)+' já existia (veio do email), os dados foram completados.','grn');
+  });
+}
+function editCb(processo){
+  var c=_cbBuscar(processo);if(!c)return;
+  _cbPrazoAuto=!c.prazo;
+  abrirM('Editar Chargeback — '+c.processo,_formCb(Object.assign({_editando:true},c)),function(){
+    var d=_lerFormCb();d.processo=c.processo;
+    _cbAplicar(c,d);
+    save();badges();fecharM();pChargebacks();
+  });
+}
+function delCb(processo){
+  var c=_cbBuscar(processo);if(!c)return;
+  abrirM('Confirmar exclusão','<div style="font-size:14px;color:var(--t2)">Excluir o chargeback do processo <b>'+_escH(c.processo)+'</b>?<br><br>Se um email novo da Stark falar desse processo, ele volta a aparecer.</div>',function(){
+    DB.chargebacks=_cbLista().filter(function(x){return String(x.processo)!==String(processo);});
+    // Avisa o leitor de emails pra não recriar o processo a partir de emails antigos
+    if(!DB.cbExcluidos)DB.cbExcluidos=[];
+    DB.cbExcluidos=DB.cbExcluidos.filter(function(x){return String(x.processo)!==String(processo);});
+    DB.cbExcluidos.push({processo:String(processo),em:Date.now()});
+    save();badges();fecharM();pChargebacks();
+  });
+}
+function cbAvisoResolver(id){
+  var a=_cbAvisos().find(function(x){return x.id===id;});if(!a)return;
+  a.resolvido=true;save();badges();pChargebacks();
+}
+function cbHistorico(processo){
+  var c=_cbBuscar(processo);if(!c)return;
+  var hist=(c.historico||[]).slice().reverse();
+  var h='<div style="font-size:12px;color:var(--t2);margin-bottom:10px">Situação atual: '+_cbPill(c)+(c.valor?' · '+R(c.valor):'')+'</div>';
+  if(!hist.length)h+='<div style="font-size:12px;color:var(--t3)">Sem histórico registrado.</div>';
+  else{
+    h+='<div class="ts"><table><thead><tr><th>QUANDO</th><th>O QUE MUDOU</th><th>DE</th><th>PARA</th><th>ORIGEM</th></tr></thead><tbody>';
+    hist.forEach(function(x){
+      h+='<tr><td class="tnw" style="font-size:11px">'+_escH(x.quando)+'</td><td style="font-size:11px">'+_escH(x.campo)+'</td><td style="font-size:11px;color:var(--t3)">'+(_escH(x.de)||'—')+'</td><td style="font-size:11px;font-weight:600">'+_escH(x.para)+'</td><td style="font-size:11px">'+(x.origem==='email'?'📩 email Stark':x.origem==='planilha'?'📄 planilha Stark':'✍️ manual')+'</td></tr>';
+    });
+    h+='</tbody></table></div>';
+  }
+  if(c.obs)h+='<div style="font-size:11px;color:var(--t3);margin-top:10px">Obs: '+_escH(c.obs)+'</div>';
+  // Todas as colunas da planilha da Stark pra esse processo, como estão lá
+  var pl=c.planilha||{},ks=Object.keys(pl);
+  if(ks.length){
+    h+='<div class="sec" style="margin-top:14px">📄 Dados na planilha da Stark</div><div class="ts"><table><tbody>';
+    ks.forEach(function(k){h+='<tr><td style="font-size:11px;color:var(--t3);width:40%">'+_escH(k)+'</td><td style="font-size:11px">'+_escH(pl[k])+'</td></tr>';});
+    h+='</tbody></table></div>';
+  }
+  abrirM('Histórico — processo '+c.processo,h,null,true);
+}
+
 // ── MARKETPLACES — SALDO EM CONTA + SAQUES ────────────
 var _mktView='saldo';
 function mktIr(view){_mktView=view;pMarketplaces();}
@@ -3784,6 +4051,7 @@ var PAGINAS_RESTRITAS=[
   {tipo:'notif',label:'Alertas & Notificações'},
   {tipo:'marketplaces',label:'Marketplaces — Saldo & A Receber'},
   {tipo:'gateways',label:'Gateways — Saldo & Retenções'},
+  {tipo:'chargebacks',label:'Chargebacks'},
   {tipo:'investimentos',label:'Investimentos'},
   {tipo:'pag',label:'Pagamentos Empresa'}
 ];

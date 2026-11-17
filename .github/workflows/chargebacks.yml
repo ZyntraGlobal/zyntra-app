@@ -1,0 +1,36 @@
+name: Chargebacks Stark Bank
+
+on:
+  schedule:
+    # A cada 15 min. O GitHub pode atrasar alguns minutos, sem problema:
+    # cada execução lê o estado completo da planilha.
+    - cron: '*/15 * * * *'
+  workflow_dispatch: {}    # permite rodar na hora, pelo botão "Run workflow"
+
+# Nunca duas execuções ao mesmo tempo (evita gravar o data.json em dobro)
+concurrency:
+  group: chargebacks
+  cancel-in-progress: false
+
+jobs:
+  sincronizar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Instalar dependências
+        run: npm install web-push@3 imapflow@1 mailparser@3 --no-save
+      - name: Sincronizar chargebacks
+        env:
+          SHEET_URL: ${{ secrets.SHEET_URL }}
+          SHEET_KEY: ${{ secrets.SHEET_KEY }}
+          SHEET_GID: ${{ secrets.SHEET_GID }}
+          IMAP_USER: ${{ secrets.IMAP_USER }}
+          IMAP_PASS: ${{ secrets.IMAP_PASS }}
+          GH_DATA_TOKEN: ${{ secrets.GH_DATA_TOKEN }}
+          VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY }}
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+        run: node scripts/chargebacks-sync.js
