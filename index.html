@@ -12,11 +12,11 @@
   --bdr:#272235;--bdr2:#3a3350;
   --t:#ece9f3;--t2:#9690a8;--t3:#5f5a70;
   --gold:#8b5cf6;--ouro:#c9a84c;--ourob:#d4b560;--gd:#7c4dea;--gdb:#cdb8ff;--gl:rgba(139,92,246,.13);--glb:rgba(139,92,246,.38);
-  --grn:#4ade80;--gnbg:rgba(74,222,128,.09);
-  --red:#f87171;--rdbg:rgba(248,113,113,.09);
-  --amb:#fbbf24;--ambg:rgba(251,191,36,.09);
-  --blu:#60a5fa;--blubg:rgba(96,165,250,.09);
-  --pur:#c084fc;--nav:210px
+  --grn:#34d399;--gnbg:rgba(52,211,153,.08);
+  --red:#f87171;--rdbg:rgba(248,113,113,.08);
+  --amb:#fbbf24;--ambg:rgba(251,191,36,.08);
+  --blu:#60a5fa;--blubg:rgba(96,165,250,.08);
+  --pur:#a78bfa;--pubg:rgba(167,139,250,.08);--nav:210px
 }
 body{font-family:var(--f-body);background:var(--bg);color:var(--t);font-size:13px;display:flex;height:100vh;overflow:hidden}
 .sb{width:var(--nav);background:var(--w);border-right:1px solid var(--bdr2);display:flex;flex-direction:column;overflow-y:auto;flex-shrink:0}
@@ -72,7 +72,7 @@ body{font-family:var(--f-body);background:var(--bg);color:var(--t);font-size:13p
 .card{background:var(--w);border:1px solid var(--bdr);border-radius:8px;padding:12px 14px}
 .card.hl{border-color:var(--glb);background:linear-gradient(135deg,var(--w),rgba(139,92,246,.06))}
 .card.danger{border-color:rgba(248,113,113,.35);background:rgba(248,113,113,.04)}
-.card.ok{border-color:rgba(74,222,128,.35);background:rgba(74,222,128,.04)}
+.card.ok{border-color:rgba(52,211,153,.35);background:rgba(52,211,153,.04)}
 .card.warn{border-color:rgba(251,191,36,.35);background:rgba(251,191,36,.04)}
 .card .lbl{font-size:10px;color:var(--t2);font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
 .card .val{font-family:var(--f-num);font-variant-numeric:tabular-nums;font-size:19px;font-weight:700;line-height:1.1}
@@ -93,11 +93,11 @@ tr:hover td{background:rgba(139,92,246,.03)}
 tfoot td{font-weight:700;border-top:2px solid var(--bdr2);border-bottom:none!important;background:var(--w2);color:var(--t)}
 .tr{text-align:right}.tc{text-align:center}.tnw{white-space:nowrap}
 .pill{font-size:10px;padding:2px 7px;border-radius:20px;font-weight:600;white-space:nowrap;display:inline-block}
-.ppago{background:rgba(74,222,128,.14);color:#4ade80;border:1px solid rgba(74,222,128,.28)}
+.ppago{background:rgba(52,211,153,.14);color:#34d399;border:1px solid rgba(52,211,153,.28)}
 .ppendente{background:rgba(251,191,36,.14);color:#fbbf24;border:1px solid rgba(251,191,36,.28)}
 .patrasado{background:rgba(248,113,113,.14);color:#f87171;border:1px solid rgba(248,113,113,.28)}
 .pprogramado{background:rgba(96,165,250,.14);color:#60a5fa;border:1px solid rgba(96,165,250,.28)}
-.pok{background:rgba(74,222,128,.14);color:#4ade80;border:1px solid rgba(74,222,128,.28)}
+.pok{background:rgba(52,211,153,.14);color:#34d399;border:1px solid rgba(52,211,153,.28)}
 .palerta{background:rgba(248,113,113,.14);color:#f87171;border:1px solid rgba(248,113,113,.28)}
 .pn{background:rgba(160,156,146,.1);color:#9690a8;border:1px solid rgba(160,156,146,.2)}
 .btn{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;font-size:12px;font-family:var(--f-body);border-radius:6px;border:1px solid var(--bdr2);background:var(--w2);color:var(--t);cursor:pointer;font-weight:500;transition:all .1s;white-space:nowrap}
@@ -774,7 +774,7 @@ function _ghSalvarG(_antes){
       DB._savedAt=res.j._savedAt;
       try{localStorage.setItem('zyntra_gestao_v1',JSON.stringify(DB));}catch(e){}
       var ts=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-      if(el){el.textContent='✅ Salvo '+ts;el.style.color='var(--grn)';el.style.background='rgba(74,222,128,.15)';el.style.borderColor='rgba(74,222,128,.3)';}
+      if(el){el.textContent='✅ Salvo '+ts;el.style.color='var(--grn)';el.style.background='rgba(52,211,153,.15)';el.style.borderColor='rgba(52,211,153,.3)';}
       _notif('✅ Salvo e sincronizado!','Notebook vai atualizar em instantes','grn');
       // Notificação do sistema já chega pra esse mesmo aparelho via push real do
       // servidor (ele também está inscrito como "dono") — chamar _pushSWNotif aqui
@@ -975,8 +975,8 @@ function pDash(){
   var rtuLabel=pctRtu>80?'⚠ Próximo do limite':pctRtu>0?pctRtu.toFixed(1)+'% do limite usado':'Sem compras registradas';
 
   function modCard(ico,titulo,valPrincipal,valCor,sub,statusCor,statusLabel,onclick,detalhes){
-    var borda=statusCor==='red'?'rgba(248,113,113,.3)':statusCor==='amb'?'rgba(251,191,36,.3)':'rgba(74,222,128,.25)';
-    var bg=statusCor==='red'?'rgba(248,113,113,.03)':statusCor==='amb'?'rgba(251,191,36,.02)':'rgba(74,222,128,.02)';
+    var borda=statusCor==='red'?'rgba(248,113,113,.3)':statusCor==='amb'?'rgba(251,191,36,.3)':'rgba(52,211,153,.25)';
+    var bg=statusCor==='red'?'rgba(248,113,113,.03)':statusCor==='amb'?'rgba(251,191,36,.02)':'rgba(52,211,153,.02)';
     var dotCor=statusCor==='red'?'var(--red)':statusCor==='amb'?'var(--amb)':'var(--grn)';
     var h='<div style="background:var(--w);border:1px solid '+borda+';border-radius:12px;padding:24px 28px;background:'+bg+';cursor:pointer;transition:transform .15s" onclick="'+onclick+'" onmouseover="this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.transform=\'translateY(0)\'">';
     h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">';
