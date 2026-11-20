@@ -99,7 +99,7 @@
 
   .ni, .pill, [onclick], button, select, .sel, .btn {
     touch-action: manipulation !important;
-    -webkit-tap-highlight-color: rgba(201,168,76,.15);
+    -webkit-tap-highlight-color: rgba(139,92,246,.15);
   }
 
   input, select, textarea, .inp, .sel,
@@ -161,7 +161,7 @@
     font-size: 18px !important; font-weight: 900 !important; letter-spacing: 4px !important;
     color: #fff !important; text-transform: uppercase !important; text-align: center !important;
   }
-  .login-logo-mob .t1 em { color: #c9a84c !important; font-style: normal !important; }
+  .login-logo-mob .t1 em { color: #8b5cf6 !important; font-style: normal !important; }
   .login-input  { font-size: 16px !important; padding: 14px 16px !important; border-radius: 10px !important; }
   .login-btn    { padding: 15px !important; font-size: 14px !important; margin-top: 6px !important; }
   .login-field  { margin-bottom: 12px !important; }

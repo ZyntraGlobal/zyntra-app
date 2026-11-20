@@ -4,8 +4,8 @@
   "description": "Sistema de Gestão Zyntra Global",
   "start_url": "/zyntra-app/",
   "display": "standalone",
-  "background_color": "#0d0d0d",
-  "theme_color": "#7c3aed",
+  "background_color": "#09080d",
+  "theme_color": "#09080d",
   "orientation": "portrait",
   "icons": [
     { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
