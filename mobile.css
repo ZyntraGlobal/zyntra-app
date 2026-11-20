@@ -191,6 +191,6 @@
     -webkit-tap-highlight-color: transparent !important;
   }
   .mob-nav-btn .ico { font-size: 19px !important; line-height: 1 !important; }
-  .mob-nav-btn.on   { color: var(--gold) !important; }
+  .mob-nav-btn.on   { color:var(--ouro) !important; }
 
 }
