@@ -344,6 +344,45 @@ tbody tr:hover td{background:rgba(139,92,246,.06)}
   .card .val{font-size:19px}
   .topbar-title{font-size:14px}
 }
+/* ── Login no padrão do Black Zyntra ── */
+.login-bg{background:radial-gradient(ellipse at 30% 40%,rgba(139,92,246,.22),transparent 55%),radial-gradient(ellipse at 80% 80%,rgba(139,92,246,.10),transparent 50%),#050408!important;padding:20px}
+#login-canvas,.login-logo-ring,.login-logo-ring2,.login-dots,.login-brand::before{display:none!important}
+.login-wrap{display:grid!important;grid-template-columns:1fr 1fr;width:min(860px,100%)!important;max-width:100%!important;min-height:520px;border:1px solid var(--bdr)!important;border-radius:18px!important;overflow:hidden;background:var(--w)!important;box-shadow:0 0 80px rgba(139,92,246,.18)!important;animation:none!important}
+.login-brand{display:flex!important;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:40px!important;border-right:1px solid var(--bdr)!important;background:radial-gradient(circle at 50% 45%,rgba(139,92,246,.28),transparent 60%),#0c0a13!important}
+.login-logo-wrap{width:96px;height:96px;margin:0!important;animation:none!important}
+.login-logo-img{width:96px!important;height:96px!important;object-fit:contain;border-radius:50%;filter:none!important;box-shadow:0 0 40px rgba(139,92,246,.45)}
+.login-brand-name{font:700 24px var(--f-disp)!important;letter-spacing:.08em!important;color:var(--t)!important;text-shadow:none!important;margin:0!important;text-transform:uppercase}
+.login-brand-name em{color:var(--t)!important;font-style:normal;margin:0 .3em!important}
+.login-brand-name span{color:#8b5cf6}
+.login-brand-sub{font-size:11px!important;letter-spacing:.3em!important;color:#cdb8ff!important;text-transform:uppercase;margin:0!important}
+.login-tagline{font-size:13px!important;color:var(--t2)!important;font-style:italic;text-align:center;letter-spacing:0!important}
+.login-tagline span{color:var(--t2)!important;font-weight:400!important}
+.login-form-side{width:auto!important;display:flex!important;flex-direction:column;justify-content:center;gap:14px;padding:40px 44px!important;background:var(--w)!important}
+.login-tag{align-self:flex-start;font:700 10px var(--f-body)!important;letter-spacing:.12em!important;color:#cdb8ff!important;border:1px solid rgba(139,92,246,.4)!important;background:rgba(139,92,246,.12)!important;border-radius:99px!important;padding:4px 12px!important;text-transform:uppercase;margin:0!important}
+.login-tag::before{background:#cdb8ff!important;box-shadow:none!important;animation:none!important}
+.login-title{font:700 28px/1.1 var(--f-disp)!important;color:var(--t)!important;letter-spacing:0!important;margin:0!important}
+.login-subtitle{font-size:13px!important;color:var(--t2)!important;margin:0!important}
+.login-field{display:flex;flex-direction:column;gap:6px;margin:0!important}
+.login-label{font-size:11px!important;font-weight:700!important;letter-spacing:.08em!important;color:var(--t2)!important;text-transform:uppercase;margin:0!important}
+.login-input{padding:12px 14px!important;font-size:14px;border-radius:10px!important;background:var(--bg)!important;border:1px solid var(--bdr)!important;color:var(--t)!important;box-shadow:none!important}
+.login-input::placeholder{color:var(--t3)!important}
+.login-input:focus{border-color:#8b5cf6!important;box-shadow:none!important;background:var(--bg)!important}
+.login-btn{margin-top:6px!important;padding:13px!important;border:0!important;border-radius:10px!important;background:#8b5cf6!important;color:#fff!important;font:700 13px var(--f-body)!important;letter-spacing:.12em!important;box-shadow:none!important;transform:none!important}
+.login-btn:hover{background:#9d74f8!important;box-shadow:none!important;transform:none!important}
+.login-err{font-size:13px!important;color:#f87171!important;margin:0!important;min-height:18px;text-align:left!important}
+.login-lock{margin:0!important;text-align:left!important}
+.login-footer-txt{font-size:11px!important;color:var(--t3)!important;letter-spacing:.06em!important;text-align:center;margin:0!important}
+.login-logo-mob,.login-divider{display:none!important}
+@media(max-width:720px){
+  .login-bg{overflow-y:auto!important;align-items:flex-start!important;padding:16px!important}
+  .login-wrap{grid-template-columns:1fr;min-height:0!important;margin:auto!important;overflow:hidden!important;width:100%!important}
+  .login-form-side{justify-content:flex-start!important}
+  .login-logo-wrap,.login-logo-img{width:76px!important;height:76px!important}
+  .login-brand{gap:10px}
+  .login-brand{display:flex!important;padding:28px!important;border-right:0!important;border-bottom:1px solid var(--bdr)!important}
+  .login-form-side{padding:28px!important}
+  .login-input{font-size:16px!important}
+}
 </style>
 </head>
 <body>
@@ -4589,7 +4628,7 @@ checkSessao();
         <div class="login-logo-ring"></div>
         <div class="login-logo-ring2"></div>
       </div>
-      <div class="login-brand-name">ZYNTRA<em>·</em>GESTÃO</div>
+      <div class="login-brand-name">ZYNTRA<em>·</em><span>GESTÃO</span></div>
       <div class="login-brand-sub">Sistema de Gestão 2026</div>
       <div class="login-tagline">Estoque · Pagamentos · RTU<br><span>Tudo em um só lugar.</span></div>
       <div class="login-dots"><div class="login-dot"></div><div class="login-dot"></div><div class="login-dot"></div></div>
