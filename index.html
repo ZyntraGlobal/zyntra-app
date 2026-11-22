@@ -920,6 +920,7 @@ function badges(){
 // ── NAVEGAÇÃO ─────────────────────────────────────────
 var _curPage='dash',_curMes=0;
 function ir(tipo,arg,el){
+  try{_ajustarSidebarFunc();}catch(e){}
   if(typeof arg==='object'&&!el){el=arg;arg=0;}
   document.querySelectorAll('.ni').forEach(function(x){x.classList.remove('on');});
   if(el)el.classList.add('on');
@@ -4692,6 +4693,43 @@ var PAGINAS_RESTRITAS=[
 ];
 function _sessaoAtual(){
   try{return JSON.parse(localStorage.getItem('zg_sess')||'{}');}catch(e){return {};}
+}
+// Esconde de verdade (igual ao FC) os itens do menu que o funcionário não pode
+// abrir — antes ele via "Dashboard", "Resumo Mensal", meses de Pagamentos etc.,
+// clicava e caía em "Acesso Restrito". Roda a cada navegação (ir), então vale
+// também quando o dono entra depois no mesmo aparelho (tudo volta a aparecer).
+// 'usuarios' e 'mensal' são sempre só do dono.
+function _ajustarSidebarFunc(){
+  var func=_isFuncionario();
+  var pode=function(t){return !func||(t!=='usuarios'&&t!=='mensal'&&_paginaPermitida(t));};
+  document.querySelectorAll('.sb .ni').forEach(function(el){
+    var m=(el.getAttribute('onclick')||'').match(/ir\('([a-z_0-9]+)'/);
+    // "Dashboard" é a porta do "Início" do funcionário (ir('dash') abre o Início pra ele)
+    if(m&&m[1]==='dash'){
+      el.style.display='';
+      var ic=el.querySelector('.ico'),lb=el.querySelector('.lbl');
+      if(ic)ic.textContent=func?'🏠':'📊';if(lb)lb.textContent=func?'Início':'Dashboard';
+      return;
+    }
+    var ok=m?pode(m[1]):!(func&&el.id==='ni-backup');
+    el.style.display=ok?'':'none';
+  });
+  document.querySelectorAll('.sb .sb-sec').forEach(function(sec){
+    var n=sec.nextElementSibling,vis=false;
+    // Os meses de Pagamentos ficam dentro de um bloco (.sb-meses), por isso olha também dentro dele
+    while(n&&!n.classList.contains('sb-sec')){
+      var itens=n.classList.contains('ni')?[n]:[].slice.call(n.querySelectorAll('.ni'));
+      if(itens.some(function(i){return i.style.display!=='none';}))vis=true;
+      n=n.nextElementSibling;
+    }
+    sec.style.display=vis?'':'none';
+  });
+  // Barra de baixo do celular
+  // mobile.css força display nesses botões — por isso o 'important'
+  var mb=function(id,t){var b=document.getElementById(id);if(!b)return;if(pode(t))b.style.removeProperty('display');else b.style.setProperty('display','none','important');};
+  mb('mn-pag','pag');mb('mn-notif','notif');
+  var d=document.getElementById('mn-dash');
+  if(d){var s=d.querySelectorAll('span');if(s.length>=2){s[0].textContent=func?'🏠':'📊';s[1].textContent=func?'Início':'Dashboard';}}
 }
 function _paginaPermitida(tipo){
   if(!_isFuncionario())return true;
