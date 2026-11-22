@@ -174,6 +174,9 @@ tfoot td{font-weight:700;border-top:2px solid var(--bdr2);border-bottom:none!imp
 .zseg button.on{background:var(--gold);color:#16130c}
 .zseg .n{display:inline-block;min-width:20px;padding:1px 6px;border-radius:10px;font-size:11px;background:var(--w3);color:var(--t)}
 .zseg button.on .n{background:rgba(0,0,0,.18);color:#16130c}
+.cad-cards{display:none;padding:10px;gap:10px;flex-direction:column}
+.cad-card{padding:12px 14px;border:1px solid var(--bdr);border-radius:10px;background:var(--w2);cursor:pointer}
+@media(max-width:768px){.cad-cards{display:flex!important}.cad-tab{display:none!important}}
 .zkpi{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:12px}
 .zkpi.k4{grid-template-columns:repeat(4,minmax(0,1fr))}
 .zmes{background:var(--w);border:1px solid var(--bdr);border-radius:12px;padding:12px 14px;margin-bottom:12px}
@@ -2125,6 +2128,182 @@ function notifTestarG(){
 var FORN_CATS=['Importador','Distribuidor','Representante','Fabricante','Outros'];
 
 var _filtroForn={busca:'',cat:'',st:''};
+
+// ── CADASTRO DE REVENDA + ACESSO AO PORTAL DO FORNECEDOR ──────────────
+// cadStatus: '' (não feito) | 'Em análise' | 'Aprovado' | 'Recusado'
+// cadData = dia em que o cadastro foi enviado; cadAprovData = dia da aprovação.
+// Senha do portal NUNCA fica em texto: vai cifrada (AES-GCM) com uma chave
+// tirada de um PIN que só o dono sabe (PBKDF2). Cada registro leva o próprio
+// salt, então não depende de nenhum campo novo no topo dos dados — e quem
+// recebe os dados (funcionário, nuvem, GitHub) só vê o texto embaralhado.
+var CAD_STS=['Em análise','Aprovado','Recusado'];
+var _fornSecao='todos';
+function fornSecao(s){_fornSecao=s;pFornecedores();}
+function _cadPill(st){
+  if(st==='Aprovado')return '<span class="pill pok">✅ Aprovado</span>';
+  if(st==='Em análise')return '<span class="pill ppendente">⏳ Em análise</span>';
+  if(st==='Recusado')return '<span class="pill patrasado">❌ Recusado</span>';
+  return '';
+}
+function _fornLink(u){u=String(u||'').trim();if(!u)return '';return /^https?:\/\//i.test(u)?u:'https://'+u;}
+
+var _cofre={key:null,salt:null,ate:0};
+function _b64(buf){var a=new Uint8Array(buf),s='';for(var i=0;i<a.length;i++)s+=String.fromCharCode(a[i]);return btoa(s);}
+function _ub64(s){var b=atob(s),a=new Uint8Array(b.length);for(var i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a;}
+async function _cofreDerivar(pin,saltB64){
+  var km=await crypto.subtle.importKey('raw',new TextEncoder().encode(pin),'PBKDF2',false,['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2',salt:_ub64(saltB64),iterations:250000,hash:'SHA-256'},km,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+}
+function _cofreAberto(){return !!(_cofre.key&&Date.now()<_cofre.ate);}
+function _cofreFechar(){_cofre.key=null;_cofre.salt=null;_cofre.ate=0;}
+// Salt de qualquer senha já guardada — se existir, o PIN digitado tem que abrir ela.
+function _cofreRef(){return (DB.fornecedores||[]).map(function(f){return f.senhaEnc;}).filter(function(e){return e&&e.salt&&e.iv&&e.ct;})[0]||null;}
+async function _cofreDecifrarCom(key,enc){
+  var pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:_ub64(enc.iv)},key,_ub64(enc.ct));
+  return new TextDecoder().decode(pt);
+}
+// Abre o cofre com o PIN (ou cria, se ainda não há nenhuma senha guardada).
+async function _cofreAbrir(pin){
+  pin=String(pin||'');
+  if(pin.length<4)throw new Error('O PIN precisa ter pelo menos 4 dígitos.');
+  var ref=_cofreRef();
+  var salt=ref?ref.salt:_b64(crypto.getRandomValues(new Uint8Array(16)));
+  var key=await _cofreDerivar(pin,salt);
+  if(ref){try{await _cofreDecifrarCom(key,ref);}catch(e){throw new Error('PIN incorreto.');}}
+  _cofre.key=key;_cofre.salt=salt;_cofre.ate=Date.now()+15*60*1000;
+  return key;
+}
+async function _cofreCifrar(txt){
+  var iv=crypto.getRandomValues(new Uint8Array(12));
+  var ct=await crypto.subtle.encrypt({name:'AES-GCM',iv:iv},_cofre.key,new TextEncoder().encode(txt));
+  return {salt:_cofre.salt,iv:_b64(iv),ct:_b64(ct)};
+}
+async function _cofreDecifrar(enc){
+  // Senha guardada com outro salt (não deveria acontecer): avisa em vez de quebrar.
+  if(enc.salt!==_cofre.salt)throw new Error('Esta senha foi guardada com outro PIN.');
+  return _cofreDecifrarCom(_cofre.key,enc);
+}
+function _pinCampo(id,criar){
+  return '<div style="grid-column:1/-1"><label>'+(criar?'Crie um PIN do cofre <span style="color:var(--t3);font-weight:400">(mín. 4 dígitos — guarde bem, sem ele não dá para ver as senhas)</span>':'PIN do cofre')+'</label>'+
+    '<input id="'+id+'" type="password" inputmode="numeric" autocomplete="off" placeholder="••••"></div>';
+}
+
+// Ver login e senha do portal de um fornecedor (pede o PIN se o cofre estiver fechado).
+function verAcessoForn(id){
+  if(_isFuncionario()){_bloqueadoFunc();return;}
+  var f=(DB.fornecedores||[]).find(function(x){return x.id===id;});if(!f)return;
+  if(!f.senhaEnc){_mostrarAcessoForn(f,'');return;}
+  if(_cofreAberto()){_cofreDecifrar(f.senhaEnc).then(function(s){_mostrarAcessoForn(f,s);}).catch(function(e){alert(e.message);});return;}
+  abrirM('🔒 Abrir cofre — '+_escH(f.apelido||f.nome),
+    '<div class="fg f2">'+_pinCampo('cofre-pin',false)+'<div id="cofre-err" style="grid-column:1/-1;color:var(--red);font-size:12px"></div></div>',
+    async function(){
+      var err=document.getElementById('cofre-err');err.textContent='Abrindo...';
+      try{await _cofreAbrir(document.getElementById('cofre-pin').value);var s=await _cofreDecifrar(f.senhaEnc);_mostrarAcessoForn(f,s);}
+      catch(e){err.textContent=e.message||'Não foi possível abrir.';}
+    });
+  setTimeout(function(){var p=document.getElementById('cofre-pin');if(p)p.focus();},50);
+}
+function _copiarTxt(txt,btn){
+  try{navigator.clipboard.writeText(txt).then(function(){if(btn){var o=btn.textContent;btn.textContent='✓ Copiado';setTimeout(function(){btn.textContent=o;},1500);}});}catch(e){}
+}
+function _mostrarAcessoForn(f,senha){
+  var url=_fornLink(f.portal||f.site);
+  window._acessoTmp={login:f.login||'',senha:senha||''};
+  var linha=function(lbl,val,chave,mono){
+    return '<div style="display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--bdr)">'+
+      '<div style="width:70px;font-size:11px;color:var(--t3)">'+lbl+'</div>'+
+      '<div style="flex:1;min-width:0;font-size:13px;color:var(--t);word-break:break-all;'+(mono?'font-family:var(--f-num,monospace)':'')+'">'+(val?_escH(val):'<span style="color:var(--t3)">— não cadastrado</span>')+'</div>'+
+      (val?'<button class="btn bsm" onclick="_copiarTxt(window._acessoTmp.'+chave+',this)">Copiar</button>':'')+'</div>';
+  };
+  var h='<div>'+
+    (url?'<div style="margin-bottom:6px"><a class="btn btnp" href="'+_escH(url)+'" target="_blank" rel="noopener">🌐 Abrir portal</a> <span style="font-size:11px;color:var(--t3);margin-left:6px;word-break:break-all">'+_escH(url)+'</span></div>':'')+
+    linha('Login',f.login,'login',false)+
+    linha('Senha',senha,'senha',true)+
+    '<div style="font-size:11px;color:var(--t3);margin-top:10px">🔒 O cofre fecha sozinho em 15 minutos.</div></div>';
+  abrirM('🔑 Acesso — '+(f.apelido||f.nome),h,null);
+}
+
+// Muda a situação do cadastro direto da lista (Aprovar / Recusado / Em análise).
+function cadStatusForn(id,st){
+  var f=(DB.fornecedores||[]).find(function(x){return x.id===id;});if(!f)return;
+  f.cadStatus=st;
+  if(st==='Em análise'&&!f.cadData)f.cadData=hoje();
+  if(st==='Aprovado')f.cadAprovData=hoje();
+  if(st!=='Aprovado')delete f.cadAprovData;
+  save();badges();pFornecedores();
+}
+
+function _renderCadastros(){
+  var todos=DB.fornecedores||[];
+  var comCad=todos.filter(function(f){return CAD_STS.indexOf(f.cadStatus)>=0;});
+  var n=function(st){return comCad.filter(function(f){return f.cadStatus===st;}).length;};
+  var semCad=todos.filter(function(f){return f.ativo!==false&&CAD_STS.indexOf(f.cadStatus)<0;});
+  var dono=!_isFuncionario();
+  var h='<div class="g3" style="margin-bottom:12px">';
+  h+='<div class="card'+(n('Em análise')?' hl':'')+'"><div class="lbl">⏳ Em análise</div><div class="val'+(n('Em análise')?' gld':'')+'">'+n('Em análise')+'</div><div class="sub">Aguardando o fornecedor</div></div>';
+  h+='<div class="card ok"><div class="lbl">✅ Aprovados</div><div class="val grn">'+n('Aprovado')+'</div><div class="sub">Já dá para comprar</div></div>';
+  h+='<div class="card"><div class="lbl">❌ Recusados</div><div class="val'+(n('Recusado')?' red':'')+'"'+(n('Recusado')?'':' style="color:var(--t3)"')+'>'+n('Recusado')+'</div><div class="sub">Ver motivo e tentar de novo</div></div>';
+  h+='</div>';
+
+  h+='<div class="panel"><div class="ph"><div class="pt">Cadastros de revenda ('+comCad.length+')</div>'+
+     (dono&&_cofreAberto()?'<button class="btn bsm" style="margin-left:auto" onclick="_cofreFechar();pFornecedores()">🔒 Fechar cofre</button>':'')+'</div>';
+  if(!comCad.length){
+    h+='<div class="empty" style="padding:40px 28px"><div style="font-size:28px;margin-bottom:10px">📝</div>'+
+       '<div style="font-size:13px;font-weight:600;color:var(--t2);margin-bottom:6px">Nenhum cadastro de revenda marcado</div>'+
+       '<div style="font-size:12px;color:var(--t3)">Abra um fornecedor e escolha "Em análise" em <b>Cadastro de revenda</b> quando enviar o cadastro.</div></div>';
+  } else {
+    var ordem={'Em análise':0,'Aprovado':1,'Recusado':2};
+    comCad=comCad.slice().sort(function(a,b){return (ordem[a.cadStatus]-ordem[b.cadStatus])||String(a.apelido||a.nome).localeCompare(String(b.apelido||b.nome));});
+    var botoes=function(f){
+      var url=_fornLink(f.portal||f.site),b='';
+      if(f.cadStatus!=='Aprovado')b+='<button class="btn bsm" onclick="cadStatusForn('+f.id+',\'Aprovado\')" title="Marcar como aprovado">✅ Aprovar</button> ';
+      if(f.cadStatus==='Em análise')b+='<button class="btn bsm" onclick="cadStatusForn('+f.id+',\'Recusado\')" title="Marcar como recusado">❌</button> ';
+      if(f.cadStatus==='Recusado')b+='<button class="btn bsm" onclick="cadStatusForn('+f.id+',\'Em análise\')" title="Enviei de novo">↺ Reenviei</button> ';
+      if(dono&&(f.login||f.senhaEnc))b+='<button class="btn bsm" onclick="verAcessoForn('+f.id+')" title="Ver login e senha">🔑 Acesso</button> ';
+      if(url)b+='<a class="btn bsm" href="'+_escH(url)+'" target="_blank" rel="noopener" title="Abrir portal">🌐</a>';
+      return b;
+    };
+    // Celular: cartões (a tabela esconderia os botões à direita)
+    h+='<div class="cad-cards">';
+    comCad.forEach(function(f){
+      var dias=f.cadData?_diasEmAberto(f.cadData):-1;
+      h+='<div class="cad-card" onclick="editForn('+f.id+')">'+
+        '<div style="display:flex;align-items:center;gap:8px;justify-content:space-between"><div style="font-weight:700;font-size:14px;color:var(--t)">'+_escH(f.apelido||f.nome)+'</div>'+_cadPill(f.cadStatus)+'</div>'+
+        '<div style="font-size:11px;color:var(--t3);margin-top:4px">'+
+          (f.cadStatus==='Aprovado'&&f.cadAprovData?'Aprovado em '+_escH(f.cadAprovData):(f.cadData?'Enviado em '+_escH(f.cadData)+(f.cadStatus==='Em análise'&&dias>=0?' · há '+dias+' dia'+(dias===1?'':'s'):''):''))+
+          (dono&&f.login?' · Login: '+_escH(f.login)+(f.senhaEnc?' 🔒':''):'')+'</div>'+
+        '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px" onclick="event.stopPropagation()">'+botoes(f)+'</div></div>';
+    });
+    h+='</div>';
+    h+='<div class="ts tw cad-tab"><table><thead><tr><th>FORNECEDOR</th><th>SITUAÇÃO</th><th>ENVIADO EM</th><th>LOGIN</th><th></th></tr></thead><tbody>';
+    comCad.forEach(function(f){
+      var dias=f.cadData?_diasEmAberto(f.cadData):-1;
+      var info=f.cadStatus==='Aprovado'&&f.cadAprovData?'Aprovado em '+_escH(f.cadAprovData):
+               (f.cadData?_escH(f.cadData)+(f.cadStatus==='Em análise'&&dias>=0?' <span style="color:var(--t3)">· há '+dias+' dia'+(dias===1?'':'s')+'</span>':''):'<span style="color:var(--t3)">—</span>');
+      var url=_fornLink(f.portal||f.site);
+      h+='<tr onclick="editForn('+f.id+')" style="cursor:pointer" title="Toque para editar">';
+      h+='<td style="min-width:150px"><div style="font-weight:600;color:var(--t);font-size:13px">'+_escH(f.apelido||f.nome)+'</div>'+
+         ((f.marcas||[]).length?'<div style="font-size:10px;color:var(--t3);margin-top:2px">'+_escH((f.marcas||[]).slice(0,5).join(', '))+((f.marcas||[]).length>5?'…':'')+'</div>':'')+'</td>';
+      h+='<td>'+_cadPill(f.cadStatus)+'</td>';
+      h+='<td style="font-size:12px;white-space:nowrap">'+info+'</td>';
+      h+='<td style="font-size:12px">'+(dono?(f.login?_escH(f.login)+(f.senhaEnc?' <span title="Senha guardada no cofre">🔒</span>':''):'<span style="color:var(--t3)">—</span>'):'<span style="color:var(--t3)">—</span>')+'</td>';
+      h+='<td class="tnw" onclick="event.stopPropagation()" style="text-align:right">'+botoes(f)+'</td></tr>';
+    });
+    h+='</tbody></table></div>';
+  }
+  h+='</div>';
+
+  if(semCad.length){
+    h+='<div class="sec">Ainda sem cadastro de revenda ('+semCad.length+')</div>';
+    h+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px">';
+    semCad.forEach(function(f){
+      h+='<button class="btn bsm" onclick="cadStatusForn('+f.id+',\'Em análise\')" title="Marcar que o cadastro foi enviado">＋ '+_escH(f.apelido||f.nome)+'</button>';
+    });
+    h+='</div><div style="font-size:11px;color:var(--t3);margin:-8px 0 16px">Toque num fornecedor quando enviar o cadastro — ele vai para "Em análise".</div>';
+  }
+  return h;
+}
+
 function pFornecedores(busca,filtCat,filtSt){
   if(busca===undefined&&filtCat===undefined&&filtSt===undefined){busca=_filtroForn.busca;filtCat=_filtroForn.cat;filtSt=_filtroForn.st;}
   busca=busca||'';filtCat=filtCat||'';filtSt=filtSt||'';
@@ -2145,7 +2324,12 @@ function pFornecedores(busca,filtCat,filtSt){
   var todasMarcas=[];
   todos.forEach(function(f){(f.marcas||[]).forEach(function(m){if(m&&todasMarcas.indexOf(m)<0)todasMarcas.push(m);});});
 
-  var h='<div class="g4">';
+  var nAnalise=todos.filter(function(f){return f.cadStatus==='Em análise';}).length;
+  var segBtn=function(sec,label,n){return '<button class="'+(_fornSecao===sec?'on':'')+'" onclick="fornSecao(\''+sec+'\')">'+label+(n?' <span class="n">'+n+'</span>':'')+'</button>';};
+  var h='<div class="zseg">'+segBtn('todos','🏭 Fornecedores',0)+segBtn('cadastros','📝 Cadastros de revenda',nAnalise)+'</div>';
+  if(_fornSecao==='cadastros'){h+=_renderCadastros();setPage(h);return;}
+
+  h+='<div class="g4">';
   h+='<div class="card hl"><div class="lbl">Total Fornecedores</div><div class="val gld">'+todos.length+'</div><div class="sub">Cadastrados no sistema</div></div>';
   h+='<div class="card ok"><div class="lbl">Ativos</div><div class="val grn">'+ativos+'</div><div class="sub">Trabalhando atualmente</div></div>';
   h+='<div class="card"><div class="lbl">Inativos</div><div class="val" style="color:var(--t3)">'+inativos+'</div><div class="sub">Fora de operação</div></div>';
@@ -2195,6 +2379,7 @@ function pFornecedores(busca,filtCat,filtSt){
       h+='<td class="tc">';
       if(ativo)h+='<span class="pill pok">Ativo</span>';
       else h+='<span class="pill patrasado">Inativo</span>';
+      if(f.cadStatus)h+='<div style="margin-top:4px">'+_cadPill(f.cadStatus)+'</div>';
       h+='</td>';
       h+='<td class="tnw" onclick="event.stopPropagation()"><button class="btn bsm" onclick="editForn('+f.id+')" title="Editar">✏</button> <button class="btn bsm btnd" onclick="delForn('+f.id+')" title="Excluir">✕</button></td>';
       h+='</tr>';
@@ -2252,7 +2437,57 @@ function _formForn(vals){
     '<div><label>Site / Portal B2B</label><input id="nf-site" value="'+(vals.site||'')+'" placeholder="www.fornecedor.com.br"></div>'+
     '<div style="grid-column:1/-1"><label>Marcas que Trabalha <span style="color:var(--t3);font-weight:400">(separadas por vírgula)</span></label><input id="nf-marcas" value="'+marcasStr+'" placeholder="Ex: Redragon, HyperX, Corsair"></div>'+
     '<div style="grid-column:1/-1"><label>Observações</label><textarea id="nf-obs" style="width:100%;resize:vertical;min-height:64px;padding:7px 9px;font-size:12px;font-family:var(--f-body);border:1px solid var(--bdr2);border-radius:6px;background:var(--w2);color:var(--t);outline:none">'+(vals.obs||'')+'</textarea></div>'+
+    _formFornCadastro(vals)+
     '</div>';
+}
+function _formFornCadastro(vals){
+  var st=vals.cadStatus||'';
+  var opts='<option value=""'+(st?'':' selected')+'>Ainda não fiz</option>'+CAD_STS.map(function(c){return '<option value="'+c+'"'+(st===c?' selected':'')+'>'+c+'</option>';}).join('');
+  var h='<div style="grid-column:1/-1;margin-top:6px;padding-top:12px;border-top:1px solid var(--bdr);font-size:12px;font-weight:700;color:var(--ouro)">📝 Cadastro de revenda</div>'+
+    '<div><label>Situação</label><select id="nf-cadst">'+opts+'</select></div>'+
+    '<div><label>Enviado em</label><input id="nf-caddata" value="'+_escH(vals.cadData||'')+'" placeholder="dd/mm/aaaa"></div>';
+  if(_isFuncionario())return h;
+  var temSenha=!!vals.senhaEnc;
+  var criar=!_cofreRef();
+  h+='<div style="grid-column:1/-1;margin-top:6px;padding-top:12px;border-top:1px solid var(--bdr);font-size:12px;font-weight:700;color:var(--ouro)">🔑 Acesso ao portal <span style="font-weight:400;color:var(--t3)">— só o dono vê</span></div>'+
+    '<div style="grid-column:1/-1"><label>Link de login</label><input id="nf-portal" value="'+_escH(vals.portal||'')+'" placeholder="https://www.fornecedor.com.br/login"></div>'+
+    '<div><label>Login (usuário, e-mail ou CNPJ)</label><input id="nf-login" autocomplete="off" value="'+_escH(vals.login||'')+'"></div>'+
+    '<div><label>Senha'+(temSenha?' <span style="color:var(--t3);font-weight:400">(guardada 🔒 — deixe vazio para manter)</span>':'')+'</label><input id="nf-senha" type="password" autocomplete="new-password" placeholder="'+(temSenha?'••••••••':'')+'"></div>'+
+    (temSenha?'<div style="grid-column:1/-1;font-size:11px;color:var(--t3);margin-top:-4px"><label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="nf-senha-del" style="width:auto"> Apagar a senha guardada</label></div>':'')+
+    (_cofreAberto()?'':'<div id="nf-pinbox" style="grid-column:1/-1;display:none">'+_pinCampo('nf-pin',criar).replace('grid-column:1/-1','')+'</div>')+
+    '<div id="nf-err" style="grid-column:1/-1;color:var(--red);font-size:12px"></div>';
+  return h;
+}
+// Mostra o campo do PIN só quando a pessoa digita uma senha (e o cofre está fechado).
+document.addEventListener('input',function(e){
+  if(!e.target||e.target.id!=='nf-senha')return;
+  var b=document.getElementById('nf-pinbox');if(b)b.style.display=e.target.value?'block':'none';
+});
+// Lê os campos de cadastro/acesso. Campos que não existem na tela (funcionário)
+// não entram — assim editar como funcionário nunca apaga o login/senha do dono.
+async function _lerFormFornAcesso(dados,atual){
+  var g=function(id){var e=document.getElementById(id);return e?e.value.trim():null;};
+  var st=g('nf-cadst');
+  if(st!==null){
+    dados.cadStatus=st;
+    var dt=g('nf-caddata');
+    dados.cadData=dt||(st==='Em análise'?((atual&&atual.cadData)||hoje()):(atual&&atual.cadData)||'');
+    if(st==='Aprovado')dados.cadAprovData=(atual&&atual.cadStatus==='Aprovado'&&atual.cadAprovData)||hoje();
+    else dados.cadAprovData='';
+  }
+  if(g('nf-login')===null)return dados;
+  dados.portal=g('nf-portal');
+  dados.login=g('nf-login');
+  var del=document.getElementById('nf-senha-del');
+  var senha=document.getElementById('nf-senha').value;
+  if(del&&del.checked&&!senha){dados.senhaEnc=null;return dados;}
+  if(!senha)return dados; // mantém a senha que já estava
+  if(!_cofreAberto()){
+    var pin=g('nf-pin')||'';
+    await _cofreAbrir(pin); // lança erro com mensagem amigável (PIN curto/incorreto)
+  }
+  dados.senhaEnc=await _cofreCifrar(senha);
+  return dados;
 }
 
 function _lerFormForn(){
@@ -2273,10 +2508,16 @@ function _lerFormForn(){
   };
 }
 
+function _erroFormForn(msg){var e=document.getElementById('nf-err');if(e)e.textContent=msg;else alert(msg);}
+var _salvandoForn=false;
 function modalAddForn(){
-  abrirM('Novo Fornecedor',_formForn(),function(){
+  abrirM('Novo Fornecedor',_formForn(),async function(){
+    if(_salvandoForn)return;
     var dados=_lerFormForn();
     if(!dados.nome){alert('Informe o nome do fornecedor.');return;}
+    _salvandoForn=true;
+    try{await _lerFormFornAcesso(dados,null);}catch(e){_salvandoForn=false;_erroFormForn(e.message||'Não foi possível guardar a senha.');return;}
+    _salvandoForn=false;
     if(!DB.fornecedores)DB.fornecedores=[];
     if(!DB.nForn)DB.nForn=1;
     DB.fornecedores.push(Object.assign({id:DB.nForn++},dados));
@@ -2287,10 +2528,12 @@ function modalAddForn(){
 function editForn(id){
   if(!DB.fornecedores)return;
   var f=DB.fornecedores.find(function(x){return x.id===id;});if(!f)return;
-  abrirM('Editar Fornecedor — '+f.nome,_formForn(f),function(){
+  abrirM('Editar Fornecedor — '+f.nome,_formForn(f),async function(){
     var dados=_lerFormForn();
     if(!dados.nome){alert('Informe o nome do fornecedor.');return;}
+    try{await _lerFormFornAcesso(dados,f);}catch(e){_erroFormForn(e.message||'Não foi possível guardar a senha.');return;}
     Object.assign(f,dados);
+    if(dados.senhaEnc===null)delete f.senhaEnc;
     save();badges();fecharM();pFornecedores();
   },true);
 }
