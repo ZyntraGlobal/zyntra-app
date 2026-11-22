@@ -1022,7 +1022,7 @@ function pDash(){
     h+='<div style="display:flex;align-items:center;gap:10px"><span style="font-size:22px">'+ico+'</span><span style="font-size:12px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.6px">'+titulo+'</span></div>';
     h+='<div style="display:flex;align-items:center;gap:6px;background:var(--w2);border:1px solid var(--bdr2);border-radius:20px;padding:4px 10px"><span style="width:7px;height:7px;border-radius:50%;background:'+dotCor+';display:inline-block"></span><span style="font-size:10px;font-weight:600;color:'+dotCor+'">'+statusLabel+'</span></div>';
     h+='</div>';
-    h+='<div style="font-size:32px;font-weight:800;color:var(--'+valCor+');letter-spacing:-.5px;margin-bottom:4px">'+valPrincipal+'</div>';
+    h+='<div style="font-size:32px;font-weight:800;color:var(--'+(valCor==='gold'?'ouro':valCor)+');letter-spacing:-.5px;margin-bottom:4px">'+valPrincipal+'</div>';
     h+='<div style="font-size:12px;color:var(--t3);margin-bottom:20px">'+sub+'</div>';
     h+='<div style="display:grid;grid-template-columns:repeat('+detalhes.length+',1fr);gap:10px;padding-top:16px;border-top:1px solid var(--bdr)">';
     detalhes.forEach(function(d){h+='<div><div style="font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">'+d[0]+'</div><div style="font-size:14px;font-weight:700;color:'+d[2]+'">'+d[1]+'</div></div>';});
@@ -1078,7 +1078,7 @@ function pDash(){
 
   // Card Estoque
   h+=modCard('📦','Estoque',R(totalVal),'gold',totalQty+' un · '+totalDisp+' disponíveis · '+totalProd+' SKUs',estStatus,estLabel,"ir('est_produtos')",[
-    ['Valor parado',R(totalVal),'var(--gold)'],
+    ['Valor parado',R(totalVal),'var(--ouro)'],
     ['Unidades',totalQty+' un','var(--grn)'],
     ['Sem estoque',semEst,semEst>0?'var(--red)':'var(--t3)']
   ]);
@@ -1099,7 +1099,7 @@ function pDash(){
 
   // Card Compras
   h+=modCard('🔗','Pedidos Bling',R(blingValorTotal),'gold',blingNPedidos+' pedido'+(blingNPedidos!==1?'s':'')+' em aberto · '+blingAComprar.length+' ite'+(blingAComprar.length!==1?'ns':'m')+' a comprar',comprasStatus,comprasLabel,"_comprasSecao='bling';ir('compras')",[
-    ['Pedidos',blingNPedidos,'var(--gold)'],
+    ['Pedidos',blingNPedidos,'var(--ouro)'],
     ['Comprados',blingComprados,blingComprados>0?'var(--grn)':'var(--t3)'],
     ['Sem custo',blingSemCusto,blingSemCusto>0?'var(--amb)':'var(--t3)'],
     ['Investir',R(blingInvestir),blingInvestir>0?'var(--t)':'var(--t3)'],
@@ -1119,7 +1119,7 @@ function pDash(){
   // Card Marketplaces — linha própria
   h+='<div style="display:grid;grid-template-columns:1fr;gap:16px;margin-top:16px">';
   h+=modCard('🏪','Marketplaces',R(mktTotal),'gold',mktComSaldo+' de '+COMPRA_PLATAFORMAS.length+' plataforma'+(COMPRA_PLATAFORMAS.length!==1?'s':'')+' com saldo lançado',mktStatus,mktLabel,"ir('marketplaces')",[
-    ['Saldo em conta',R(mktTotalSaldo),'var(--gold)'],
+    ['Saldo em conta',R(mktTotalSaldo),'var(--ouro)'],
     ['Saques aguardando',R(mktTotalSaque),mktTotalSaque>0?'var(--grn)':'var(--t3)'],
     ['Desatualizados',mktDesatualizados,mktDesatualizados>0?'var(--amb)':'var(--t3)']
   ]);
@@ -1127,7 +1127,7 @@ function pDash(){
   // Card Gateways — linha própria
   h+='<div style="display:grid;grid-template-columns:1fr;gap:16px;margin-top:16px">';
   h+=modCard('💳','Gateways',R(gwDisp+gwRetTotal),'gold',GATEWAYS.join(' · '),gwStatus,gwLabel,"ir('gateways')",[
-    ['Disponível agora',R(gwDisp),'var(--gold)'],
+    ['Disponível agora',R(gwDisp),'var(--ouro)'],
     ['Retido / a liberar',R(gwRetTotal),gwRetTotal>0?'#8cc5c7':'var(--t3)'],
     ['Prazo vencido',gwVenc,gwVenc>0?'var(--amb)':'var(--t3)']
   ]);
@@ -1251,7 +1251,7 @@ function pEstProdutos(busca,filtCat,filtSt){
     h+='<td class="tc" style="color:var(--t3)">'+p.min+'</td>';
     h+='<td class="tc" style="color:var(--blu)">'+(p.vendas30>0?p.vendas30:'—')+'</td>';
     if(!_func){
-      var abc=getABC(p);var abcCor=abc==='A'?'var(--gold)':abc==='B'?'var(--amb)':'var(--t3)';
+      var abc=getABC(p);var abcCor=abc==='A'?'var(--ouro)':abc==='B'?'var(--amb)':'var(--t3)';
       var parado=p.qty*(p.preco>0?p.preco:p.cmv);
       var cobTxt=_cobTxt(p);var cobCor=_cobCor(p);
       h+='<td class="tc" style="font-weight:800;color:'+abcCor+'">'+abc+'</td>';
@@ -1413,7 +1413,7 @@ function pEstFinanceiro(){
     var mg=p.cmv>0?(pv-p.cmv)/p.cmv*100:0;
     var mgCor=mg>30?'var(--grn)':mg>10?'var(--amb)':mg>0?'var(--t3)':'var(--red)';
     var abc=getABC(p);
-    var abcCor=abc==='A'?'var(--gold)':abc==='B'?'var(--amb)':'var(--t3)';
+    var abcCor=abc==='A'?'var(--ouro)':abc==='B'?'var(--amb)':'var(--t3)';
     h+='<tr>';
     h+='<td class="mono" style="font-size:11px">'+p.cod+'</td>';
     h+='<td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500" title="'+p.nome+'">'+p.nome+'</td>';
