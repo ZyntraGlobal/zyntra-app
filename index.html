@@ -4855,14 +4855,15 @@ function _formUsuario(vals,editando){
   vals=vals||{};
   var pagsHtml=PAGINAS_RESTRITAS.map(function(p){
     var checked=(vals.paginas||[]).indexOf(p.tipo)>=0?' checked':'';
-    return '<label style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:400;margin-bottom:6px;color:var(--t2)"><input type="checkbox" class="up-pag" value="'+p.tipo+'"'+checked+'> '+p.label+'</label>';
+    return '<label class="up-pag-l"><input type="checkbox" class="up-pag" value="'+p.tipo+'"'+checked+'><span>'+p.label+'</span></label>';
   }).join('');
   return '<div class="fg f2">'+
     '<div><label>Nome *</label><input id="up-nome" value="'+(vals.nome||'')+'" placeholder="Nome do funcionário" autofocus></div>'+
     '<div><label>Login *</label><input id="up-login" value="'+(vals.login||'')+'" placeholder="ex: joao"'+(editando?' readonly style="opacity:.6"':'')+'></div>'+
-    '<div style="grid-column:1/-1"><label>'+(editando?'Nova Senha (deixe em branco pra manter a atual)':'Senha *')+'</label><input id="up-senha" type="password" placeholder="'+(editando?'••••••••':'Mínimo 6 caracteres')+'"></div>'+
+    (editando?_formSenhaAtual(vals):'')+
+    '<div style="grid-column:1/-1"><label>'+(editando?'Nova Senha (deixe em branco pra manter a atual)':'Senha *')+'</label>'+_campoSenhaOlho('up-senha',editando?'Digite só se quiser trocar':'Mínimo 6 caracteres')+'</div>'+
     (_cofreAberto()?'':'<div id="up-pinbox" style="grid-column:1/-1;display:none">'+_pinCampo('up-pin',!_cofreRef()).replace('grid-column:1/-1','')+'</div>')+
-    '<div style="grid-column:1/-1;font-size:11px;color:var(--t3);margin-top:-4px">🔒 A senha fica guardada no cofre — depois você vê login e senha em "🔑 Ver senha".</div>'+
+    '<div style="grid-column:1/-1;font-size:11px;color:var(--t3);margin-top:-4px">🔒 A senha fica guardada no cofre (protegida pelo seu PIN). Para ver depois: botão "👁 Mostrar senha" na lista de usuários.</div>'+
     '<div style="grid-column:1/-1"><label>Páginas extras liberadas pra este funcionário</label>'+pagsHtml+'</div>'+
     '</div><div id="up-msg" style="font-size:11px;color:var(--red);margin-top:6px"></div>';
 }
@@ -4890,6 +4891,30 @@ function _mostrarSenhaNaLinha(id,s){
     '<button class="btn bsm" onclick="_copiarTxt(window._pw'+id+',this)">Copiar</button> '+
     '<button class="btn bsm" onclick="pUsuarios()" title="Esconder a senha">Ocultar</button>';
 }
+// Campo de senha com 👁 (mostra/esconde o que está sendo digitado)
+function _campoSenhaOlho(id,ph){
+  return '<div style="display:flex;gap:6px;align-items:center"><input id="'+id+'" type="password" autocomplete="new-password" placeholder="'+ph+'" style="flex:1;min-width:0">'+
+    '<button type="button" class="btn bsm" onclick="_olhoSenha(\''+id+'\',this)" title="Mostrar/esconder o que você digitou">👁</button></div>';
+}
+function _olhoSenha(id,btn){var i=document.getElementById(id);if(!i)return;var v=i.type==='password';i.type=v?'text':'password';if(btn)btn.textContent=v?'🙈':'👁';}
+// No editar: mostra a senha ATUAL (do cofre) ali mesmo, pedindo o PIN no próprio formulário
+function _formSenhaAtual(u){
+  if(!u.senhaEnc)return '<div style="grid-column:1/-1;font-size:11px;color:var(--t3)">Senha atual: não dá para ver (foi criada antes do cofre). Digite a senha abaixo e salve — depois ela aparece aqui.</div>';
+  return '<div style="grid-column:1/-1" id="up-atual"><label>Senha atual</label><button type="button" class="btn bsm" onclick="_verSenhaAtualForm('+u.id+')">👁 Mostrar senha atual</button></div>';
+}
+async function _verSenhaAtualForm(id,comPin){
+  var u=(DB.usuarios||[]).find(function(x){return x.id===id;});var box=document.getElementById('up-atual');if(!u||!box)return;
+  try{
+    if(!_cofreAberto()){
+      if(!comPin){box.innerHTML='<label>Senha atual — digite seu PIN</label><div style="display:flex;gap:6px;align-items:center"><input id="up-atual-pin" type="password" inputmode="numeric" placeholder="PIN" style="width:120px"><button type="button" class="btn bsm" onclick="_verSenhaAtualForm('+id+',true)">Ver</button><span id="up-atual-err" style="font-size:11px;color:var(--red)"></span></div>';setTimeout(function(){var p=document.getElementById('up-atual-pin');if(p)p.focus();},30);return;}
+      await _cofreAbrir((document.getElementById('up-atual-pin')||{}).value||'');
+    }
+    var s=await _cofreDecifrar(u.senhaEnc);window['_pw'+id]=s;
+    box.innerHTML='<label>Senha atual</label><div style="display:flex;gap:6px;align-items:center"><span style="font-family:var(--f-num,monospace);font-size:14px;color:var(--t)">'+_escH(s)+'</span><button type="button" class="btn bsm" onclick="_copiarTxt(window._pw'+id+',this)">Copiar</button></div>';
+    var pb=document.getElementById('up-pinbox');if(pb)pb.remove();
+  }catch(e){var er=document.getElementById('up-atual-err');if(er)er.textContent=e.message||'Não foi possível abrir.';else alert(e.message);}
+}
+(function(){try{var st=document.createElement('style');st.textContent='.up-pag-l{display:flex!important;align-items:center;justify-content:flex-start;gap:8px;margin:0 0 7px!important;font-size:12px!important;font-weight:400!important;color:var(--t2)!important;text-transform:none!important;letter-spacing:0!important;text-align:left;cursor:pointer}.up-pag-l input{width:16px!important;height:16px;margin:0!important;flex:0 0 auto}';document.head.appendChild(st);}catch(e){}})();
 
 function modalAddUsuario(){
   abrirM('Novo Usuário',_formUsuario({}),async function(){
