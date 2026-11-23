@@ -2162,7 +2162,7 @@ function _cofreRef(){return (DB.fornecedores||[]).concat(DB.usuarios||[]).map(fu
 // Pede o PIN (se o cofre estiver fechado), abre a senha cifrada e chama ok(senha).
 function _cofreVer(titulo,enc,ok){
   if(_cofreAberto()){_cofreDecifrar(enc).then(ok).catch(function(e){alert(e.message);});return;}
-  abrirM('🔒 Abrir cofre — '+titulo,
+  abrirM('🔒 Digite seu PIN — '+titulo,
     '<div class="fg f2">'+_pinCampo('cofre-pin',false)+'<div id="cofre-err" style="grid-column:1/-1;color:var(--red);font-size:12px"></div></div>',
     async function(){
       var err=document.getElementById('cofre-err');err.textContent='Abrindo...';
@@ -2197,7 +2197,7 @@ async function _cofreDecifrar(enc){
   return _cofreDecifrarCom(_cofre.key,enc);
 }
 function _pinCampo(id,criar){
-  return '<div style="grid-column:1/-1"><label>'+(criar?'Crie um PIN do cofre <span style="color:var(--t3);font-weight:400">(mín. 4 dígitos — guarde bem, sem ele não dá para ver as senhas)</span>':'PIN do cofre')+'</label>'+
+  return '<div style="grid-column:1/-1"><label>'+(criar?'Crie um PIN do cofre <span style="color:var(--t3);font-weight:400">(mín. 4 dígitos — guarde bem, sem ele não dá para ver as senhas)</span>':'Seu PIN <span style="color:var(--t3);font-weight:400">(o número que você criou ao guardar a primeira senha)</span>')+'</label>'+
     '<input id="'+id+'" type="password" inputmode="numeric" autocomplete="off" placeholder="••••"></div>';
 }
 
@@ -2207,7 +2207,7 @@ function verAcessoForn(id){
   var f=(DB.fornecedores||[]).find(function(x){return x.id===id;});if(!f)return;
   if(!f.senhaEnc){_mostrarAcessoForn(f,'');return;}
   if(_cofreAberto()){_cofreDecifrar(f.senhaEnc).then(function(s){_mostrarAcessoForn(f,s);}).catch(function(e){alert(e.message);});return;}
-  abrirM('🔒 Abrir cofre — '+_escH(f.apelido||f.nome),
+  abrirM('🔒 Digite seu PIN — '+_escH(f.apelido||f.nome),
     '<div class="fg f2">'+_pinCampo('cofre-pin',false)+'<div id="cofre-err" style="grid-column:1/-1;color:var(--red);font-size:12px"></div></div>',
     async function(){
       var err=document.getElementById('cofre-err');err.textContent='Abrindo...';
@@ -4808,7 +4808,15 @@ function checkSessao(){localStorage.removeItem('zg_sess');var bg=document.getEle
 function _migrarUsuarioColab(){
   if(!DB.usuarios)DB.usuarios=[];
   if(!DB.nUsuarios)DB.nUsuarios=1;
-  var jaTem=DB.usuarios.some(function(u){return u.login==='colab';});
+  // Migração antiga (de quando o colab era fixo no código): roda UMA vez só.
+  // Antes recriava o colab toda vez que o sistema abria sem ele — então
+  // excluir o colab não adiantava, ele voltava sozinho.
+  if(DB.colabMigrado)return;
+  // Só no aparelho do DONO e logado: pro funcionário a lista de usuários chega
+  // vazia (é dado só do dono) — rodar lá recriava o colab e mandava pra nuvem.
+  if(_isFuncionario()||DB._papel==='funcionario'||!(_sessaoAtual()||{}).token)return;
+  DB.colabMigrado=true;
+  var jaTem=DB.usuarios.length>0;
   if(!jaTem&&_USERS['colab']){
     DB.usuarios.push({id:DB.nUsuarios++,nome:'Colaborador',login:'colab',senhaHash:_USERS['colab'],ativo:true,paginas:[]});
     try{save();}catch(e){}
@@ -4833,7 +4841,7 @@ function pUsuarios(){
     lista.forEach(function(u){
       var pagsLbl=(u.paginas||[]).map(function(t){var p=PAGINAS_RESTRITAS.find(function(x){return x.tipo===t;});return p?p.label:t;}).join(', ')||'<span style="color:var(--t3)">Nenhuma (só acesso operacional)</span>';
       h+='<tr><td style="font-weight:600">'+u.nome+'</td><td><span class="mono">'+u.login+'</span></td>';
-      h+='<td>'+(u.senhaEnc?'<button class="btn bsm" onclick="verSenhaUsuario('+u.id+')" title="Ver login e senha">🔑 Ver senha</button>':'<span style="font-size:11px;color:var(--t3)" title="Senhas criadas antes do cofre não podem ser vistas — edite e defina uma nova">— redefina no ✏ para ver</span>')+'</td>';
+      h+='<td id="us-pw-'+u.id+'" style="white-space:nowrap">'+(u.senhaEnc?'<button class="btn bsm" onclick="verSenhaUsuario('+u.id+')" title="Mostrar a senha aqui">👁 Mostrar senha</button>':'<span style="font-size:11px;color:var(--t3)">Senha antiga — clique no ✏, digite a senha de novo e salve</span>')+'</td>';
       h+='<td class="tc">'+(u.ativo?'<span class="pill pok">Ativo</span>':'<span class="pill patrasado">Desativado</span>')+'</td>';
       h+='<td style="font-size:11px">'+pagsLbl+'</td>';
       h+='<td class="tnw"><button class="btn bsm" onclick="modalEditUsuario('+u.id+')" title="Editar">✏</button> <button class="btn bsm" onclick="toggleAtivoUsuario('+u.id+')" title="'+(u.ativo?'Desativar acesso':'Reativar acesso')+'">'+(u.ativo?'🚫':'✅')+'</button> <button class="btn bsm btnd" onclick="delUsuario('+u.id+')" title="Excluir">✕</button></td></tr>';
@@ -4871,10 +4879,16 @@ function verSenhaUsuario(id){
   if(_isFuncionario()){_bloqueadoFunc();return;}
   var u=(DB.usuarios||[]).find(function(x){return x.id===id;});if(!u||!u.senhaEnc)return;
   _cofreVer(u.nome,u.senhaEnc,function(s){
-    window._acessoTmp={login:u.login,senha:s};
-    var linha=function(lbl,val,chave){return '<div style="display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--bdr)"><div style="width:70px;font-size:11px;color:var(--t3)">'+lbl+'</div><div style="flex:1;min-width:0;font-size:14px;color:var(--t);word-break:break-all;font-family:var(--f-num,monospace)">'+_escH(val)+'</div><button class="btn bsm" onclick="_copiarTxt(window._acessoTmp.'+chave+',this)">Copiar</button></div>';};
-    abrirM('🔑 Acesso — '+u.nome,'<div>'+linha('Login',u.login,'login')+linha('Senha',s,'senha')+'<div style="font-size:11px;color:var(--t3);margin-top:10px">🔒 O cofre fecha sozinho em 15 minutos.</div></div>',null);
+    fecharM();_mostrarSenhaNaLinha(u.id,s);
   });
+}
+// Mostra a senha na própria linha da tabela, com Copiar e Ocultar.
+function _mostrarSenhaNaLinha(id,s){
+  var td=document.getElementById('us-pw-'+id);if(!td)return;
+  window['_pw'+id]=s;
+  td.innerHTML='<span style="font-family:var(--f-num,monospace);font-size:13px;color:var(--t);margin-right:6px">'+_escH(s)+'</span>'+
+    '<button class="btn bsm" onclick="_copiarTxt(window._pw'+id+',this)">Copiar</button> '+
+    '<button class="btn bsm" onclick="pUsuarios()" title="Esconder a senha">Ocultar</button>';
 }
 
 function modalAddUsuario(){
