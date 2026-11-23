@@ -439,6 +439,7 @@ tbody tr:hover td{background:rgba(139,92,246,.06)}
   <div class="sb-sec">Sistema</div>
   <div class="ni" id="ni-usuarios" onclick="ir('usuarios',this)"><span class="ico">👥</span><span class="lbl">Usuários</span></div>
   <div class="ni" onclick="fazerBackupG()" id="ni-backup"><span class="ico">💾</span><span class="lbl">Backup</span></div>
+  <div class="ni" onclick="sairSistema()" id="ni-sair"><span class="ico">🚪</span><span class="lbl">Sair</span></div>
 </nav>
 
 <div class="main">
@@ -4799,6 +4800,13 @@ async function doLogin(){
     btn.disabled=false;btn.textContent='ENTRAR NO SISTEMA';
     err.textContent='Erro ao processar login. Verifique sua conexão e tente novamente.';
   }
+}
+// Botão "Sair": encerra a sessão na hora (antes só caía sozinha após 4h)
+function sairSistema(){
+  if(!confirm("Sair do sistema agora?"))return;
+  try{_cofre.key=null;_cofre.ate=0;}catch(e){}
+  localStorage.removeItem('zg_sess');
+  window.location.reload();
 }
 function _expirar(){localStorage.removeItem('zg_sess');if(window._zyntraAtualizacaoPendente){window.location.reload();return;}document.getElementById('login-bg').classList.remove('hidden');document.getElementById('li-pass').value='';var e=document.createElement('div');e.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#13111a;border:1px solid var(--glb);color:var(--ouro);padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;z-index:10000;box-shadow:0 8px 32px rgba(0,0,0,.5)';e.textContent='🔒 Sessão expirada. Faça login novamente.';document.body.appendChild(e);setTimeout(function(){e.remove();},4000);setTimeout(function(){var u=document.getElementById('li-user');if(u)u.focus();},200);}
 var _wt=null;function _iniciarWatch(){if(_wt)clearInterval(_wt);_wt=setInterval(function(){var raw=localStorage.getItem('zg_sess');if(!raw){_expirar();clearInterval(_wt);return;}try{var s=JSON.parse(raw);if(!s.until||Date.now()>=s.until){_expirar();clearInterval(_wt);}}catch(e){_expirar();clearInterval(_wt);}},60000);}
