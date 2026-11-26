@@ -510,6 +510,7 @@ input:focus,select:focus,textarea:focus{border-color:#ff2e93!important;box-shado
   <div class="ni" onclick="ir('investimentos',this)"><span class="ico">📊</span><span class="lbl">Investimentos</span></div>
   <div class="sb-sec">Sistema</div>
   <div class="ni" id="ni-usuarios" onclick="ir('usuarios',this)"><span class="ico">👥</span><span class="lbl">Usuários</span></div>
+  <div class="ni" id="ni-site" onclick="ir('site',this)"><span class="ico">🌐</span><span class="lbl">Atividade do Site</span></div>
   <div class="ni" onclick="fazerBackupG()" id="ni-backup"><span class="ico">💾</span><span class="lbl">Backup</span></div>
   <div class="ni" onclick="sairSistema()" id="ni-sair"><span class="ico">🚪</span><span class="lbl">Sair</span></div>
 </nav>
@@ -999,12 +1000,12 @@ function ir(tipo,arg,el){
   if(el)el.classList.add('on');
   _curPage=tipo;_curMes=arg||0;
   // 'usuarios' é sempre exclusivo do dono, nunca liberável por permissão
-  if((tipo==='usuarios'||tipo==='mensal')&&_isFuncionario()){_bloqueadoFunc();document.getElementById('ptitle').textContent='Acesso Restrito';return;}
+  if((tipo==='usuarios'||tipo==='mensal'||tipo==='site')&&_isFuncionario()){_bloqueadoFunc();document.getElementById('ptitle').textContent='Acesso Restrito';return;}
   if(!_paginaPermitida(tipo)){
     if(tipo==='dash'&&_isFuncionario()){document.getElementById('ptitle').textContent='Início';pInicioFunc();return;}
     _bloqueadoFunc();document.getElementById('ptitle').textContent='Acesso Restrito';return;
   }
-  var titulos={dash:'Dashboard',est_produtos:'Estoque — Produtos',est_fin:'Estoque — Financeiro',est_mov:'Estoque — Movimentações',est_alertas:'Estoque — Alertas',rtu_lanc:'Controle RTU — Lançamentos',rtu_resumo:'Controle RTU — Resumo Anual',notif:'Alertas & Notificações',fornecedores:'Fornecedores',compras:'Compras — Lista de Compras',pendencias:'Avisos & Pendências',marketplaces:'Marketplaces — Saldo & A Receber',gateways:'Gateways — Saldo & Retenções',investimentos:'Investimentos — Aplicações por Conta',usuarios:'Usuários & Acessos',inicio:'Início',mensal:'Resumo Mensal',chargebacks:'Chargebacks — Stark Bank',recebimentos:'Recebimentos — Stark Bank'};
+  var titulos={dash:'Dashboard',est_produtos:'Estoque — Produtos',est_fin:'Estoque — Financeiro',est_mov:'Estoque — Movimentações',est_alertas:'Estoque — Alertas',rtu_lanc:'Controle RTU — Lançamentos',rtu_resumo:'Controle RTU — Resumo Anual',notif:'Alertas & Notificações',fornecedores:'Fornecedores',compras:'Compras — Lista de Compras',pendencias:'Avisos & Pendências',marketplaces:'Marketplaces — Saldo & A Receber',gateways:'Gateways — Saldo & Retenções',investimentos:'Investimentos — Aplicações por Conta',usuarios:'Usuários & Acessos',inicio:'Início',mensal:'Resumo Mensal',chargebacks:'Chargebacks — Stark Bank',recebimentos:'Recebimentos — Stark Bank',site:'Atividade do Site — zyntraglobal.com.br'};
   document.getElementById('ptitle').textContent=titulos[tipo]||(tipo==='pag'?'Pagamentos — '+MFULL[(arg||1)-1]+' 2026':tipo);
   if(tipo==='dash')pDash();
   else if(tipo==='est_produtos')pEstProdutos();
@@ -1025,6 +1026,7 @@ function ir(tipo,arg,el){
   else if(tipo==='mensal')pMensal();
   else if(tipo==='chargebacks')pChargebacks();
   else if(tipo==='recebimentos')pRecebimentos();
+  else if(tipo==='site')pSite();
   else if(tipo==='inicio')pInicioFunc();
 }
 
@@ -2231,7 +2233,7 @@ async function _cofreDerivar(pin,saltB64){
 function _cofreAberto(){return !!(_cofre.key&&Date.now()<_cofre.ate);}
 function _cofreFechar(){_cofre.key=null;_cofre.salt=null;_cofre.ate=0;}
 // Salt de qualquer senha já guardada — se existir, o PIN digitado tem que abrir ela.
-function _cofreRef(){return (DB.fornecedores||[]).concat(DB.usuarios||[]).map(function(f){return f.senhaEnc;}).filter(function(e){return e&&e.salt&&e.iv&&e.ct;})[0]||null;}
+function _cofreRef(){return (DB.fornecedores||[]).concat(DB.usuarios||[]).concat(DB.siteMon?[DB.siteMon]:[]).map(function(f){return f.senhaEnc;}).filter(function(e){return e&&e.salt&&e.iv&&e.ct;})[0]||null;}
 // Pede o PIN (se o cofre estiver fechado), abre a senha cifrada e chama ok(senha).
 function _cofreVer(titulo,enc,ok){
   if(_cofreAberto()){_cofreDecifrar(enc).then(ok).catch(function(e){alert(e.message);});return;}
@@ -4786,7 +4788,7 @@ function _sessaoAtual(){
 // 'usuarios' e 'mensal' são sempre só do dono.
 function _ajustarSidebarFunc(){
   var func=_isFuncionario();
-  var pode=function(t){return !func||(t!=='usuarios'&&t!=='mensal'&&_paginaPermitida(t));};
+  var pode=function(t){return !func||(t!=='usuarios'&&t!=='mensal'&&t!=='site'&&_paginaPermitida(t));};
   document.querySelectorAll('.sb .ni').forEach(function(el){
     var m=(el.getAttribute('onclick')||'').match(/ir\('([a-z_0-9]+)'/);
     // "Dashboard" é a porta do "Início" do funcionário (ir('dash') abre o Início pra ele)
@@ -4901,6 +4903,237 @@ function _migrarUsuarioColab(){
     DB.usuarios.push({id:DB.nUsuarios++,nome:'Colaborador',login:'colab',senhaHash:_USERS['colab'],ativo:true,paginas:[]});
     try{save();}catch(e){}
   }
+}
+
+// ── ATIVIDADE DO SITE (zyntraglobal.com.br) ──────────────────────────────
+// Lê o histórico do painel do WordPress, gravado pelo plugin Simple History
+// (/wp-json/simple-history/v1/events). Entra com uma "senha de aplicativo" do
+// WordPress, que fica cifrada no cofre (PIN do dono) em DB.siteMon — nunca em
+// texto. A senha só lê dados, não abre o painel. Só o dono vê esta aba.
+var SITE_URL='https://zyntraglobal.com.br';
+var SITE_PEDRO='adminpdr';
+var _site={ev:[],pag:0,fim:false,carregando:false,erro:'',auth:null,quem:'equipe',area:'',busca:'',timer:null,visto:0};
+try{_site.visto=parseInt(localStorage.getItem('zg_site_visto')||'0',10)||0;}catch(e){}
+var SITE_AREAS=[
+  {k:'entradas',l:'🔑 Entradas no painel'},
+  {k:'conteudo',l:'📝 Páginas, produtos e Elementor'},
+  {k:'midia',l:'🖼️ Fotos e arquivos'},
+  {k:'plugins',l:'🧩 Plugins e tema'},
+  {k:'usuarios',l:'👥 Usuários'},
+  {k:'config',l:'⚙️ Configurações'},
+  {k:'outros',l:'• Outros'}
+];
+function _siteArea(e){
+  var lg=String(e.logger||''),k=String(e.message_key||'');
+  if(lg==='SimpleUserLogger'&&/log(ged)?_?(in|out)|login/.test(k))return 'entradas';
+  if(lg==='SimpleUserLogger')return 'usuarios';
+  if(lg==='SimplePostLogger'||/Elementor|Menu|Comment|Woo|Product/i.test(lg))return 'conteudo';
+  if(lg==='SimpleMediaLogger')return 'midia';
+  if(/Plugin|Theme|CoreUpdates|Translation/i.test(lg))return 'plugins';
+  if(/Option|Setting|Privacy|Export/i.test(lg))return 'config';
+  return 'outros';
+}
+function _siteQuem(e){var d=e.initiator_data||{};return e.initiator==='wp_user'?String(d.user_login||''):'';}
+function _siteNomeQuem(e){
+  var d=e.initiator_data||{};
+  if(e.initiator==='wp_user')return d.user_display_name||d.user_login||'Usuário';
+  if(e.initiator==='wp')return 'Sistema (WordPress)';
+  if(e.initiator==='wp_cli')return 'Sistema (WP-CLI)';
+  return 'Visitante / cliente';
+}
+function _siteSensivel(e){
+  var k=String(e.message_key||''),a=_siteArea(e);
+  if(/failed/.test(k))return true;
+  if(/warning|error|critical|alert|emergency/.test(String(e.loglevel||'')))return true;
+  if(e.initiator!=='wp_user')return false;
+  return a==='plugins'||a==='config'||a==='usuarios'||/delet|trash/.test(k);
+}
+function _siteIco(e){
+  var k=String(e.message_key||''),a=_siteArea(e);
+  if(/failed/.test(k))return '⚠️';
+  if(/logged_in/.test(k))return '🔑';
+  if(/logged_out/.test(k))return '🚪';
+  if(/delet|trash/.test(k))return '🗑️';
+  return ({conteudo:'📝',midia:'🖼️',plugins:'🧩',usuarios:'👥',config:'⚙️'})[a]||'•';
+}
+function _siteData(s){
+  var m=String(s||'').match(/^(\d{4})-(\d\d)-(\d\d)[ T](\d\d):(\d\d)/);if(!m)return String(s||'');
+  var d=new Date(+m[1],m[2]-1,+m[3]),h=new Date();h.setHours(0,0,0,0);
+  var dif=Math.round((h-d)/864e5);
+  return (dif===0?'Hoje':dif===1?'Ontem':m[3]+'/'+m[2]+(m[1]!=String(h.getFullYear())?'/'+m[1]:''))+' '+m[4]+':'+m[5];
+}
+function _siteEhHoje(s){var t=new Date(),p=function(n){return (n<10?'0':'')+n;};return String(s||'').indexOf(t.getFullYear()+'-'+p(t.getMonth()+1)+'-'+p(t.getDate()))===0;}
+function _siteAuth(user,senha){return 'Basic '+btoa(unescape(encodeURIComponent(String(user).trim()+':'+String(senha).replace(/\s+/g,''))));}
+async function _siteBuscar(pagina,auth){
+  var r=await fetch(SITE_URL+'/wp-json/simple-history/v1/events?per_page=100&page='+pagina,{headers:{'Authorization':auth||_site.auth},cache:'no-store'});
+  if(r.status===401||r.status===403)throw new Error('O site recusou a senha de aplicativo. Clique em "⚙️ Conexão" e cadastre de novo.');
+  if(r.status===400&&pagina>1)return [];
+  if(!r.ok)throw new Error('O site respondeu com erro '+r.status+'.');
+  var j=await r.json();return Array.isArray(j)?j:[];
+}
+async function _siteCarregar(doZero){
+  if(_site.carregando)return;
+  _site.carregando=true;_site.erro='';if(_curPage==='site')_siteRender();
+  try{
+    if(doZero){var l=await _siteBuscar(1);_site.ev=l;_site.pag=1;_site.fim=l.length<100;}
+    else{var m=await _siteBuscar(_site.pag+1);_site.pag++;if(m.length<100)_site.fim=true;
+      var ids={};_site.ev.forEach(function(e){ids[e.id]=1;});m.forEach(function(e){if(!ids[e.id])_site.ev.push(e);});}
+  }catch(e){_site.erro=(e&&e.message)||'Não foi possível falar com o site.';if(/Failed to fetch|NetworkError/i.test(_site.erro))_site.erro='Sem conexão com o site agora. Tente de novo em instantes.';}
+  _site.carregando=false;if(_curPage==='site')_siteRender();
+}
+// Atualiza sozinha a cada 60s enquanto a aba estiver aberta (só busca o que é novo).
+function _siteAuto(){
+  clearInterval(_site.timer);
+  _site.timer=setInterval(function(){
+    if(_curPage!=='site'||!_site.auth||_site.carregando||document.hidden){if(_curPage!=='site')clearInterval(_site.timer);return;}
+    _siteBuscar(1).then(function(l){var ids={};_site.ev.forEach(function(e){ids[e.id]=1;});var novos=l.filter(function(e){return !ids[e.id];});
+      if(novos.length){_site.ev=novos.concat(_site.ev);_siteRender();}}).catch(function(){});
+  },60000);
+}
+function pSite(){
+  if(_isFuncionario()){_bloqueadoFunc();return;}
+  var cfg=DB.siteMon;
+  if(!cfg||!cfg.senhaEnc){setPage(_siteIntroHtml());return;}
+  if(!_site.auth){
+    var h='<div class="panel"><div class="empty" style="padding:48px 30px"><div style="font-size:34px;margin-bottom:10px">🔒</div>'+
+      '<div style="font-size:14px;font-weight:600;color:var(--t2);margin-bottom:6px">Histórico do site protegido</div>'+
+      '<div style="font-size:12px;color:var(--t3);margin-bottom:16px">Digite o PIN do cofre para ver tudo o que foi feito no painel do site.</div>'+
+      '<button class="btn btnp" onclick="_siteDesbloquear()">🔓 Abrir com PIN</button></div></div>';
+    setPage(h);
+    if(_cofreAberto())_siteDesbloquear();
+    return;
+  }
+  _siteRender();_siteAuto();
+  if(!_site.ev.length&&!_site.carregando&&!_site.erro)_siteCarregar(true);
+}
+function _siteDesbloquear(){
+  var cfg=DB.siteMon;if(!cfg||!cfg.senhaEnc)return;
+  _cofreVer('Atividade do site',cfg.senhaEnc,function(s){
+    fecharM();_site.auth=_siteAuth(cfg.user,s);_site.ev=[];_site.erro='';pSite();
+  });
+}
+function _siteIntroHtml(){
+  return '<div class="panel"><div style="padding:22px 22px 24px">'+
+    '<div style="font-size:30px;margin-bottom:8px">🌐</div>'+
+    '<div style="font-size:15px;font-weight:700;color:var(--t);margin-bottom:6px">Ver tudo o que é feito no painel do site</div>'+
+    '<div style="font-size:12.5px;color:var(--t2);line-height:1.6;max-width:640px">Esta aba mostra cada entrada no painel do zyntraglobal.com.br e cada alteração (páginas, produtos, Elementor, plugins, usuários e configurações) — de quem fez, quando e de qual internet. Os dados vêm do plugin <b>Simple History</b> do site.</div>'+
+    '<div style="margin:16px 0 6px;font-size:12px;font-weight:700;color:var(--ouro)">Para ligar (uma vez só):</div>'+
+    '<ol style="margin:0 0 16px 18px;padding:0;font-size:12.5px;color:var(--t2);line-height:1.8">'+
+      '<li>No painel do site: <b>Usuários → Perfil</b>, desça até <b>Senhas de aplicativo</b>.</li>'+
+      '<li>Em “Nome da nova senha de aplicativo” escreva <b>Gestão</b> e clique em <b>Adicionar</b>.</li>'+
+      '<li>Copie a senha que aparece (ela só aparece uma vez) e cole aqui em <b>Conectar</b>.</li>'+
+    '</ol>'+
+    '<button class="btn btnp" onclick="modalSiteConexao()">🔗 Conectar ao site</button>'+
+    ' <a class="btn bsm" href="'+SITE_URL+'/wp-admin/profile.php#application-passwords-section" target="_blank" rel="noopener">Abrir o perfil no site ↗</a>'+
+    '<div style="margin-top:14px;font-size:11px;color:var(--t3)">A senha de aplicativo só serve para ler o histórico: não abre o painel e pode ser apagada no site a qualquer momento. Aqui ela fica cifrada no cofre (seu PIN).</div>'+
+  '</div></div>';
+}
+function modalSiteConexao(){
+  if(_isFuncionario()){_bloqueadoFunc();return;}
+  var cfg=DB.siteMon||{},criar=!_cofreRef();
+  var b='<div class="fg f2">'+
+    '<div><label>Usuário do site</label><input id="st-user" autocomplete="off" value="'+_escH(cfg.user||'Felipe')+'"></div>'+
+    '<div><label>Senha de aplicativo'+(cfg.senhaEnc?' <span style="color:var(--t3);font-weight:400">(guardada 🔒 — cole outra para trocar)</span>':'')+'</label><input id="st-senha" type="password" autocomplete="new-password" placeholder="xxxx xxxx xxxx xxxx xxxx xxxx"></div>'+
+    (_cofreAberto()?'':_pinCampo('st-pin',criar))+
+    (cfg.senhaEnc?'<div style="grid-column:1/-1;font-size:11px;color:var(--t3)"><label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="st-del" style="width:auto"> Desconectar (apaga a senha guardada aqui)</label></div>':'')+
+    '<div id="st-err" style="grid-column:1/-1;color:var(--red);font-size:12px"></div></div>';
+  abrirM('🔗 Conexão com o site',b,async function(){
+    var err=document.getElementById('st-err'),user=document.getElementById('st-user').value.trim(),senha=document.getElementById('st-senha').value;
+    var del=document.getElementById('st-del');
+    if(del&&del.checked&&!senha){delete DB.siteMon;_site.auth=null;_site.ev=[];save();fecharM();pSite();return;}
+    if(!user||!senha){err.textContent='Preencha o usuário e cole a senha de aplicativo.';return;}
+    try{
+      err.style.color='var(--t3)';err.textContent='Testando no site...';
+      var auth=_siteAuth(user,senha);await _siteBuscar(1,auth);
+      if(!_cofreAberto()){var p=document.getElementById('st-pin');await _cofreAbrir(p?p.value:'');}
+      DB.siteMon={user:user,senhaEnc:await _cofreCifrar(senha.replace(/\s+/g,'')),desde:hoje()};
+      save();_site.auth=auth;_site.ev=[];_site.erro='';fecharM();pSite();
+    }catch(e){err.style.color='var(--red)';err.textContent=(e&&e.message)||'Não deu certo.';}
+  });
+  setTimeout(function(){var s=document.getElementById('st-senha');if(s)s.focus();},50);
+}
+function siteFiltro(campo,v){_site[campo]=v;_siteRender();}
+function siteMarcarVisto(){var m=_site.ev.reduce(function(a,e){return Math.max(a,e.id||0);},0);_site.visto=m;try{localStorage.setItem('zg_site_visto',String(m));}catch(e){}_siteRender();}
+function _siteDetalhes(e){
+  var it=[];(e.details_data||[]).forEach(function(g){(g&&g.items||[]).forEach(function(i){if(i&&i.name)it.push(i);});});
+  if(!it.length)return '';
+  var c=function(v){v=String(v==null?'':v).replace(/\s+/g,' ').trim();return _escH(v.length>110?v.slice(0,110)+'…':v);};
+  return '<div style="margin-top:4px;font-size:11px;color:var(--t3);line-height:1.5">'+it.slice(0,6).map(function(i){
+    var tem=i.prev_value!==undefined&&i.prev_value!==null&&String(i.prev_value)!=='';
+    return '<div><b style="color:var(--t2);font-weight:600">'+c(i.name)+':</b> '+(tem?'<span style="text-decoration:line-through;opacity:.7">'+c(i.prev_value)+'</span> → ':'')+c(i.new_value)+'</div>';
+  }).join('')+(it.length>6?'<div>+ '+(it.length-6)+' alteração(ões)</div>':'')+'</div>';
+}
+function _siteRender(){
+  if(_curPage!=='site')return;
+  var todos=_site.ev;
+  var pedro=todos.filter(function(e){return _siteQuem(e)===SITE_PEDRO;});
+  var pedroHoje=pedro.filter(function(e){return _siteEhHoje(e.date_local);}).length;
+  var ultEntrada=pedro.find(function(e){return /logged_in/.test(String(e.message_key||''));});
+  var semana=Date.now()-7*864e5;
+  var alertas=todos.filter(function(e){return _siteSensivel(e)&&new Date(String(e.date_gmt||'').replace(' ','T')+'Z').getTime()>semana;}).length;
+  var novos=todos.filter(function(e){return e.id>_site.visto&&e.initiator==='wp_user'&&_siteQuem(e)!=='Felipe';}).length;
+
+  var lista=todos.filter(function(e){
+    var q=_siteQuem(e);
+    if(_site.quem==='equipe'&&e.initiator!=='wp_user')return false;
+    if(_site.quem==='pedro'&&q!==SITE_PEDRO)return false;
+    if(_site.quem==='felipe'&&q!=='Felipe')return false;
+    if(_site.quem==='alertas'&&!_siteSensivel(e))return false;
+    if(_site.area&&_siteArea(e)!==_site.area)return false;
+    if(_site.busca){var b=_site.busca.toLowerCase();if((String(e.message||'')+' '+_siteNomeQuem(e)).toLowerCase().indexOf(b)<0)return false;}
+    return true;
+  });
+
+  var h='<div class="g4">';
+  h+='<div class="card hl"><div class="lbl">Pedro hoje</div><div class="val gld">'+pedroHoje+'</div><div class="sub">ações no painel do site</div></div>';
+  h+='<div class="card"><div class="lbl">Última entrada do Pedro</div><div class="val blu" style="font-size:18px">'+(ultEntrada?_escH(_siteData(ultEntrada.date_local)):'—')+'</div><div class="sub">'+(ultEntrada?'entrou no painel':'nenhuma nos eventos carregados')+'</div></div>';
+  h+='<div class="card'+(alertas?' warn':'')+'"><div class="lbl">Ações sensíveis (7 dias)</div><div class="val" style="color:'+(alertas?'var(--red)':'var(--grn)')+'">'+alertas+'</div><div class="sub">plugins, usuários, config., senha errada</div></div>';
+  h+='<div class="card ok"><div class="lbl">Novas desde a última olhada</div><div class="val grn">'+novos+'</div><div class="sub">'+(novos?'<a href="#" onclick="siteMarcarVisto();return false" style="color:inherit">marcar como vistas</a>':'da equipe (sem contar você)')+'</div></div>';
+  h+='</div>';
+
+  var opQ=[['equipe','Equipe (quem entra no painel)'],['pedro','Só o Pedro'],['felipe','Só eu (Felipe)'],['alertas','Só ações sensíveis'],['todos','Tudo (inclui sistema e clientes)']];
+  h+='<div class="brow">';
+  h+='<select class="sel" onchange="siteFiltro(\'quem\',this.value)">'+opQ.map(function(o){return '<option value="'+o[0]+'"'+(_site.quem===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('')+'</select>';
+  h+='<select class="sel" onchange="siteFiltro(\'area\',this.value)"><option value="">Todas as áreas</option>'+SITE_AREAS.map(function(a){return '<option value="'+a.k+'"'+(_site.area===a.k?' selected':'')+'>'+a.l+'</option>';}).join('')+'</select>';
+  h+='<input class="inp" id="site-busca" style="width:220px" placeholder="Buscar (ex.: nome do produto)" value="'+_escH(_site.busca)+'" oninput="_site.busca=this.value;clearTimeout(_site._tb);_site._tb=setTimeout(function(){_siteRender();var i=document.getElementById(\'site-busca\');if(i){i.focus();i.setSelectionRange(i.value.length,i.value.length);}},250)">';
+  h+='<button class="btn bsm" onclick="_siteCarregar(true)"'+(_site.carregando?' disabled':'')+'>'+(_site.carregando?'⏳ Atualizando...':'🔄 Atualizar')+'</button>';
+  h+='<span style="margin-left:auto;display:flex;gap:6px"><a class="btn bsm" href="'+SITE_URL+'/wp-admin/admin.php?page=simple_history_admin_menu_page" target="_blank" rel="noopener">Abrir no site ↗</a>'+
+     '<button class="btn bsm" onclick="modalSiteConexao()">⚙️ Conexão</button>'+(_cofreAberto()?'<button class="btn bsm" onclick="_cofreFechar();_site.auth=null;_site.ev=[];pSite()">🔒 Trancar</button>':'')+'</span>';
+  h+='</div>';
+
+  if(_site.erro)h+='<div class="panel" style="margin-bottom:12px;border-color:rgba(248,113,113,.4)"><div style="padding:12px 16px;font-size:12.5px;color:var(--red)">⚠️ '+_escH(_site.erro)+'</div></div>';
+
+  h+='<div class="panel"><div class="ph"><div class="pt">Movimentações ('+lista.length+')</div><div style="font-size:11px;color:var(--t3)">atualiza sozinho a cada minuto</div></div>';
+  if(!lista.length){
+    h+='<div class="empty" style="padding:40px 24px">'+(_site.carregando&&!todos.length?'Carregando o histórico do site...':'Nada encontrado com esses filtros'+(_site.fim?'.':' nos eventos carregados — clique em “Carregar mais antigos”.'))+'</div>';
+  }else{
+    lista.forEach(function(e){
+      var sens=_siteSensivel(e),novo=e.id>_site.visto&&e.initiator==='wp_user'&&_siteQuem(e)!=='Felipe';
+      var ips=Object.keys(e.ip_addresses||{}).map(function(k){return e.ip_addresses[k];}).filter(Boolean).join(', ');
+      var area=(SITE_AREAS.find(function(a){return a.k===_siteArea(e);})||{}).l||'';
+      var ehPedro=_siteQuem(e)===SITE_PEDRO;
+      h+='<div style="display:flex;gap:12px;padding:11px 16px;border-bottom:1px solid var(--bdr);'+(sens?'background:rgba(248,113,113,.07);box-shadow:inset 3px 0 0 #f87171;':'')+'">'+
+        '<div style="font-size:18px;line-height:1.2;width:24px;text-align:center;flex:0 0 auto">'+_siteIco(e)+'</div>'+
+        '<div style="flex:1;min-width:0">'+
+          '<div style="font-size:12.5px;color:var(--t);line-height:1.45;word-break:break-word">'+_escH(e.message||'')+
+            (e.subsequent_occasions_count>1?' <span class="pill pn">'+e.subsequent_occasions_count+'×</span>':'')+
+            (novo?' <span class="pill ppendente">novo</span>':'')+(sens?' <span class="pill patrasado">atenção</span>':'')+'</div>'+
+          _siteDetalhes(e)+
+          '<div style="margin-top:4px;font-size:11px;color:var(--t3);display:flex;flex-wrap:wrap;gap:4px 12px">'+
+            '<span style="'+(ehPedro?'color:#fbbf24;font-weight:700':'')+'">👤 '+_escH(_siteNomeQuem(e))+'</span>'+
+            '<span>🕒 '+_escH(_siteData(e.date_local))+'</span>'+
+            (area?'<span>'+_escH(area)+'</span>':'')+
+            (ips?'<span>🌍 IP '+_escH(ips)+'</span>':'')+
+            (e.link?'<a href="'+_escH(e.link)+'" target="_blank" rel="noopener" style="color:var(--t3)">ver no site ↗</a>':'')+
+          '</div>'+
+        '</div></div>';
+    });
+  }
+  if(todos.length&&!_site.fim)h+='<div style="padding:12px 16px;text-align:center"><button class="btn bsm" onclick="_siteCarregar(false)"'+(_site.carregando?' disabled':'')+'>'+(_site.carregando?'⏳ Carregando...':'⬇ Carregar mais antigos')+'</button></div>';
+  h+='</div>';
+  var pg=document.querySelector('.pg'),y=pg?pg.scrollTop:0;
+  setPage(h);
+  if(pg)pg.scrollTop=y;
 }
 
 function pUsuarios(){
