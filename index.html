@@ -510,6 +510,7 @@ input:focus,select:focus,textarea:focus{border-color:#ff2e93!important;box-shado
   <div class="ni" onclick="ir('investimentos',this)"><span class="ico">📊</span><span class="lbl">Investimentos</span></div>
   <div class="sb-sec">Sistema</div>
   <div class="ni" id="ni-usuarios" onclick="ir('usuarios',this)"><span class="ico">👥</span><span class="lbl">Usuários</span></div>
+  <div class="ni" id="ni-torre" onclick="ir('torre',this)"><span class="ico">🗼</span><span class="lbl">Torre de Comando</span></div>
   <div class="ni" id="ni-site" onclick="ir('site',this)"><span class="ico">🌐</span><span class="lbl">Atividade do Site</span></div>
   <div class="ni" onclick="fazerBackupG()" id="ni-backup"><span class="ico">💾</span><span class="lbl">Backup</span></div>
   <div class="ni" onclick="sairSistema()" id="ni-sair"><span class="ico">🚪</span><span class="lbl">Sair</span></div>
@@ -1000,12 +1001,12 @@ function ir(tipo,arg,el){
   if(el)el.classList.add('on');
   _curPage=tipo;_curMes=arg||0;
   // 'usuarios' é sempre exclusivo do dono, nunca liberável por permissão
-  if((tipo==='usuarios'||tipo==='mensal'||tipo==='site')&&_isFuncionario()){_bloqueadoFunc();document.getElementById('ptitle').textContent='Acesso Restrito';return;}
+  if((tipo==='usuarios'||tipo==='mensal'||tipo==='site'||tipo==='torre')&&_isFuncionario()){_bloqueadoFunc();document.getElementById('ptitle').textContent='Acesso Restrito';return;}
   if(!_paginaPermitida(tipo)){
     if(tipo==='dash'&&_isFuncionario()){document.getElementById('ptitle').textContent='Início';pInicioFunc();return;}
     _bloqueadoFunc();document.getElementById('ptitle').textContent='Acesso Restrito';return;
   }
-  var titulos={dash:'Dashboard',est_produtos:'Estoque — Produtos',est_fin:'Estoque — Financeiro',est_mov:'Estoque — Movimentações',est_alertas:'Estoque — Alertas',rtu_lanc:'Controle RTU — Lançamentos',rtu_resumo:'Controle RTU — Resumo Anual',notif:'Alertas & Notificações',fornecedores:'Fornecedores',compras:'Compras — Lista de Compras',pendencias:'Avisos & Pendências',marketplaces:'Marketplaces — Saldo & A Receber',gateways:'Gateways — Saldo & Retenções',investimentos:'Investimentos — Aplicações por Conta',usuarios:'Usuários & Acessos',inicio:'Início',mensal:'Resumo Mensal',chargebacks:'Chargebacks — Stark Bank',recebimentos:'Recebimentos — Stark Bank',site:'Atividade do Site — zyntraglobal.com.br'};
+  var titulos={dash:'Dashboard',est_produtos:'Estoque — Produtos',est_fin:'Estoque — Financeiro',est_mov:'Estoque — Movimentações',est_alertas:'Estoque — Alertas',rtu_lanc:'Controle RTU — Lançamentos',rtu_resumo:'Controle RTU — Resumo Anual',notif:'Alertas & Notificações',fornecedores:'Fornecedores',compras:'Compras — Lista de Compras',pendencias:'Avisos & Pendências',marketplaces:'Marketplaces — Saldo & A Receber',gateways:'Gateways — Saldo & Retenções',investimentos:'Investimentos — Aplicações por Conta',usuarios:'Usuários & Acessos',inicio:'Início',mensal:'Resumo Mensal',chargebacks:'Chargebacks — Stark Bank',recebimentos:'Recebimentos — Stark Bank',site:'Atividade do Site — zyntraglobal.com.br',torre:'Torre de Comando — site, domínio, e-mail e acessos'};
   document.getElementById('ptitle').textContent=titulos[tipo]||(tipo==='pag'?'Pagamentos — '+MFULL[(arg||1)-1]+' 2026':tipo);
   if(tipo==='dash')pDash();
   else if(tipo==='est_produtos')pEstProdutos();
@@ -1027,6 +1028,7 @@ function ir(tipo,arg,el){
   else if(tipo==='chargebacks')pChargebacks();
   else if(tipo==='recebimentos')pRecebimentos();
   else if(tipo==='site')pSite();
+  else if(tipo==='torre')pTorre();
   else if(tipo==='inicio')pInicioFunc();
 }
 
@@ -4788,7 +4790,7 @@ function _sessaoAtual(){
 // 'usuarios' e 'mensal' são sempre só do dono.
 function _ajustarSidebarFunc(){
   var func=_isFuncionario();
-  var pode=function(t){return !func||(t!=='usuarios'&&t!=='mensal'&&t!=='site'&&_paginaPermitida(t));};
+  var pode=function(t){return !func||(t!=='usuarios'&&t!=='mensal'&&t!=='site'&&t!=='torre'&&_paginaPermitida(t));};
   document.querySelectorAll('.sb .ni').forEach(function(el){
     var m=(el.getAttribute('onclick')||'').match(/ir\('([a-z_0-9]+)'/);
     // "Dashboard" é a porta do "Início" do funcionário (ir('dash') abre o Início pra ele)
@@ -5184,6 +5186,325 @@ function _siteRender(){
     }
     h+=maisBtn+'</div>';
   }
+  var pg=document.querySelector('.pg'),y=pg?pg.scrollTop:0;
+  setPage(h);
+  if(pg)pg.scrollTop=y;
+}
+
+// ── TORRE DE COMANDO — termômetro do site, domínio, e-mail, loja e acessos ──
+// Tudo é conferido ao vivo, do próprio aparelho:
+//  • DNS/e-mail: DNS público da Cloudflare e do Google (sem login).
+//  • Domínio: RDAP do Registro.br (sem login).
+//  • Loja, pagamentos, plugins e administradores: API do WordPress com a mesma
+//    senha de aplicativo da aba "Atividade do Site" (cofre/PIN). Só leitura.
+// Nada aqui altera o site. "Referência" (admins, pagamentos, nº de plugins) é
+// gravada na primeira verificação; mudança depois disso vira alerta.
+var _torre={res:{},carregando:false,ultima:0,timer:null,sys:null,sysEm:0};
+var TORRE_NS=['ignat.ns.cloudflare.com','walk.ns.cloudflare.com'];
+var TORRE_CF_IP=/^(104\.(1[6-9]|2\d|3[01])|172\.(6[4-9]|7[01])|188\.114|162\.159|141\.101|108\.162|190\.93|197\.234|198\.41)\./;
+var TORRE_PRAZOS_PADRAO=[
+  {id:'dom',nome:'Domínio zyntraglobal.com.br (cobrança na Hostinger)',data:'2027-01-27',valor:'R$ 64,99',onde:'Hostinger → Assinaturas'},
+  {id:'host',nome:'Hospedagem do site (Hostinger)',data:'2027-02-09',valor:'R$ 779,88',onde:'Hostinger → Assinaturas'},
+  {id:'mail',nome:'E-mail da loja — teste grátis vira pago',data:'2027-02-27',valor:'R$ 209,40',onde:'Hostinger → Assinaturas'}
+];
+var TORRE_ACESSOS=[
+  {p:'🔴',n:'Hostinger (hPanel)',o:'Site inteiro (arquivos e banco), domínio e e-mails. Quem entra aqui tem a loja toda.',u:'https://hpanel.hostinger.com/'},
+  {p:'🔴',n:'Cloudflare',o:'Para onde o site e os e-mails apontam (DNS). Também guarda o robô zyntra-push-relay deste app.',u:'https://dash.cloudflare.com/'},
+  {p:'🔴',n:'E-mail contato@zyntraglobal.com.br',o:'É o login da Cloudflare — quem entra nele consegue trocar a senha dela.',u:'https://mail.hostinger.com/'},
+  {p:'🟠',n:'WordPress (painel do site)',o:'Produtos, pedidos, clientes e plugins. Administradores: Felipe e adminpdr.',u:SITE_URL+'/wp-admin/'},
+  {p:'🟠',n:'Stark Bank',o:'Recebe os pagamentos do site (Pix e cartão) — é o único pagamento ligado.',u:'https://web.starkbank.com/'},
+  {p:'🟡',n:'Melhor Envio',o:'Fretes e etiquetas.',u:'https://melhorenvio.com.br/'},
+  {p:'🟡',n:'Google / Meta / Microsoft Clarity',o:'Anúncios, Tag Manager e medição do site.',u:''},
+  {p:'🟡',n:'Bling e GitHub',o:'Usados por este app (via o robô da Cloudflare).',u:''}
+];
+function _torreCfg(){if(!DB.torre)DB.torre={base:null,prazos:null};if(!DB.torre.prazos)DB.torre.prazos=TORRE_PRAZOS_PADRAO.map(function(p){return Object.assign({},p);});return DB.torre;}
+function _torreDias(iso){var m=String(iso||'').match(/^(\d{4})-(\d\d)-(\d\d)/);if(!m)return null;var d=new Date(+m[1],m[2]-1,+m[3]),h=new Date();h.setHours(0,0,0,0);return Math.round((d-h)/864e5);}
+function _torreDataBR(iso){var m=String(iso||'').match(/^(\d{4})-(\d\d)-(\d\d)/);return m?m[3]+'/'+m[2]+'/'+m[1]:'—';}
+async function _torreDns(nome,tipo){
+  var urls=['https://cloudflare-dns.com/dns-query?name='+encodeURIComponent(nome)+'&type='+tipo,'https://dns.google/resolve?name='+encodeURIComponent(nome)+'&type='+tipo];
+  for(var i=0;i<urls.length;i++){
+    try{var r=await fetch(urls[i],{headers:{accept:'application/dns-json'},cache:'no-store'});if(!r.ok)continue;var j=await r.json();
+      return (j.Answer||[]).map(function(a){return {t:a.type,d:String(a.data||'').replace(/^"|"$/g,'').replace(/" "/g,'').replace(/\.$/,'')};});}catch(e){}
+  }
+  throw new Error('DNS público sem resposta');
+}
+async function _torreWp(caminho){
+  var r=await fetch(SITE_URL+'/wp-json/'+caminho,{headers:{'Authorization':_site.auth},cache:'no-store'});
+  if(r.status===401||r.status===403)throw new Error('O site recusou a senha de aplicativo (aba Atividade do Site → ⚙️ Conexão).');
+  if(!r.ok)throw new Error('erro '+r.status);
+  return {j:await r.json(),total:parseInt(r.headers.get('X-WP-Total')||'',10)};
+}
+// Cada verificação devolve {s:'ok'|'warn'|'bad'|'info', v:'valor curto', d:'detalhe', u:'link'}
+function _torreDef(){
+  var defs=[];
+  var add=function(g,id,nome,fn,precisaLogin){defs.push({g:g,id:id,nome:nome,fn:fn,login:!!precisaLogin});};
+  // ── Site no ar
+  add('site','wp','WordPress respondendo',async function(){
+    var t0=performance.now(),r=await fetch(SITE_URL+'/wp-json/?_fields=name',{cache:'no-store'}),ms=Math.round(performance.now()-t0);
+    if(!r.ok)return {s:'bad',v:'erro '+r.status,d:'O site respondeu com erro. Pode estar fora do ar.'};
+    return {s:ms>4000?'warn':'ok',v:(ms/1000).toFixed(1).replace('.',',')+' s',d:ms>4000?'Respondendo, mas lento.':'No ar e respondendo normalmente.'};
+  });
+  add('site','loja','Loja (WooCommerce) mostrando produtos',async function(){
+    // (a Store API do WooCommerce não libera acesso de fora do site; a lista pública de produtos do WordPress libera)
+    var t0=performance.now(),r=await fetch(SITE_URL+'/wp-json/wp/v2/product?per_page=1&status=publish&_fields=id',{cache:'no-store'}),ms=Math.round(performance.now()-t0);
+    if(!r.ok)return {s:'bad',v:'erro '+r.status,d:'A loja não está devolvendo produtos.'};
+    var j=await r.json();
+    if(!Array.isArray(j)||!j.length)return {s:'bad',v:'0 produtos',d:'A loja respondeu sem nenhum produto publicado.'};
+    return {s:ms>5000?'warn':'ok',v:(ms/1000).toFixed(1).replace('.',',')+' s',d:'Catálogo carregando.'};
+  });
+  // ── Domínio e DNS (Cloudflare)
+  add('dns','ns','Domínio apontando para a Cloudflare',async function(){
+    var a=(await _torreDns('zyntraglobal.com.br','NS')).filter(function(x){return x.t===2;}).map(function(x){return x.d.toLowerCase();}).sort();
+    var ok=a.length===TORRE_NS.length&&TORRE_NS.every(function(n){return a.indexOf(n)>=0;});
+    return {s:ok?'ok':'bad',v:ok?'Cloudflare':'MUDOU',d:ok?'Servidores de DNS: '+a.join(', '):'Os servidores do domínio mudaram para: '+(a.join(', ')||'nenhum')+'. Alguém mexeu no registro do domínio.',u:'https://dash.cloudflare.com/'};
+  });
+  add('dns','ip','Site passando pela Cloudflare',async function(){
+    var a=(await _torreDns('zyntraglobal.com.br','A')).filter(function(x){return x.t===1;}).map(function(x){return x.d;});
+    var fora=a.filter(function(ip){return !TORRE_CF_IP.test(ip);});
+    if(!a.length)return {s:'bad',v:'sem IP',d:'O domínio não aponta para lugar nenhum.'};
+    return {s:fora.length?'warn':'ok',v:fora.length?'fora da Cloudflare':'protegido',d:fora.length?'Endereço fora da Cloudflare: '+fora.join(', ')+' (proteção desligada ou DNS alterado).':'Endereços da Cloudflare: '+a.join(', ')};
+  });
+  add('dns','mx','E-mails chegando na Hostinger (MX)',async function(){
+    var a=(await _torreDns('zyntraglobal.com.br','MX')).filter(function(x){return x.t===15;}).map(function(x){return x.d.toLowerCase();});
+    var ok=a.some(function(x){return /mx1\.hostinger\.com$/.test(x);})&&a.some(function(x){return /mx2\.hostinger\.com$/.test(x);});
+    return {s:ok?'ok':'bad',v:ok?'Hostinger':'MUDOU',d:ok?a.join(' · '):'O destino dos e-mails mudou: '+(a.join(', ')||'nenhum')};
+  });
+  add('dns','spf','SPF (quem pode mandar e-mail pelo domínio)',async function(){
+    var a=(await _torreDns('zyntraglobal.com.br','TXT')).map(function(x){return x.d;}).filter(function(t){return /^v=spf1/i.test(t);});
+    if(!a.length)return {s:'bad',v:'ausente',d:'Sem SPF: os e-mails da loja tendem a cair no spam.'};
+    var ok=/include:_spf\.mail\.hostinger\.com/i.test(a[0]);
+    return {s:ok?'ok':'warn',v:ok?'ok':'sem Hostinger',d:a[0]};
+  });
+  add('dns','dkim','DKIM (assinatura dos e-mails)',async function(){
+    var a=await _torreDns('hostingermail-a._domainkey.zyntraglobal.com.br','TXT');
+    var txt=a.filter(function(x){return x.t===16;}).map(function(x){return x.d;}).join('');
+    var cname=a.filter(function(x){return x.t===5;}).map(function(x){return x.d;})[0]||'';
+    if(/v=DKIM1/i.test(txt)&&/p=\S{20,}/.test(txt))return {s:'ok',v:'ativo',d:'Assinatura publicada'+(cname?' via '+cname:'')+'.'};
+    return {s:'bad',v:'SUMIU',d:'A assinatura DKIM não aparece. Na Cloudflare os registros hostingermail-a/b/c._domainkey precisam estar como "Somente DNS" (nuvem cinza).',u:'https://dash.cloudflare.com/'};
+  });
+  add('dns','dmarc','DMARC (proteção do domínio)',async function(){
+    var t=(await _torreDns('_dmarc.zyntraglobal.com.br','TXT')).map(function(x){return x.d;}).filter(function(t){return /^v=DMARC1/i.test(t);})[0];
+    if(!t)return {s:'warn',v:'ausente',d:'Sem DMARC.'};
+    var p=(t.match(/p=(\w+)/i)||[])[1]||'?';
+    return {s:p.toLowerCase()==='none'?'info':'ok',v:'p='+p,d:t+(p.toLowerCase()==='none'?' — funciona, mas é a regra mais fraca (dá para endurecer depois).':'')};
+  });
+  add('dns','rdap','Registro do domínio (Registro.br)',async function(){
+    var r=await fetch('https://rdap.registro.br/domain/zyntraglobal.com.br',{cache:'no-store'});
+    if(!r.ok)return {s:'info',v:'—',d:'Registro.br não respondeu agora.'};
+    var j=await r.json(),ev=(j.events||[]).find(function(e){return e.eventAction==='expiration';}),dias=ev?_torreDias(ev.eventDate):null;
+    var st=(j.status||[]).join(', ');
+    if(dias===null)return {s:'info',v:'—',d:'Sem data de vencimento.'};
+    return {s:!/active/.test(st)?'bad':dias<15?'bad':dias<60?'warn':'ok',v:dias+' dias',d:'Vence em '+_torreDataBR(ev.eventDate)+' · situação: '+(st||'?'),u:'https://registro.br/'};
+  });
+  // ── Loja (precisa da senha de aplicativo)
+  add('loja','pedidos','Pedidos nas últimas 24 h',async function(){
+    var desde=new Date(Date.now()-864e5).toISOString().slice(0,19);
+    var r=await _torreWp('wc/v3/orders?after='+desde+'&per_page=100&_fields=id,status,total,date_created');
+    var l=Array.isArray(r.j)?r.j:[],falhou=l.filter(function(o){return o.status==='failed';}).length;
+    var pagos=l.filter(function(o){return /processing|completed|ready-ship/.test(o.status);});
+    var tot=pagos.reduce(function(a,o){return a+(parseFloat(o.total)||0);},0);
+    var u=await _torreWp('wc/v3/orders?per_page=1&_fields=id,date_created'),ult=(Array.isArray(u.j)&&u.j[0])||null;
+    var hrs=ult?Math.round((Date.now()-new Date(ult.date_created).getTime())/36e5):null;
+    return {s:falhou>=3?'warn':'info',v:String(isNaN(r.total)?l.length:r.total),d:pagos.length+' pagos ('+R(tot)+')'+(falhou?' · '+falhou+' com pagamento recusado':'')+(ult?' · último pedido há '+(hrs<1?'menos de 1 h':hrs+' h')+' (#'+ult.id+')':''),u:SITE_URL+'/wp-admin/admin.php?page=wc-orders'};
+  },true);
+  add('loja','aguard','Pedidos aguardando pagamento',async function(){
+    var r=await _torreWp('wc/v3/reports/orders/totals'),l=Array.isArray(r.j)?r.j:[];
+    var g=function(s){var x=l.find(function(o){return o.slug===s;});return x?x.total:0;};
+    var n=g('on-hold')+g('pending');
+    return {s:'info',v:String(n),d:'Pago e em separação: '+g('processing')+' · Aguardando pagamento: '+g('on-hold')+(g('pending')?' · Em análise: '+g('pending'):''),u:SITE_URL+'/wp-admin/admin.php?page=wc-orders&status=wc-on-hold'};
+  },true);
+  add('loja','pagto','Formas de pagamento ligadas',async function(){
+    var r=await _torreWp('wc/v3/payment_gateways'),on=(Array.isArray(r.j)?r.j:[]).filter(function(g){return g.enabled;});
+    var ids=on.map(function(g){return g.id;}).sort(),base=_torreCfg().base;
+    var nomes=on.map(function(g){return g.method_title||g.title||g.id;}).join(' · ');
+    if(!on.length)return {s:'bad',v:'NENHUMA',d:'Nenhuma forma de pagamento ligada — ninguém consegue pagar.',u:SITE_URL+'/wp-admin/admin.php?page=wc-settings&tab=checkout'};
+    var mudou=base&&base.gws&&base.gws.join(',')!==ids.join(',');
+    return {s:mudou?'warn':'ok',v:on.length+' ligada'+(on.length>1?'s':''),d:(mudou?'MUDOU desde a referência ('+base.gws.join(', ')+'). Agora: ':'')+nomes,u:SITE_URL+'/wp-admin/admin.php?page=wc-settings&tab=checkout',_gws:ids};
+  },true);
+  // ── Segurança e acessos (precisa da senha de aplicativo)
+  add('seg','admins','Administradores do painel',async function(){
+    var r=await _torreWp('wp/v2/users?roles=administrator&context=edit&per_page=100&_fields=id,username,name,registered_date');
+    var l=(Array.isArray(r.j)?r.j:[]).map(function(u){return u.username;}).sort(),base=_torreCfg().base;
+    var novos=base&&base.admins?l.filter(function(u){return base.admins.indexOf(u)<0;}):[];
+    var sairam=base&&base.admins?base.admins.filter(function(u){return l.indexOf(u)<0;}):[];
+    return {s:novos.length?'bad':sairam.length?'warn':'ok',v:String(l.length),d:(novos.length?'NOVO ADMINISTRADOR: '+novos.join(', ')+'. Se não foi você, troque as senhas agora. · ':'')+(sairam.length?'Saiu: '+sairam.join(', ')+' · ':'')+'Hoje: '+l.join(', '),u:SITE_URL+'/wp-admin/users.php?role=administrator',_admins:l};
+  },true);
+  add('seg','senhaerr','Tentativas de login com senha errada (24 h)',async function(){
+    var l=await _siteBuscar(1),lim=Date.now()-864e5;
+    var f=l.filter(function(e){return /failed/.test(String(e.message_key||''))&&new Date(String(e.date_gmt||'').replace(' ','T')+'Z').getTime()>lim;});
+    var n=f.reduce(function(a,e){return a+(e.subsequent_occasions_count||1);},0);
+    return {s:n>=20?'bad':n>=5?'warn':'ok',v:String(n),d:n?'Últimas: '+f.slice(0,3).map(function(e){return _siteData(e.date_local);}).join(', ')+' — veja na aba Atividade do Site.':'Nenhuma tentativa errada registrada.'};
+  },true);
+  add('seg','plugins','Plugins (atualizações e mudanças)',async function(){
+    var s=await _torreSys(),ativos=s.active_plugins||[];
+    var upd=ativos.filter(function(p){return p.version_latest&&p.version&&p.version_latest!==p.version;});
+    var base=_torreCfg().base,mudou=base&&base.nplug&&base.nplug!==ativos.length;
+    return {s:mudou?'warn':upd.length?'info':'ok',v:ativos.length+' ativos',d:(mudou?'Quantidade de plugins mudou (era '+base.nplug+'). ':'')+(upd.length?upd.length+' com atualização: '+upd.map(function(p){return p.name+' '+p.version+'→'+p.version_latest;}).join(' · '):'Todos atualizados.'),u:SITE_URL+'/wp-admin/plugins.php',_nplug:ativos.length};
+  },true);
+  add('seg','saude','Saúde técnica do WordPress',async function(){
+    var s=await _torreSys(),e=s.environment||{},sec=s.security||{},prob=[];
+    if(!sec.secure_connection)prob.push('site sem HTTPS');
+    if(e.wp_debug_mode)prob.push('modo de depuração ligado');
+    if(e.wp_cron===false)prob.push('agendador (cron) desligado');
+    var db=s.database&&s.database.database_size?(s.database.database_size.data||0)+(s.database.database_size.index||0):0;
+    return {s:prob.length?'warn':'ok',v:prob.length?prob.length+' ponto(s)':'ok',d:(prob.length?prob.join(' · ')+' · ':'')+'WordPress '+(e.wp_version||'?')+' · WooCommerce '+(e.version||'?')+' · PHP '+(e.php_version||'?')+(db?' · banco '+Math.round(db)+' MB':''),u:SITE_URL+'/wp-admin/admin.php?page=wc-status'};
+  },true);
+  return defs;
+}
+async function _torreSys(){
+  if(_torre.sys&&Date.now()-_torre.sysEm<15*60e3)return _torre.sys;
+  var r=await _torreWp('wc/v3/system_status');_torre.sys=r.j;_torre.sysEm=Date.now();return r.j;
+}
+async function _torreVerificar(){
+  if(_torre.carregando)return;
+  _torre.carregando=true;if(_curPage==='torre')_torreRender();
+  var defs=_torreDef();
+  await Promise.all(defs.map(async function(d){
+    if(d.login&&!_site.auth){_torre.res[d.id]={s:'lock',v:'🔒',d:'Abra com o PIN para ver.'};return;}
+    try{_torre.res[d.id]=await d.fn();}
+    catch(e){_torre.res[d.id]={s:'warn',v:'sem resposta',d:(e&&e.message)||'Não foi possível conferir agora.'};}
+  }));
+  // Primeira vez com login: grava a referência (o que é "normal" hoje)
+  var cfg=_torreCfg(),R_=_torre.res;
+  if(_site.auth&&!cfg.base&&R_.admins&&R_.admins._admins&&R_.pagto&&R_.pagto._gws&&R_.plugins&&R_.plugins._nplug){
+    cfg.base={admins:R_.admins._admins,gws:R_.pagto._gws,nplug:R_.plugins._nplug,em:hoje()};try{save();}catch(e){}
+  }
+  _torre.ultima=Date.now();_torre.carregando=false;
+  _torreBadge();
+  if(_curPage==='torre')_torreRender();
+}
+function _torreContagem(){
+  var c={bad:0,warn:0,ok:0};
+  Object.keys(_torre.res).forEach(function(k){var s=_torre.res[k].s;if(c[s]!==undefined)c[s]++;});
+  (_torreCfg().prazos||[]).forEach(function(p){var d=_torreDias(p.data);if(d!==null&&d<10)c.bad++;else if(d!==null&&d<45)c.warn++;});
+  return c;
+}
+function _torreBadge(){
+  var el=document.getElementById('ni-torre');if(!el)return;
+  var c=_torreContagem(),b=el.querySelector('.tbadge');
+  if(!b){b=document.createElement('span');b.className='tbadge';b.style.cssText='margin-left:auto;font-size:10px;font-weight:700;border-radius:10px;padding:1px 7px';el.appendChild(b);}
+  if(c.bad){b.textContent=c.bad;b.style.background='rgba(248,113,113,.2)';b.style.color='#f87171';b.style.display='';}
+  else if(c.warn){b.textContent=c.warn;b.style.background='rgba(251,191,36,.18)';b.style.color='#fbbf24';b.style.display='';}
+  else b.style.display='none';
+}
+function _torreAuto(){
+  clearInterval(_torre.timer);
+  _torre.timer=setInterval(function(){
+    if(_curPage!=='torre'){clearInterval(_torre.timer);return;}
+    if(!document.hidden&&!_torre.carregando)_torreVerificar();
+    else if(_curPage==='torre')_torreRender();
+  },120000);
+}
+function pTorre(){
+  if(_isFuncionario()){_bloqueadoFunc();return;}
+  _torreCfg();
+  _torreRender();_torreAuto();
+  if(DB.siteMon&&DB.siteMon.senhaEnc&&!_site.auth&&_cofreAberto()){_torreDesbloquear();return;}
+  if(!_torre.ultima||Date.now()-_torre.ultima>60000)_torreVerificar();
+}
+function _torreDesbloquear(){
+  var cfg=DB.siteMon;if(!cfg||!cfg.senhaEnc){ir('site',document.getElementById('ni-site'));return;}
+  _cofreVer('Torre de Comando',cfg.senhaEnc,function(s){fecharM();_site.auth=_siteAuth(cfg.user,s);_torre.sys=null;_torreVerificar();});
+}
+function torreRefBase(){
+  if(!confirm('Gravar o estado de agora (administradores, formas de pagamento e nº de plugins) como o "normal"? Os alertas de mudança passam a comparar com isso.'))return;
+  var R_=_torre.res,cfg=_torreCfg();
+  if(!(R_.admins&&R_.admins._admins&&R_.pagto&&R_.pagto._gws&&R_.plugins&&R_.plugins._nplug)){alert('Abra com o PIN e espere a verificação terminar antes.');return;}
+  cfg.base={admins:R_.admins._admins,gws:R_.pagto._gws,nplug:R_.plugins._nplug,em:hoje()};save();_torreVerificar();
+}
+function torrePrazoEditar(i){
+  var cfg=_torreCfg(),p=cfg.prazos[i]||{nome:'',data:'',valor:'',onde:''},novo=i===undefined||i<0;
+  var b='<div class="fg f2">'+
+    '<div style="grid-column:1/-1"><label>O que vence</label><input id="tp-nome" value="'+_escH(p.nome||'')+'"></div>'+
+    '<div><label>Data</label><input id="tp-data" type="date" value="'+_escH(p.data||'')+'"></div>'+
+    '<div><label>Valor</label><input id="tp-valor" value="'+_escH(p.valor||'')+'" placeholder="R$ 0,00"></div>'+
+    '<div style="grid-column:1/-1"><label>Onde pagar / renovar</label><input id="tp-onde" value="'+_escH(p.onde||'')+'"></div>'+
+    (novo?'':'<div style="grid-column:1/-1;font-size:11px;color:var(--t3)"><label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="tp-del" style="width:auto"> Remover este prazo</label></div>')+
+  '</div>';
+  abrirM(novo?'➕ Novo prazo':'✏️ Editar prazo',b,function(){
+    var del=document.getElementById('tp-del');
+    if(del&&del.checked){cfg.prazos.splice(i,1);}
+    else{
+      var n={id:p.id||('p'+Date.now()),nome:document.getElementById('tp-nome').value.trim(),data:document.getElementById('tp-data').value,valor:document.getElementById('tp-valor').value.trim(),onde:document.getElementById('tp-onde').value.trim()};
+      if(!n.nome||!n.data){alert('Preencha o que vence e a data.');return;}
+      if(novo)cfg.prazos.push(n);else cfg.prazos[i]=n;
+    }
+    save();fecharM();_torreBadge();_torreRender();
+  });
+}
+var TORRE_GRUPOS=[
+  {k:'site',t:'🌐 Site no ar'},
+  {k:'dns',t:'🛰️ Domínio, DNS e e-mail'},
+  {k:'loja',t:'🛒 Loja e pagamentos'},
+  {k:'seg',t:'🛡️ Segurança e acessos'}
+];
+var TORRE_COR={ok:'var(--grn)',warn:'var(--amb)',bad:'var(--red)',info:'var(--blu)',lock:'var(--t3)',load:'var(--t3)'};
+var TORRE_TXT={ok:'Normal',warn:'Atenção',bad:'Problema',info:'Info',lock:'Bloqueado',load:'...'};
+function _torreLinha(d){
+  var r=_torre.res[d.id]||{s:'load',v:'…',d:'Conferindo...'},cor=TORRE_COR[r.s]||'var(--t3)';
+  var fundo=r.s==='bad'?'background:rgba(248,113,113,.07);box-shadow:inset 3px 0 0 #f87171;':r.s==='warn'?'background:rgba(251,191,36,.05);box-shadow:inset 3px 0 0 #fbbf24;':'';
+  return '<div style="display:flex;gap:12px;align-items:flex-start;padding:10px 16px;border-bottom:1px solid var(--bdr);'+fundo+'">'+
+    '<div style="width:10px;height:10px;border-radius:50%;margin-top:5px;flex:0 0 auto;background:'+cor+';box-shadow:0 0 0 3px '+(r.s==='ok'?'var(--gnbg)':r.s==='bad'?'var(--rdbg)':r.s==='warn'?'var(--ambg)':'transparent')+'"></div>'+
+    '<div style="flex:1;min-width:0">'+
+      '<div style="display:flex;gap:8px;align-items:baseline;flex-wrap:wrap"><span style="font-size:12.5px;font-weight:600;color:var(--t)">'+_escH(d.nome)+'</span>'+
+      '<span style="font-size:10px;font-weight:700;color:'+cor+';text-transform:uppercase;letter-spacing:.4px">'+TORRE_TXT[r.s]+'</span></div>'+
+      '<div style="font-size:11px;color:var(--t3);line-height:1.5;margin-top:2px;word-break:break-word">'+_escH(r.d||'')+(r.u?' <a href="'+_escH(r.u)+'" target="_blank" rel="noopener" style="color:var(--t3)">abrir ↗</a>':'')+'</div>'+
+    '</div>'+
+    '<div style="flex:0 0 auto;font-family:var(--f-num);font-variant-numeric:tabular-nums;font-size:13px;font-weight:700;color:'+cor+';text-align:right;max-width:40%">'+_escH(r.v||'')+'</div>'+
+  '</div>';
+}
+function _torreRender(){
+  if(_curPage!=='torre')return;
+  var cfg=_torreCfg(),defs=_torreDef(),c=_torreContagem();
+  var temLogin=!!_site.auth,temConexao=!!(DB.siteMon&&DB.siteMon.senhaEnc);
+  var geral=c.bad?{c:'bad',t:'Problema — veja os itens em vermelho',i:'🔴'}:c.warn?{c:'warn',t:'Atenção em '+c.warn+' ponto'+(c.warn>1?'s':''),i:'🟡'}:{c:'ok',t:'Tudo normal',i:'🟢'};
+  if(_torre.carregando&&!_torre.ultima)geral={c:'load',t:'Conferindo tudo...',i:'⏳'};
+  var hora=_torre.ultima?new Date(_torre.ultima).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'—';
+  var cor=TORRE_COR[geral.c];
+  var h='<div class="panel" style="margin-bottom:12px"><div style="display:flex;align-items:center;gap:16px;padding:16px 18px;flex-wrap:wrap">'+
+    '<div style="font-size:34px;line-height:1">'+geral.i+'</div>'+
+    '<div style="flex:1;min-width:200px"><div style="font-size:17px;font-weight:800;color:'+cor+'">'+geral.t+'</div>'+
+    '<div style="font-size:11.5px;color:var(--t3);margin-top:3px">Última verificação: '+hora+' · confere sozinho a cada 2 minutos enquanto esta aba estiver aberta</div></div>'+
+    '<div style="display:flex;gap:6px;flex-wrap:wrap">'+
+      '<button class="btn bsm" onclick="_torreVerificar()"'+(_torre.carregando?' disabled':'')+'>'+(_torre.carregando?'⏳ Conferindo...':'🔄 Verificar agora')+'</button>'+
+      (temConexao&&!temLogin?'<button class="btn btnp bsm" onclick="_torreDesbloquear()">🔓 Abrir loja e acessos (PIN)</button>':'')+
+      (!temConexao?'<button class="btn btnp bsm" onclick="ir(\'site\',document.getElementById(\'ni-site\'))">🔗 Conectar ao site</button>':'')+
+    '</div></div></div>';
+  h+='<div class="g4">'+
+    '<div class="card'+(c.bad?' danger':'')+'"><div class="lbl">Problemas</div><div class="val" style="color:'+(c.bad?'var(--red)':'var(--t3)')+'">'+c.bad+'</div><div class="sub">precisam de ação agora</div></div>'+
+    '<div class="card'+(c.warn?' warn':'')+'"><div class="lbl">Atenção</div><div class="val" style="color:'+(c.warn?'var(--amb)':'var(--t3)')+'">'+c.warn+'</div><div class="sub">vale olhar</div></div>'+
+    '<div class="card ok"><div class="lbl">Normais</div><div class="val grn">'+c.ok+'</div><div class="sub">funcionando</div></div>'+
+    '<div class="card hl"><div class="lbl">Referência gravada</div><div class="val gld" style="font-size:16px">'+(cfg.base?_escH(String(cfg.base.em||'')):'—')+'</div><div class="sub">'+(cfg.base?'<a href="#" onclick="torreRefBase();return false" style="color:inherit">gravar o estado de agora</a>':'grava na 1ª verificação com PIN')+'</div></div>'+
+  '</div>';
+  if(!temConexao)h+='<div class="panel" style="margin-bottom:12px"><div style="padding:12px 16px;font-size:12px;color:var(--t2)">Para ver loja, pagamentos, plugins e administradores, conecte o site uma vez na aba <b>Atividade do Site</b> (senha de aplicativo do WordPress). A Torre usa a mesma conexão.</div></div>';
+  TORRE_GRUPOS.forEach(function(g){
+    var itens=defs.filter(function(d){return d.g===g.k;});
+    h+='<div class="panel"><div class="ph"><div class="pt">'+g.t+'</div></div>'+itens.map(_torreLinha).join('')+'</div>';
+  });
+  // Prazos
+  var pz=(cfg.prazos||[]).map(function(p,i){return {p:p,i:i,d:_torreDias(p.data)};}).sort(function(a,b){return (a.d===null?1e9:a.d)-(b.d===null?1e9:b.d);});
+  h+='<div class="panel"><div class="ph"><div class="pt">📅 Prazos e renovações</div><button class="btn bsm" onclick="torrePrazoEditar(-1)">+ Prazo</button></div>';
+  h+=pz.map(function(x){
+    var s=x.d===null?'info':x.d<10?'bad':x.d<45?'warn':'ok',cor=TORRE_COR[s];
+    return '<div style="display:flex;gap:12px;align-items:center;padding:10px 16px;border-bottom:1px solid var(--bdr)">'+
+      '<div style="width:10px;height:10px;border-radius:50%;flex:0 0 auto;background:'+cor+'"></div>'+
+      '<div style="flex:1;min-width:0"><div style="font-size:12.5px;font-weight:600;color:var(--t)">'+_escH(x.p.nome)+'</div>'+
+      '<div style="font-size:11px;color:var(--t3)">'+_torreDataBR(x.p.data)+(x.p.valor?' · '+_escH(x.p.valor):'')+(x.p.onde?' · '+_escH(x.p.onde):'')+'</div></div>'+
+      '<div style="font-family:var(--f-num);font-weight:700;font-size:13px;color:'+cor+'">'+(x.d===null?'—':x.d<0?'venceu':x.d===0?'hoje':x.d+' dias')+'</div>'+
+      '<button class="btn bsm" onclick="torrePrazoEditar('+x.i+')">✏️</button></div>';
+  }).join('')+'<div style="padding:8px 16px;font-size:11px;color:var(--t3)">Amarelo a partir de 45 dias, vermelho a partir de 10. Confira se o cartão da Hostinger vence antes dessas datas.</div></div>';
+  // Pendências conhecidas (o que ainda não dá para conferir ao vivo)
+  h+='<div class="panel"><div class="ph"><div class="pt">📝 Para ficar de olho (conferir no site)</div></div><div style="padding:10px 16px;font-size:12px;color:var(--t2);line-height:1.7">'+
+    '• <b>Backup:</b> o backup automático do WPvivid estava desligado (último em 01/10/2026). <a href="'+SITE_URL+'/wp-admin/admin.php?page=WPvivid" target="_blank" rel="noopener" style="color:var(--ouro)">abrir ↗</a><br>'+
+    '• <b>E-mails do site:</b> erros de envio aparecem em WP Mail SMTP → Ferramentas → Eventos de depuração. <a href="'+SITE_URL+'/wp-admin/admin.php?page=wp-mail-smtp-tools&tab=debug-events" target="_blank" rel="noopener" style="color:var(--ouro)">abrir ↗</a><br>'+
+    '• <b>Verificação em 2 etapas:</b> ativar na Hostinger, na Cloudflare e no WordPress.'+
+  '</div></div>';
+  // Mapa de acessos
+  h+='<div class="panel"><div class="ph"><div class="pt">🔑 Mapa de acessos — quem controla o quê</div></div>'+TORRE_ACESSOS.map(function(a){
+    return '<div style="display:flex;gap:10px;padding:9px 16px;border-bottom:1px solid var(--bdr);font-size:12px;line-height:1.5"><div style="flex:0 0 auto">'+a.p+'</div>'+
+      '<div style="flex:1;min-width:0"><b style="color:var(--t)">'+_escH(a.n)+'</b> <span style="color:var(--t3)">— '+_escH(a.o)+'</span></div>'+
+      (a.u?'<a class="btn bsm" href="'+_escH(a.u)+'" target="_blank" rel="noopener">abrir ↗</a>':'')+'</div>';
+  }).join('')+'<div style="padding:8px 16px;font-size:11px;color:var(--t3)">🔴 máximo cuidado · 🟠 alto · 🟡 médio. Nenhuma senha fica salva nesta aba.</div></div>';
   var pg=document.querySelector('.pg'),y=pg?pg.scrollTop:0;
   setPage(h);
   if(pg)pg.scrollTop=y;
