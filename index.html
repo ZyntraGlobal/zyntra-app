@@ -4912,7 +4912,8 @@ function _migrarUsuarioColab(){
 // texto. A senha só lê dados, não abre o painel. Só o dono vê esta aba.
 var SITE_URL='https://zyntraglobal.com.br';
 var SITE_PEDRO='adminpdr';
-var _site={ev:[],pag:0,fim:false,carregando:false,erro:'',auth:null,quem:'equipe',area:'',busca:'',timer:null,visto:0};
+var _site={ev:[],pag:0,fim:false,carregando:false,erro:'',auth:null,quem:'equipe',area:'',busca:'',timer:null,visto:0,vista:'lista',diaAberto:''};
+try{if(localStorage.getItem('zg_site_vista')==='dia')_site.vista='dia';}catch(e){}
 try{_site.visto=parseInt(localStorage.getItem('zg_site_visto')||'0',10)||0;}catch(e){}
 var SITE_AREAS=[
   {k:'entradas',l:'🔑 Entradas no painel'},
@@ -5052,7 +5053,7 @@ function modalSiteConexao(){
   });
   setTimeout(function(){var s=document.getElementById('st-senha');if(s)s.focus();},50);
 }
-function siteFiltro(campo,v){_site[campo]=v;_siteRender();}
+function siteFiltro(campo,v){_site[campo]=v;if(campo==='vista'){try{localStorage.setItem('zg_site_vista',v);}catch(e){}}_siteRender();}
 function siteMarcarVisto(){var m=_site.ev.reduce(function(a,e){return Math.max(a,e.id||0);},0);_site.visto=m;try{localStorage.setItem('zg_site_visto',String(m));}catch(e){}_siteRender();}
 function _siteDetalhes(e){
   var it=[];(e.details_data||[]).forEach(function(g){(g&&g.items||[]).forEach(function(i){if(i&&i.name)it.push(i);});});
@@ -5062,6 +5063,72 @@ function _siteDetalhes(e){
     var tem=i.prev_value!==undefined&&i.prev_value!==null&&String(i.prev_value)!=='';
     return '<div><b style="color:var(--t2);font-weight:600">'+c(i.name)+':</b> '+(tem?'<span style="text-decoration:line-through;opacity:.7">'+c(i.prev_value)+'</span> → ':'')+c(i.new_value)+'</div>';
   }).join('')+(it.length>6?'<div>+ '+(it.length-6)+' alteração(ões)</div>':'')+'</div>';
+}
+function _siteLinha(e){
+  var sens=_siteSensivel(e),novo=e.id>_site.visto&&e.initiator==='wp_user'&&_siteQuem(e)!=='Felipe';
+  var ips=Object.keys(e.ip_addresses||{}).map(function(k){return e.ip_addresses[k];}).filter(Boolean).join(', ');
+  var area=(SITE_AREAS.find(function(a){return a.k===_siteArea(e);})||{}).l||'';
+  var ehPedro=_siteQuem(e)===SITE_PEDRO;
+  return '<div style="display:flex;gap:12px;padding:11px 16px;border-bottom:1px solid var(--bdr);'+(sens?'background:rgba(248,113,113,.07);box-shadow:inset 3px 0 0 #f87171;':'')+'">'+
+    '<div style="font-size:18px;line-height:1.2;width:24px;text-align:center;flex:0 0 auto">'+_siteIco(e)+'</div>'+
+    '<div style="flex:1;min-width:0">'+
+      '<div style="font-size:12.5px;color:var(--t);line-height:1.45;word-break:break-word">'+_escH(e.message||'')+
+        (e.subsequent_occasions_count>1?' <span class="pill pn">'+e.subsequent_occasions_count+'×</span>':'')+
+        (novo?' <span class="pill ppendente">novo</span>':'')+(sens?' <span class="pill patrasado">atenção</span>':'')+'</div>'+
+      _siteDetalhes(e)+
+      '<div style="margin-top:4px;font-size:11px;color:var(--t3);display:flex;flex-wrap:wrap;gap:4px 12px">'+
+        '<span style="'+(ehPedro?'color:#fbbf24;font-weight:700':'')+'">👤 '+_escH(_siteNomeQuem(e))+'</span>'+
+        '<span>🕒 '+_escH(_siteData(e.date_local))+'</span>'+
+        (area?'<span>'+_escH(area)+'</span>':'')+
+        (ips?'<span>🌍 IP '+_escH(ips)+'</span>':'')+
+        (e.link?'<a href="'+_escH(e.link)+'" target="_blank" rel="noopener" style="color:var(--t3)">ver no site ↗</a>':'')+
+      '</div>'+
+    '</div></div>';
+}
+// ── Resumo por dia: um bloco por dia com quem mexeu, em quê, horários e o que foi feito ──
+var _SITE_SEM=['dom','seg','ter','qua','qui','sex','sáb'];
+function _siteDiaTitulo(dia){
+  var m=dia.split('-'),d=new Date(+m[0],m[1]-1,+m[2]),h=new Date();h.setHours(0,0,0,0);
+  var dif=Math.round((h-d)/864e5);
+  return (dif===0?'Hoje':dif===1?'Ontem':_SITE_SEM[d.getDay()].replace(/^./,function(c){return c.toUpperCase();}))+', '+m[2]+'/'+m[1]+(m[0]!=String(h.getFullYear())?'/'+m[0]:'');
+}
+function siteAbrirDia(dia){_site.diaAberto=_site.diaAberto===dia?'':dia;_siteRender();}
+function _siteRenderDias(lista,todos){
+  if(!lista.length)return '<div class="panel"><div class="empty" style="padding:40px 24px">'+(_site.carregando&&!todos.length?'Carregando o histórico do site...':'Nenhuma movimentação com esses filtros nos dias carregados.')+'</div></div>';
+  var dias={},ordem=[];
+  lista.forEach(function(e){var d=String(e.date_local||'').slice(0,10);if(!dias[d]){dias[d]=[];ordem.push(d);}dias[d].push(e);});
+  var hr=function(e){return String(e.date_local||'').slice(11,16);};
+  var h='';
+  ordem.forEach(function(dia){
+    var evs=dias[dia];
+    var pessoas={};
+    evs.forEach(function(e){var n=_siteNomeQuem(e);var p=pessoas[n]=pessoas[n]||{n:0,ent:0,ini:'99:99',fim:'00:00',pedro:_siteQuem(e)===SITE_PEDRO};
+      p.n++;if(/logged_in/.test(String(e.message_key||'')))p.ent++;var t=hr(e);if(t<p.ini)p.ini=t;if(t>p.fim)p.fim=t;});
+    var sens=evs.filter(_siteSensivel).length;
+    var areas={};evs.forEach(function(e){var a=_siteArea(e);(areas[a]=areas[a]||[]).push(e);});
+    var aberto=_site.diaAberto===dia||(!_site.diaAberto&&dia===ordem[0]);
+    h+='<div class="panel" style="margin-bottom:12px'+(sens?';border-color:rgba(248,113,113,.45)':'')+'">';
+    h+='<div class="ph" style="cursor:pointer;flex-wrap:wrap;gap:6px" onclick="siteAbrirDia(\''+dia+'\')"><div class="pt">📅 '+_escH(_siteDiaTitulo(dia))+'</div>'+
+       '<div style="font-size:11.5px;color:var(--t2);display:flex;gap:8px;align-items:center;flex-wrap:wrap">'+evs.length+' movimentação(ões)'+
+       (sens?' <span class="pill patrasado">⚠ '+sens+' sensível(is)</span>':'')+' <span style="color:var(--t3)">'+(aberto?'▲ fechar':'▼ ver o dia')+'</span></div></div>';
+    // Quem mexeu
+    h+='<div style="padding:10px 16px;display:flex;flex-wrap:wrap;gap:8px;border-bottom:1px solid var(--bdr)">';
+    Object.keys(pessoas).sort(function(a,b){return pessoas[b].n-pessoas[a].n;}).forEach(function(n){var p=pessoas[n];
+      h+='<div style="padding:7px 11px;border-radius:10px;background:var(--w2);border:1px solid '+(p.pedro?'rgba(251,191,36,.45)':'var(--bdr)')+';font-size:12px;line-height:1.35">'+
+         '<div style="font-weight:700;color:'+(p.pedro?'#fbbf24':'var(--t)')+'">👤 '+_escH(n)+'</div>'+
+         '<div style="color:var(--t3);font-size:11px">'+p.n+' ação(ões)'+(p.ent?' · entrou '+p.ent+'x':'')+' · '+(p.ini===p.fim?'às '+p.ini:'das '+p.ini+' às '+p.fim)+'</div></div>';});
+    h+='</div>';
+    // O que foi feito, por área
+    h+='<div style="padding:8px 16px 10px">';
+    SITE_AREAS.forEach(function(a){var l=areas[a.k];if(!l)return;
+      var ex=[],vistos={};l.forEach(function(e){var t=String(e.message||'').trim();if(t&&!vistos[t]&&ex.length<3){vistos[t]=1;ex.push(t);}});
+      h+='<div style="display:flex;gap:10px;padding:5px 0;font-size:12px;line-height:1.45"><div style="flex:0 0 auto;min-width:150px;color:var(--t2);font-weight:600">'+a.l+' <span style="color:var(--t3);font-weight:400">('+l.length+')</span></div>'+
+         '<div style="flex:1;min-width:0;color:var(--t3);word-break:break-word">'+ex.map(function(t){return _escH(t.length>90?t.slice(0,90)+'…':t);}).join(' · ')+(l.length>ex.length?' · <i>e mais '+(l.length-ex.length)+'</i>':'')+'</div></div>';});
+    h+='</div>';
+    if(aberto)h+='<div style="border-top:1px solid var(--bdr)">'+evs.map(_siteLinha).join('')+'</div>';
+    h+='</div>';
+  });
+  return h;
 }
 function _siteRender(){
   if(_curPage!=='site')return;
@@ -5084,7 +5151,9 @@ function _siteRender(){
     return true;
   });
 
-  var h='<div class="g4">';
+  var segB=function(v,l){return '<button class="'+(_site.vista===v?'on':'')+'" onclick="siteFiltro(\'vista\',\''+v+'\')">'+l+'</button>';};
+  var h='<div class="zseg">'+segB('lista','📋 Movimentações')+segB('dia','📅 Por dia')+'</div>';
+  h+='<div class="g4">';
   h+='<div class="card hl"><div class="lbl">Pedro hoje</div><div class="val gld">'+pedroHoje+'</div><div class="sub">ações no painel do site</div></div>';
   h+='<div class="card"><div class="lbl">Última entrada do Pedro</div><div class="val blu" style="font-size:18px">'+(ultEntrada?_escH(_siteData(ultEntrada.date_local)):'—')+'</div><div class="sub">'+(ultEntrada?'entrou no painel':'nenhuma nos eventos carregados')+'</div></div>';
   h+='<div class="card'+(alertas?' warn':'')+'"><div class="lbl">Ações sensíveis (7 dias)</div><div class="val" style="color:'+(alertas?'var(--red)':'var(--grn)')+'">'+alertas+'</div><div class="sub">plugins, usuários, config., senha errada</div></div>';
@@ -5103,34 +5172,18 @@ function _siteRender(){
 
   if(_site.erro)h+='<div class="panel" style="margin-bottom:12px;border-color:rgba(248,113,113,.4)"><div style="padding:12px 16px;font-size:12.5px;color:var(--red)">⚠️ '+_escH(_site.erro)+'</div></div>';
 
-  h+='<div class="panel"><div class="ph"><div class="pt">Movimentações ('+lista.length+')</div><div style="font-size:11px;color:var(--t3)">atualiza sozinho a cada minuto</div></div>';
-  if(!lista.length){
-    h+='<div class="empty" style="padding:40px 24px">'+(_site.carregando&&!todos.length?'Carregando o histórico do site...':'Nada encontrado com esses filtros'+(_site.fim?'.':' nos eventos carregados — clique em “Carregar mais antigos”.'))+'</div>';
+  var maisBtn=(todos.length&&!_site.fim)?'<div style="padding:12px 16px;text-align:center"><button class="btn bsm" onclick="_siteCarregar(false)"'+(_site.carregando?' disabled':'')+'>'+(_site.carregando?'⏳ Carregando...':(_site.vista==='dia'?'⬇ Carregar dias anteriores':'⬇ Carregar mais antigos'))+'</button></div>':'';
+  if(_site.vista==='dia'){
+    h+=_siteRenderDias(lista,todos)+(maisBtn?'<div class="panel">'+maisBtn+'</div>':'');
   }else{
-    lista.forEach(function(e){
-      var sens=_siteSensivel(e),novo=e.id>_site.visto&&e.initiator==='wp_user'&&_siteQuem(e)!=='Felipe';
-      var ips=Object.keys(e.ip_addresses||{}).map(function(k){return e.ip_addresses[k];}).filter(Boolean).join(', ');
-      var area=(SITE_AREAS.find(function(a){return a.k===_siteArea(e);})||{}).l||'';
-      var ehPedro=_siteQuem(e)===SITE_PEDRO;
-      h+='<div style="display:flex;gap:12px;padding:11px 16px;border-bottom:1px solid var(--bdr);'+(sens?'background:rgba(248,113,113,.07);box-shadow:inset 3px 0 0 #f87171;':'')+'">'+
-        '<div style="font-size:18px;line-height:1.2;width:24px;text-align:center;flex:0 0 auto">'+_siteIco(e)+'</div>'+
-        '<div style="flex:1;min-width:0">'+
-          '<div style="font-size:12.5px;color:var(--t);line-height:1.45;word-break:break-word">'+_escH(e.message||'')+
-            (e.subsequent_occasions_count>1?' <span class="pill pn">'+e.subsequent_occasions_count+'×</span>':'')+
-            (novo?' <span class="pill ppendente">novo</span>':'')+(sens?' <span class="pill patrasado">atenção</span>':'')+'</div>'+
-          _siteDetalhes(e)+
-          '<div style="margin-top:4px;font-size:11px;color:var(--t3);display:flex;flex-wrap:wrap;gap:4px 12px">'+
-            '<span style="'+(ehPedro?'color:#fbbf24;font-weight:700':'')+'">👤 '+_escH(_siteNomeQuem(e))+'</span>'+
-            '<span>🕒 '+_escH(_siteData(e.date_local))+'</span>'+
-            (area?'<span>'+_escH(area)+'</span>':'')+
-            (ips?'<span>🌍 IP '+_escH(ips)+'</span>':'')+
-            (e.link?'<a href="'+_escH(e.link)+'" target="_blank" rel="noopener" style="color:var(--t3)">ver no site ↗</a>':'')+
-          '</div>'+
-        '</div></div>';
-    });
+    h+='<div class="panel"><div class="ph"><div class="pt">Movimentações ('+lista.length+')</div><div style="font-size:11px;color:var(--t3)">atualiza sozinho a cada minuto</div></div>';
+    if(!lista.length){
+      h+='<div class="empty" style="padding:40px 24px">'+(_site.carregando&&!todos.length?'Carregando o histórico do site...':'Nada encontrado com esses filtros'+(_site.fim?'.':' nos eventos carregados — clique em “Carregar mais antigos”.'))+'</div>';
+    }else{
+      lista.forEach(function(e){h+=_siteLinha(e);});
+    }
+    h+=maisBtn+'</div>';
   }
-  if(todos.length&&!_site.fim)h+='<div style="padding:12px 16px;text-align:center"><button class="btn bsm" onclick="_siteCarregar(false)"'+(_site.carregando?' disabled':'')+'>'+(_site.carregando?'⏳ Carregando...':'⬇ Carregar mais antigos')+'</button></div>';
-  h+='</div>';
   var pg=document.querySelector('.pg'),y=pg?pg.scrollTop:0;
   setPage(h);
   if(pg)pg.scrollTop=y;
