@@ -5567,15 +5567,58 @@ function _rbRastro(s){
   if(!ev.length)return '<div style="padding:10px 0;color:var(--t3);font-size:12px">Sem registros ainda.</div>';
   return '<div style="position:relative;margin:6px 0 2px;padding-left:18px;border-left:2px solid var(--bdr)">'+ev.map(function(e){return '<div style="position:relative;padding:6px 0 10px"><span style="position:absolute;left:-29px;top:4px;width:20px;height:20px;border-radius:50%;background:var(--w2);border:1px solid var(--bdr);display:flex;align-items:center;justify-content:center;font-size:11px">'+e.ic+'</span><div style="font-size:11px;color:var(--t3)">'+_escH(_rbData(e.d))+(e.quem?' · <b style="color:var(--t2)">'+_escH(e.quem)+'</b>':'')+'</div><div style="font-size:12.5px;color:var(--t);line-height:1.45">'+_escH(e.txt)+'</div></div>';}).join('')+'</div>';
 }
+function rbVista(v){_rb.vista=v;try{localStorage.setItem('zg_rb_vista',v);}catch(e){}_rbRender();}
+function _rbChave(iso,tipo){var d=new Date(iso);if(isNaN(d))return '';var p=function(n){return (n<10?'0':'')+n;};if(tipo==='dia')return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate());if(tipo==='mes')return d.getFullYear()+'-'+p(d.getMonth()+1);return String(d.getFullYear());}
+function _rbNomePeriodo(k,tipo){var M=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'],S=['dom','seg','ter','qua','qui','sex','sáb'];var a=k.split('-');if(tipo==='dia'){var d=new Date(+a[0],a[1]-1,+a[2]);var h=new Date();h.setHours(0,0,0,0);var df=Math.round((h-d)/864e5);return (df===0?'Hoje':df===1?'Ontem':S[d.getDay()])+', '+a[2]+'/'+a[1]+'/'+a[0];}if(tipo==='mes')return M[+a[1]-1].replace(/^./,function(c){return c.toUpperCase();})+' de '+a[0];return 'Ano de '+k;}
+function _rbPeriodos(D,tipo){
+  var P={},novo=function(){return {sol:0,rec:0,est:0,valor:0,pix:0,cartao:0,outros:0,fora:0,motivos:{},eventos:[]};},pega=function(k){return P[k]||(P[k]=novo());};
+  (D.solicitacoes||[]).forEach(function(s){
+    if(s.datas&&s.datas.pendente){var k=_rbChave(s.datas.pendente,tipo),x=pega(k);x.sol++;x.motivos[s.motivo]=(x.motivos[s.motivo]||0)+1;x.eventos.push({d:s.datas.pendente,ic:'📥',txt:'Solicitação aberta · pedido #'+s.pedido+' · '+s.cliente+' · '+(s.motivo||''),v:s.total});}
+    if(s.datas&&s.datas.recusado){var k2=_rbChave(s.datas.recusado,tipo),y=pega(k2);y.rec++;y.eventos.push({d:s.datas.recusado,ic:'⛔',txt:'Recusado · pedido #'+s.pedido+(s.resposta?' · '+s.resposta:'')});}
+  });
+  (D.estornos||[]).forEach(function(e){var k=_rbChave(e.data,tipo),x=pega(k);x.est++;x.valor+=e.valor;var m=String(e.pagamento||'').toLowerCase();if(m.indexOf('pix')>=0)x.pix+=e.valor;else if(m.indexOf('cart')>=0||m.indexOf('card')>=0)x.cartao+=e.valor;else x.outros+=e.valor;if(!e.na_central)x.fora++;x.eventos.push({d:e.data,ic:'🏦',txt:'Estorno de '+_rbBRL(e.valor)+' · pedido #'+e.pedido+' · '+(e.pagamento||'')+(e.via_gateway?' (Stark Bank)':' (manual)')+(e.por?' · por '+e.por:'')+(e.na_central?'':' · ⚠️ feito fora da Central'),v:e.valor});});
+  Object.keys(P).forEach(function(k){P[k].eventos.sort(function(a,b){return new Date(b.d)-new Date(a.d);});});
+  return P;
+}
+function _rbRenderPeriodos(D,tipo){
+  var P=_rbPeriodos(D,tipo),chaves=Object.keys(P).filter(Boolean).sort().reverse();
+  var agora=_rbChave(new Date().toISOString(),tipo),cur=P[agora]||{sol:0,rec:0,est:0,valor:0,pix:0,cartao:0};
+  var rot={dia:'Hoje',mes:'Este mês',ano:'Este ano'}[tipo];
+  var h='<div class="g4">';
+  h+='<div class="card hl"><div class="lbl">'+rot+' · solicitações</div><div class="val gld">'+cur.sol+'</div><div class="sub">pedidos de reembolso abertos</div></div>';
+  h+='<div class="card ok"><div class="lbl">'+rot+' · devolvido</div><div class="val grn" style="font-size:20px">'+_rbBRL(cur.valor)+'</div><div class="sub">'+cur.est+' estorno(s)</div></div>';
+  h+='<div class="card"><div class="lbl">'+rot+' · Pix / cartão</div><div class="val blu" style="font-size:16px">'+_rbBRL(cur.pix)+' / '+_rbBRL(cur.cartao)+'</div><div class="sub">por forma de pagamento</div></div>';
+  h+='<div class="card"><div class="lbl">'+rot+' · recusadas</div><div class="val" style="color:var(--t2)">'+cur.rec+'</div><div class="sub">solicitações recusadas</div></div>';
+  h+='</div>';
+  if(!chaves.length){h+='<div class="panel"><div class="empty" style="padding:36px 24px">Nenhum movimento de reembolso ainda.</div></div>';return h;}
+  var limite={dia:31,mes:24,ano:10}[tipo];
+  chaves.slice(0,limite).forEach(function(k){
+    var x=P[k],ab=!!_rb.aberto['p'+k],mot=Object.keys(x.motivos).sort(function(a,b){return x.motivos[b]-x.motivos[a];}).map(function(m){return _escH(m)+' ('+x.motivos[m]+')';}).join(' · ');
+    h+='<div class="panel" style="margin-bottom:10px"><div class="ph" style="cursor:pointer;flex-wrap:wrap;gap:6px" onclick="rbAbrir(\'p'+k+'\')"><div class="pt">'+(tipo==='dia'?'📅 ':tipo==='mes'?'🗓 ':'📆 ')+_escH(_rbNomePeriodo(k,tipo))+'</div><div style="font-size:11.5px;color:var(--t2);display:flex;gap:10px;flex-wrap:wrap;align-items:center"><span>'+x.sol+' solicitação(ões)</span><span style="color:var(--grn);font-weight:700">'+_rbBRL(x.valor)+' devolvido</span>'+(x.rec?'<span>'+x.rec+' recusada(s)</span>':'')+(x.fora?' <span class="pill patrasado">⚠ '+x.fora+' fora da Central</span>':'')+'<span style="color:var(--t3)">'+(ab?'▲':'▼')+'</span></div></div>';
+    h+='<div style="padding:8px 16px 10px;display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:var(--t2)"><span>Pix: <b>'+_rbBRL(x.pix)+'</b></span><span>Cartão: <b>'+_rbBRL(x.cartao)+'</b></span>'+(x.outros?'<span>Outros: <b>'+_rbBRL(x.outros)+'</b></span>':'')+(mot?'<span>Motivos: '+mot+'</span>':'')+'</div>';
+    if(ab)h+='<div style="border-top:1px solid var(--bdr);padding:6px 16px 10px">'+x.eventos.map(function(e){return '<div style="display:flex;gap:10px;padding:7px 0;border-bottom:1px solid var(--bdr);font-size:12.5px"><span>'+e.ic+'</span><span style="color:var(--t3);min-width:92px">'+_escH(_rbData(e.d))+'</span><span style="color:var(--t);flex:1">'+_escH(e.txt)+'</span></div>';}).join('')+'</div>';
+    h+='</div>';
+  });
+  return h;
+}
 function _rbRender(){
   if(_curPage!=='reembolsos')return;
   var D=_rb.dados||{solicitacoes:[],aprovadores:[]},L=D.solicitacoes||[];
+  if(!_rb.vista){try{_rb.vista=localStorage.getItem('zg_rb_vista')||'lista';}catch(e){_rb.vista='lista';}}
+  var segV=function(v,l){return '<button style="flex:1 1 auto;min-width:max-content" class="'+(_rb.vista===v?'on':'')+'" onclick="rbVista(\''+v+'\')">'+l+'</button>';};
+  var topo='<div class="zseg" style="flex-wrap:wrap">'+segV('lista','📋 Solicitações')+segV('dia','📅 Por dia')+segV('mes','🗓 Por mês')+segV('ano','📆 Por ano')+'</div>';
+  topo+='<div class="panel" style="margin-bottom:12px"><div style="padding:10px 16px;font-size:12px;color:var(--t2)">🔒 Só o dono (Felipe) acessa a Central de reembolsos, aprova, decide o valor e devolve o dinheiro. Esta aba mostra tudo o que acontece lá.'+(_rb.erro?' <span style="color:var(--red)">⚠️ '+_escH(_rb.erro)+'</span>':'')+'</div></div>';
+  if(_rb.vista!=='lista'){
+    var hp=topo+'<div class="brow"><button class="btn bsm" onclick="_rbCarregar()"'+(_rb.carregando?' disabled':'')+'>'+(_rb.carregando?'⏳ Atualizando...':'🔄 Atualizar')+'</button><a class="btn btnp bsm" style="margin-left:auto" href="'+SITE_URL+'/wp-admin/admin.php?page=zx-reembolsos&rel='+_rb.vista+'" target="_blank" rel="noopener">Ver relatório na Central ↗</a></div>';
+    hp+=_rb.dados?_rbRenderPeriodos(D,_rb.vista):'<div class="panel"><div class="empty" style="padding:36px 24px">Carregando…</div></div>';
+    var pg0=document.querySelector('.pg'),y0=pg0?pg0.scrollTop:0;setPage(hp);if(pg0)pg0.scrollTop=y0;return;
+  }
   var abertos=L.filter(function(s){return s.status==='pendente'||s.status==='info';});
   var mes=new Date();mes.setDate(1);mes.setHours(0,0,0,0);
   var devMes=0,devTot=0,nMes=0;L.forEach(function(s){(s.reembolsos||[]).forEach(function(r){devTot+=r.valor;if(new Date(r.data)>=mes){devMes+=r.valor;nMes++;}});});
   var atras=abertos.filter(function(s){var t=s.datas&&s.datas.pendente?new Date(s.datas.pendente):null;return t&&(Date.now()-t)>2*864e5;}).length;
   var podem=abertos.filter(function(s){return s.analise&&s.analise.cor==='verde';}).length;
-  var h='<div class="g4">';
+  var h=topo+'<div class="g4">';
   h+='<div class="card hl"><div class="lbl">Para analisar</div><div class="val gld">'+abertos.length+'</div><div class="sub">'+podem+' com selo "Pode aprovar"</div></div>';
   h+='<div class="card'+(atras?' warn':'')+'"><div class="lbl">Respostas atrasadas</div><div class="val" style="color:'+(atras?'var(--red)':'var(--grn)')+'">'+atras+'</div><div class="sub">em análise há mais de 2 dias</div></div>';
   h+='<div class="card"><div class="lbl">Devolvido este mês</div><div class="val blu" style="font-size:20px">'+_rbBRL(devMes)+'</div><div class="sub">'+nMes+' estorno(s)</div></div>';
