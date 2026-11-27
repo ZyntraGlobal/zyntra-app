@@ -7,6 +7,7 @@
 //  • domínio nos servidores da Cloudflare (NS)
 //  • e-mails apontando pra Hostinger (MX)
 //  • assinatura DKIM dos e-mails publicada
+//  • e-mails saindo do site (snippet "Zyntra - saude do site para a Torre de Comando")
 //  • (opcional) administradores do painel — só se os secrets WP_MONITOR_USER e
 //    WP_MONITOR_APP_PASSWORD existirem (senha de aplicativo do WordPress).
 //
@@ -110,6 +111,18 @@ const VERIFICACOES = [
     const txt = a.filter(x => x.t === 16).map(x => x.d).join('');
     const ok = /v=dkim1/.test(txt) && /p=\S{20,}/.test(txt);
     return { ok, detalhe: ok ? 'publicada' : 'Na Cloudflare, os registros hostingermail-a/b/c._domainkey precisam estar como "Somente DNS" (nuvem cinza). Sem isso os e-mails caem no spam ou somem.' };
+  } },
+  // Resumo do snippet "Zyntra - saude do site" (/wp-json/zyntra/v1/saude). Falha = 2+ erros de
+  // envio nas últimas 2 h e nenhum e-mail saiu depois do último erro. Se o site não responder,
+  // isso fica "não conferido" (quem avisa é a verificação do site).
+  { id: 'email', nome: 'Site não está conseguindo enviar e-mails', voltou: 'Site voltou a enviar e-mails', fn: async () => {
+    const r = await buscar(SITE + '/wp-json/zyntra/v1/saude', { cache: 'no-store' });
+    if (!r.ok) throw new Error('resumo de saúde respondeu ' + r.status);
+    const e = (await r.json()).email || {};
+    const falhando = e.ultimo_erro && (!e.ultimo_ok || e.ultimo_erro > e.ultimo_ok) && e.erros_2h >= 2;
+    return { ok: !falhando, detalhe: falhando
+      ? e.erros_2h + ' erros de envio nas últimas 2 h e nenhum e-mail saiu depois disso. Clientes podem não receber senha e confirmação de pedido — veja WP Mail SMTP → Eventos de depuração.'
+      : (e.ok_24h || 0) + ' enviados e ' + (e.erros_24h || 0) + ' erros nas últimas 24 h' };
   } }
 ];
 
@@ -202,7 +215,7 @@ async function main() {
       webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC, VAPID_PRIVATE);
       if (TESTE) {
         const falhas = VERIFICACOES.filter(v => res[v.id] && res[v.id].ok === false).map(v => v.nome);
-        await enviarPush(subs, '🗼 Teste da Torre de Comando', falhas.length ? 'Teste ok. Agora com problema: ' + falhas.join(', ') + '.' : 'Teste ok — site, loja, domínio, e-mail e DKIM normais. Você será avisado aqui se algo mudar.', 'zyntra-monitor-teste');
+        await enviarPush(subs, '🗼 Teste da Torre de Comando', falhas.length ? 'Teste ok. Agora com problema: ' + falhas.join(', ') + '.' : 'Teste ok — site, loja, domínio, e-mail, DKIM e envio de e-mails normais. Você será avisado aqui se algo mudar.', 'zyntra-monitor-teste');
       }
       for (const a of avisos) await enviarPush(subs, a.t, a.b, a.tag);
     }
