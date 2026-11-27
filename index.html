@@ -512,6 +512,7 @@ input:focus,select:focus,textarea:focus{border-color:#ff2e93!important;box-shado
   <div class="sb-sec">Sistema</div>
   <div class="ni" id="ni-usuarios" onclick="ir('usuarios',this)"><span class="ico">👥</span><span class="lbl">Usuários</span></div>
   <div class="ni" id="ni-torre" onclick="ir('torre',this)"><span class="ico">🗼</span><span class="lbl">Torre de Comando</span></div>
+  <div class="ni" id="ni-cofre" onclick="ir('cofre',this)"><span class="ico">🔐</span><span class="lbl">Cofre</span></div>
   <div class="ni" id="ni-site" onclick="ir('site',this)"><span class="ico">🌐</span><span class="lbl">Atividade do Site</span></div>
   <div class="ni" onclick="fazerBackupG()" id="ni-backup"><span class="ico">💾</span><span class="lbl">Backup</span></div>
   <div class="ni" onclick="sairSistema()" id="ni-sair"><span class="ico">🚪</span><span class="lbl">Sair</span></div>
@@ -1144,12 +1145,12 @@ function ir(tipo,arg,el){
   if(el)el.classList.add('on');
   _curPage=tipo;_curMes=arg||0;
   // 'usuarios' é sempre exclusivo do dono, nunca liberável por permissão
-  if((tipo==='usuarios'||tipo==='mensal'||tipo==='site'||tipo==='torre'||tipo==='reembolsos')&&_isFuncionario()){_bloqueadoFunc();document.getElementById('ptitle').textContent='Acesso Restrito';return;}
+  if((tipo==='usuarios'||tipo==='mensal'||tipo==='site'||tipo==='torre'||tipo==='reembolsos'||tipo==='cofre')&&_isFuncionario()){_bloqueadoFunc();document.getElementById('ptitle').textContent='Acesso Restrito';return;}
   if(!_paginaPermitida(tipo)){
     if(tipo==='dash'&&_isFuncionario()){document.getElementById('ptitle').textContent='Início';pInicioFunc();return;}
     _bloqueadoFunc();document.getElementById('ptitle').textContent='Acesso Restrito';return;
   }
-  var titulos={dash:'Dashboard',est_produtos:'Estoque — Produtos',est_fin:'Estoque — Financeiro',est_mov:'Estoque — Movimentações',est_alertas:'Estoque — Alertas',rtu_lanc:'Controle RTU — Lançamentos',rtu_resumo:'Controle RTU — Resumo Anual',notif:'Alertas & Notificações',fornecedores:'Fornecedores',compras:'Compras — Lista de Compras',pendencias:'Avisos & Pendências',marketplaces:'Marketplaces — Saldo & A Receber',gateways:'Gateways — Saldo & Retenções',investimentos:'Investimentos — Aplicações por Conta',usuarios:'Usuários & Acessos',inicio:'Início',mensal:'Resumo Mensal',chargebacks:'Chargebacks — Stark Bank',recebimentos:'Recebimentos — Stark Bank',site:'Atividade do Site — zyntraglobal.com.br',torre:'Torre de Comando — site, domínio, e-mail e acessos',reembolsos:'Reembolsos — Central do site'};
+  var titulos={dash:'Dashboard',est_produtos:'Estoque — Produtos',est_fin:'Estoque — Financeiro',est_mov:'Estoque — Movimentações',est_alertas:'Estoque — Alertas',rtu_lanc:'Controle RTU — Lançamentos',rtu_resumo:'Controle RTU — Resumo Anual',notif:'Alertas & Notificações',fornecedores:'Fornecedores',compras:'Compras — Lista de Compras',pendencias:'Avisos & Pendências',marketplaces:'Marketplaces — Saldo & A Receber',gateways:'Gateways — Saldo & Retenções',investimentos:'Investimentos — Aplicações por Conta',usuarios:'Usuários & Acessos',inicio:'Início',mensal:'Resumo Mensal',chargebacks:'Chargebacks — Stark Bank',recebimentos:'Recebimentos — Stark Bank',site:'Atividade do Site — zyntraglobal.com.br',torre:'Torre de Comando — site, domínio, e-mail e acessos',cofre:'Cofre — anotações secretas (cifradas com seu PIN)',reembolsos:'Reembolsos — Central do site'};
   document.getElementById('ptitle').textContent=titulos[tipo]||(tipo==='pag'?'Pagamentos — '+MFULL[(arg||1)-1]+' 2026':tipo);
   if(tipo==='dash')pDash();
   else if(tipo==='est_produtos')pEstProdutos();
@@ -1173,6 +1174,7 @@ function ir(tipo,arg,el){
   else if(tipo==='reembolsos')pReembolsos();
   else if(tipo==='site')pSite();
   else if(tipo==='torre')pTorre();
+  else if(tipo==='cofre')pCofre();
   else if(tipo==='inicio')pInicioFunc();
 }
 
@@ -2376,7 +2378,7 @@ async function _cofreDerivar(pin,saltB64){
 function _cofreAberto(){return !!(_cofre.key&&Date.now()<_cofre.ate);}
 function _cofreFechar(){_cofre.key=null;_cofre.salt=null;_cofre.ate=0;}
 // Salt de qualquer senha já guardada — se existir, o PIN digitado tem que abrir ela.
-function _cofreRef(){return (DB.fornecedores||[]).concat(DB.usuarios||[]).concat(DB.siteMon?[DB.siteMon]:[]).map(function(f){return f.senhaEnc;}).filter(function(e){return e&&e.salt&&e.iv&&e.ct;})[0]||null;}
+function _cofreRef(){return (DB.fornecedores||[]).concat(DB.usuarios||[]).concat(DB.siteMon?[DB.siteMon]:[]).map(function(f){return f.senhaEnc;}).concat((DB.cofreItens||[]).map(function(c){return c.enc;})).filter(function(e){return e&&e.salt&&e.iv&&e.ct;})[0]||null;}
 // Pede o PIN (se o cofre estiver fechado), abre a senha cifrada e chama ok(senha).
 function _cofreVer(titulo,enc,ok){
   if(_cofreAberto()){_cofreDecifrar(enc).then(ok).catch(function(e){alert(e.message);});return;}
@@ -4951,7 +4953,7 @@ function _sessaoAtual(){
 // 'usuarios' e 'mensal' são sempre só do dono.
 function _ajustarSidebarFunc(){
   var func=_isFuncionario();
-  var pode=function(t){return !func||(t!=='usuarios'&&t!=='mensal'&&t!=='site'&&t!=='torre'&&t!=='reembolsos'&&_paginaPermitida(t));};
+  var pode=function(t){return !func||(t!=='usuarios'&&t!=='mensal'&&t!=='site'&&t!=='torre'&&t!=='reembolsos'&&t!=='cofre'&&_paginaPermitida(t));};
   document.querySelectorAll('.sb .ni').forEach(function(el){
     var m=(el.getAttribute('onclick')||'').match(/ir\('([a-z_0-9]+)'/);
     // "Dashboard" é a porta do "Início" do funcionário (ir('dash') abre o Início pra ele)
@@ -5582,6 +5584,74 @@ function _torreAuto(){
     else if(_curPage==='torre')_torreRender();
   },120000);
 }
+// ── COFRE — anotações secretas do dono (códigos de recuperação, chaves etc.) ──
+// Cada item: {id, titulo, enc:{salt,iv,ct}, em}. O texto fica cifrado com o PIN do
+// cofre (AES-GCM, mesma chave das senhas de fornecedores/usuários/site) e só é
+// decifrado na tela, quando o dono pede para ver. Só o dono vê esta aba.
+var _cofreVis={};
+function _cofreItens(){if(!Array.isArray(DB.cofreItens))DB.cofreItens=[];return DB.cofreItens;}
+function pCofre(){
+  if(_isFuncionario()){_bloqueadoFunc();return;}
+  var l=_cofreItens().slice().sort(function(a,b){return String(a.titulo||'').localeCompare(String(b.titulo||''));});
+  var h='<div class="panel" style="margin-bottom:12px"><div style="padding:12px 16px;font-size:12px;color:var(--t2);line-height:1.6">🔐 Guarde aqui o que <b>só você</b> pode ver: códigos de recuperação (GitHub, Cloudflare…), chaves e anotações secretas. '+
+    'Tudo fica <b>cifrado com o seu PIN</b> — sem o PIN ninguém lê, nem quem tiver acesso aos dados. '+
+    '<span style="color:var(--t3)">Dica: guarde também uma cópia em papel dos códigos de recuperação, para o caso de perder o acesso ao próprio Gestão.</span></div></div>';
+  h+='<div class="brow"><button class="btn btnp bsm" onclick="cofreEditar()">+ Nova anotação</button>'+(_cofreAberto()?'<button class="btn bsm" onclick="_cofreFechar();_cofreVis={};pCofre()">🔒 Trancar</button>':'')+'</div>';
+  if(!l.length){
+    h+='<div class="panel"><div class="empty" style="padding:48px 30px"><div style="font-size:32px;margin-bottom:10px">🔐</div><div style="font-size:14px;font-weight:600;color:var(--t2);margin-bottom:6px">Cofre vazio</div><div style="font-size:12px;color:var(--t3);margin-bottom:16px">Crie uma anotação e cole os códigos de recuperação do GitHub, por exemplo.</div><button class="btn btnp" onclick="cofreEditar()">+ Nova anotação</button></div></div>';
+    setPage(h);return;
+  }
+  h+='<div class="panel">';
+  l.forEach(function(c){
+    var v=_cofreVis[c.id];
+    h+='<div style="padding:12px 16px;border-bottom:1px solid var(--bdr)">'+
+      '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">'+
+        '<div style="flex:1;min-width:160px"><div style="font-size:13px;font-weight:700;color:var(--t)">🔒 '+_escH(c.titulo||'Sem título')+'</div><div style="font-size:11px;color:var(--t3)">guardado em '+_escH(c.em||'—')+'</div></div>'+
+        (v===undefined?'<button class="btn bsm" onclick="cofreVer(\''+c.id+'\')">👁 Ver</button>':'<button class="btn bsm" onclick="cofreCopiar(\''+c.id+'\')">📋 Copiar</button><button class="btn bsm" onclick="delete _cofreVis[\''+c.id+'\'];pCofre()">🙈 Esconder</button>')+
+        '<button class="btn bsm" onclick="cofreEditar(\''+c.id+'\')">✏️</button>'+
+      '</div>'+
+      (v!==undefined?'<pre style="margin:10px 0 0;padding:10px 12px;background:var(--w2);border:1px solid var(--bdr);border-radius:8px;font-size:12.5px;line-height:1.6;white-space:pre-wrap;word-break:break-word;color:var(--t);font-family:var(--f-num),monospace">'+_escH(v)+'</pre>':'')+
+    '</div>';
+  });
+  h+='</div>';
+  setPage(h);
+}
+function cofreVer(id){
+  var c=_cofreItens().find(function(x){return x.id===id;});if(!c)return;
+  _cofreVer(c.titulo||'Cofre',c.enc,function(txt){fecharM();_cofreVis[id]=txt;pCofre();});
+}
+function cofreCopiar(id){
+  var t=_cofreVis[id];if(t===undefined)return;
+  try{navigator.clipboard.writeText(t).then(function(){alert('Copiado. Cole onde precisar e depois limpe a área de transferência.');});}catch(e){alert('Não deu para copiar — selecione o texto e copie.');}
+}
+function cofreEditar(id){
+  var itens=_cofreItens(),c=id?itens.find(function(x){return x.id===id;}):null,criar=!_cofreRef();
+  var montar=function(txtAtual){
+    var b='<div class="fg f2">'+
+      '<div style="grid-column:1/-1"><label>Título</label><input id="cf-tit" value="'+_escH(c?c.titulo:'')+'" placeholder="Ex.: GitHub — códigos de recuperação"></div>'+
+      '<div style="grid-column:1/-1"><label>Conteúdo secreto</label><textarea id="cf-txt" rows="8" style="width:100%;font-family:monospace" placeholder="Cole aqui os códigos ou a anotação">'+_escH(txtAtual||'')+'</textarea></div>'+
+      (_cofreAberto()?'':_pinCampo('cf-pin',criar))+
+      (c?'<div style="grid-column:1/-1;font-size:11px;color:var(--t3)"><label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="cf-del" style="width:auto"> Apagar esta anotação do cofre</label></div>':'')+
+      '<div id="cf-err" style="grid-column:1/-1;color:var(--red);font-size:12px"></div></div>';
+    abrirM(c?'✏️ Editar anotação':'🔐 Nova anotação no cofre',b,async function(){
+      var err=document.getElementById('cf-err'),del=document.getElementById('cf-del');
+      if(del&&del.checked){if(!confirm('Apagar "'+(c.titulo||'')+'" do cofre? Não dá para desfazer.'))return;DB.cofreItens=itens.filter(function(x){return x.id!==c.id;});delete _cofreVis[c.id];save();fecharM();pCofre();return;}
+      var tit=document.getElementById('cf-tit').value.trim(),txt=document.getElementById('cf-txt').value;
+      if(!tit||!txt.trim()){err.textContent='Preencha o título e o conteúdo.';return;}
+      try{
+        if(!_cofreAberto()){var p=document.getElementById('cf-pin');await _cofreAbrir(p?p.value:'');}
+        var enc=await _cofreCifrar(txt);
+        if(c){c.titulo=tit;c.enc=enc;c.em=hoje();_cofreVis[c.id]=txt;}
+        else{var n={id:'cf'+Date.now().toString(36),titulo:tit,enc:enc,em:hoje()};itens.push(n);}
+        save();fecharM();pCofre();
+      }catch(e){err.textContent=(e&&e.message)||'Não foi possível guardar.';}
+    });
+    setTimeout(function(){var f=document.getElementById(c?'cf-txt':'cf-tit');if(f)f.focus();},50);
+  };
+  if(c)_cofreVer(c.titulo||'Cofre',c.enc,function(txt){montar(txt);});
+  else montar('');
+}
+
 function pTorre(){
   if(_isFuncionario()){_bloqueadoFunc();return;}
   _torreCfg();
