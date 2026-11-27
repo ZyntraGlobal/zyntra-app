@@ -1093,7 +1093,7 @@ function pillStatus(s){var m={'Pago':'ppago','Pendente':'ppendente','Atrasado':'
 function diasAte(dataStr){if(!dataStr)return null;var p=dataStr.split('/');var d=new Date(p[2],p[1]-1,p[0]);var hoje=new Date();hoje.setHours(0,0,0,0);return Math.ceil((d-hoje)/(1000*60*60*24));}
 
 var _mfn=null;
-function abrirM(t,b,fn,lg){document.getElementById('mtit').textContent=t;document.getElementById('mbody').innerHTML=b;_mfn=fn||null;document.getElementById('macts').style.display=fn?'flex':'none';document.getElementById('mbox').className='modal'+(lg?' lg':'');document.getElementById('mbg').classList.add('open');}
+function abrirM(t,b,fn,lg,okTxt){document.getElementById('mtit').textContent=t;document.getElementById('mbody').innerHTML=b;_mfn=fn||null;var ok=document.querySelector('#macts .btnp');if(ok)ok.textContent=okTxt||'Salvar';document.getElementById('macts').style.display=fn?'flex':'none';document.getElementById('mbox').className='modal'+(lg?' lg':'');document.getElementById('mbg').classList.add('open');}
 function fecharM(){
   document.getElementById('mbg').classList.remove('open');_mfn=null;
   if(window._pendingSyncApply){window._pendingSyncApply=false;if(typeof _atualizarTelaComDadosNovos==='function')_atualizarTelaComDadosNovos();}
@@ -5045,11 +5045,16 @@ async function doLogin(){
   }
 }
 // Botão "Sair": encerra a sessão na hora (antes só caía sozinha após 4h)
+// Usa a janela do próprio sistema, não o confirm() nativo: no app de computador
+// (Electron/Windows) o confirm() deixa a página sem foco de teclado e, depois de
+// recarregar, os campos de usuário e senha não aceitam digitação; no iPhone (app
+// instalado) o confirm() nem aparece.
 function sairSistema(){
-  if(!confirm("Sair do sistema agora?"))return;
-  try{_cofre.key=null;_cofre.ate=0;}catch(e){}
-  localStorage.removeItem('zg_sess');
-  window.location.reload();
+  abrirM('Sair do sistema','<div style="font-size:14px;color:var(--t2)">Sair do sistema agora? Para entrar de novo (ou com outro usuário) é só fazer login.</div>',function(){
+    try{_cofre.key=null;_cofre.ate=0;}catch(e){}
+    localStorage.removeItem('zg_sess');
+    window.location.reload();
+  },false,'Sair');
 }
 function _expirar(){localStorage.removeItem('zg_sess');if(window._zyntraAtualizacaoPendente){window.location.reload();return;}document.getElementById('login-bg').classList.remove('hidden');document.getElementById('li-pass').value='';var e=document.createElement('div');e.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#1a0c1c;border:1px solid var(--glb);color:var(--ouro);padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;z-index:10000;box-shadow:0 8px 32px rgba(0,0,0,.5)';e.textContent='🔒 Sessão expirada. Faça login novamente.';document.body.appendChild(e);setTimeout(function(){e.remove();},4000);setTimeout(function(){var u=document.getElementById('li-user');if(u)u.focus();},200);}
 var _wt=null;function _iniciarWatch(){if(_wt)clearInterval(_wt);_wt=setInterval(function(){var raw=localStorage.getItem('zg_sess');if(!raw){_expirar();clearInterval(_wt);return;}try{var s=JSON.parse(raw);if(!s.until||Date.now()>=s.until){_expirar();clearInterval(_wt);}}catch(e){_expirar();clearInterval(_wt);}},60000);}
