@@ -112,10 +112,24 @@
       if (!resp.ok) return false;
       const body = await resp.json();
       const remoto = body && body.data;
-      if (!remoto || !remoto.produtos) return false;
+      // Funcionário pode não ter Estoque liberado — aí não vem "produtos" e está tudo certo
+      if (!remoto || typeof remoto !== 'object' || (sess.role === 'dono' && !remoto.produtos)) return false;
+
+      // O dono mudou as áreas liberadas: atualiza o menu na hora, sem precisar sair e entrar
+      let paginasMudaram = false;
+      if (sess.role !== 'dono' && Array.isArray(body.paginas)) {
+        const antes = JSON.stringify(sess.paginas || []);
+        if (antes !== JSON.stringify(body.paginas)) {
+          try { const s2 = _sessaoWS(); s2.paginas = body.paginas; localStorage.setItem('zg_sess', JSON.stringify(s2)); } catch(e) {}
+          paginasMudaram = true;
+          window._zgForcarRedesenho = true;
+        }
+      }
 
       let local = null;
       try { local = JSON.parse(localStorage.getItem(CHAVE)); } catch(e) {}
+      // Enquanto este aparelho está salvando, quem resolve é o salvamento (ele já junta as versões)
+      if (typeof window._zgOcupado === 'function' && window._zgOcupado()) return paginasMudaram;
 
       // Filtrar pra funcionário não muda o _savedAt (é o mesmo dado, só com campos
       // a menos) — então trocar de usuário no mesmo aparelho (ex: colab → felipe)
@@ -126,7 +140,9 @@
       const tLocal  = local ? (local._savedAt || 0) : 0;
       const papelMudou = local && local._papel && local._papel !== sess.role;
       if (tRemoto <= tLocal && !papelMudou) {
+        if (tRemoto === tLocal && typeof _zgBaseGravar === 'function' && !localStorage.getItem('zyntra_gestao_base')) _zgBaseGravar(remoto);
         if (!_espelhouLocal && tRemoto === tLocal) _espelharBackupLocal(remoto, sess.role);
+        if (paginasMudaram) return true;
         // Local é mais recente que GitHub — push automático (dados ficaram presos por falha anterior)
         if (tLocal > tRemoto && typeof _ghSalvarG === 'function' && typeof DB !== 'undefined' && DB && DB.produtos) {
           console.log('[ZyntraG] Auto-push: local mais recente que GitHub — enviando...');
@@ -136,9 +152,21 @@
       }
 
       const linhas = _diffGestao(local, remoto);
-      localStorage.setItem(CHAVE, JSON.stringify(Object.assign({}, remoto, { _papel: sess.role })));
+      // Mudança feita aqui que ainda não chegou no servidor (ex: caiu a internet):
+      // junta com o que veio de lá em vez de jogar fora, e manda de novo.
+      let final = remoto, juntou = false;
+      const base = typeof _zgBaseLer === 'function' ? _zgBaseLer() : null;
+      if (!papelMudou && local && base && localStorage.getItem('zg_pend') === '1' && typeof _zgMesclarDB === 'function') {
+        try { final = _zgMesclarDB(base, local, remoto); juntou = true; } catch(e) { final = remoto; }
+      }
+      if (papelMudou) { try { localStorage.removeItem('zg_pend'); } catch(e) {} }
+      localStorage.setItem(CHAVE, JSON.stringify(Object.assign({}, final, { _papel: sess.role })));
+      if (typeof _zgBaseGravar === 'function') _zgBaseGravar(remoto);
       _espelharBackupLocal(remoto, sess.role);
       localStorage.removeItem('zg_lock');
+      if (juntou && typeof DB !== 'undefined' && typeof loadDB === 'function' && typeof _ghSalvarG === 'function') {
+        try { _zgTrocarDB(loadDB()); _ghSalvarG(); } catch(e) {}
+      }
 
       if (linhas && linhas.length > 0) {
         _notifSync('Zyntra Gestão — ' + linhas.length + ' alteração(ões)', linhas);
