@@ -1,0 +1,38 @@
+name: Monitor do site (avisos no celular)
+
+on:
+  schedule:
+    # A cada 15 min. O GitHub pode atrasar alguns minutos; o script só avisa
+    # depois de 2 falhas seguidas, então um atraso não gera alarme falso.
+    - cron: '7,22,37,52 * * * *'
+  workflow_dispatch:
+    inputs:
+      teste:
+        description: 'Mandar uma notificação de teste agora'
+        type: boolean
+        default: false
+
+concurrency:
+  group: monitor-site
+  cancel-in-progress: false
+
+jobs:
+  vigiar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Instalar dependências
+        run: npm install web-push --no-save
+      - name: Conferir o site e avisar
+        env:
+          VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY }}
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+          GH_DATA_TOKEN: ${{ secrets.GH_DATA_TOKEN }}
+          WP_MONITOR_USER: ${{ secrets.WP_MONITOR_USER }}
+          WP_MONITOR_APP_PASSWORD: ${{ secrets.WP_MONITOR_APP_PASSWORD }}
+          TESTE: ${{ github.event.inputs.teste == 'true' && '1' || '0' }}
+        run: node scripts/monitor-site.js
