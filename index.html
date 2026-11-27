@@ -5298,6 +5298,20 @@ function _torreDef(){
     if(dias===null)return {s:'info',v:'—',d:'Sem data de vencimento.'};
     return {s:!/active/.test(st)?'bad':dias<15?'bad':dias<60?'warn':'ok',v:dias+' dias',d:'Vence em '+_torreDataBR(ev.eventDate)+' · situação: '+(st||'?'),u:'https://registro.br/'};
   });
+  // ── E-mails enviados pelo site e backup (snippet "Zyntra - saude do site para a Torre de Comando", /wp-json/zyntra/v1/saude)
+  add('mail','envio','E-mails saindo do site (pedidos, senhas, avisos)',async function(){
+    var s=await _torreSaude(),e=s.email||{},hora=function(t){return t?new Date(t*1000).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'—';};
+    var falhando=e.ultimo_erro&&(!e.ultimo_ok||e.ultimo_erro>e.ultimo_ok);
+    if(falhando&&e.erros_2h>=2)return {s:'bad',v:'FALHANDO',d:e.erros_2h+' erro(s) de envio nas últimas 2 h e nenhum e-mail saiu depois do último erro ('+hora(e.ultimo_erro)+'). Clientes podem não receber senha e pedido.',u:SITE_URL+'/wp-admin/admin.php?page=wp-mail-smtp-tools&tab=debug-events'};
+    if(e.erros_24h)return {s:'warn',v:e.erros_24h+' erro(s)',d:e.erros_24h+' erro(s) de envio nas últimas 24 h (último '+hora(e.ultimo_erro)+') · '+(e.ok_24h||0)+' enviados · último enviado '+hora(e.ultimo_ok)+'.',u:SITE_URL+'/wp-admin/admin.php?page=wp-mail-smtp-tools&tab=debug-events'};
+    if(!e.ultimo_ok)return {s:'info',v:'—',d:'Registrando desde '+hora(e.desde)+'. Ainda nenhum e-mail enviado desde então.'};
+    return {s:'ok',v:(e.ok_24h||0)+' em 24 h',d:'Nenhum erro de envio nas últimas 24 h · último e-mail enviado '+hora(e.ultimo_ok)+'.'};
+  });
+  add('mail','backup','Backup do site',async function(){
+    var s=await _torreSaude(),b=s.backup_wpvivid||{};
+    var wv=b.ultimo?new Date(b.ultimo*1000).toLocaleDateString('pt-BR'):'nenhum';
+    return {s:'ok',v:'diário',d:'Hostinger faz backup automático todo dia (hPanel → Sites → Backups). Cópia extra do WPvivid: última em '+wv+(b.agendado?' (agendada).':' (agendamento desligado — opcional).'),u:'https://hpanel.hostinger.com/websites/zyntraglobal.com.br/files/backups'};
+  });
   // ── Loja (precisa da senha de aplicativo)
   add('loja','pedidos','Pedidos nas últimas 24 h',async function(){
     var desde=new Date(Date.now()-864e5).toISOString().slice(0,19);
@@ -5352,6 +5366,14 @@ function _torreDef(){
     return {s:prob.length?'warn':'ok',v:prob.length?prob.length+' ponto(s)':'ok',d:(prob.length?prob.join(' · ')+' · ':'')+'WordPress '+(e.wp_version||'?')+' · WooCommerce '+(e.version||'?')+' · PHP '+(e.php_version||'?')+(db?' · banco '+Math.round(db)+' MB':''),u:SITE_URL+'/wp-admin/admin.php?page=wc-status'};
   },true);
   return defs;
+}
+// Resumo público do snippet do site (e-mails enviados/erros e backup) — 1 busca serve às duas linhas
+async function _torreSaude(){
+  if(_torre.saude&&Date.now()-_torre.saudeEm<30e3)return _torre.saude;
+  var r=await fetch(SITE_URL+'/wp-json/zyntra/v1/saude',{cache:'no-store'});
+  if(r.status===404)throw new Error('O snippet "Zyntra - saude do site" está desativado no site.');
+  if(!r.ok)throw new Error('erro '+r.status);
+  _torre.saude=await r.json();_torre.saudeEm=Date.now();return _torre.saude;
 }
 async function _torreSys(){
   if(_torre.sys&&Date.now()-_torre.sysEm<15*60e3)return _torre.sys;
@@ -5437,6 +5459,7 @@ function torrePrazoEditar(i){
 var TORRE_GRUPOS=[
   {k:'site',t:'🌐 Site no ar'},
   {k:'dns',t:'🛰️ Domínio, DNS e e-mail'},
+  {k:'mail',t:'📧 E-mails enviados e backup'},
   {k:'loja',t:'🛒 Loja e pagamentos'},
   {k:'seg',t:'🛡️ Segurança e acessos'}
 ];
@@ -5497,8 +5520,8 @@ function _torreRender(){
   }).join('')+'<div style="padding:8px 16px;font-size:11px;color:var(--t3)">Amarelo a partir de 45 dias, vermelho a partir de 10. Confira se o cartão da Hostinger vence antes dessas datas.</div></div>';
   // Pendências conhecidas (o que ainda não dá para conferir ao vivo)
   h+='<div class="panel"><div class="ph"><div class="pt">📝 Para ficar de olho (conferir no site)</div></div><div style="padding:10px 16px;font-size:12px;color:var(--t2);line-height:1.7">'+
-    '• <b>Backup:</b> o backup automático do WPvivid estava desligado (último em 01/10/2026). <a href="'+SITE_URL+'/wp-admin/admin.php?page=WPvivid" target="_blank" rel="noopener" style="color:var(--ouro)">abrir ↗</a><br>'+
-    '• <b>E-mails do site:</b> erros de envio aparecem em WP Mail SMTP → Ferramentas → Eventos de depuração. <a href="'+SITE_URL+'/wp-admin/admin.php?page=wp-mail-smtp-tools&tab=debug-events" target="_blank" rel="noopener" style="color:var(--ouro)">abrir ↗</a><br>'+
+    '• <b>Detalhe dos erros de e-mail:</b> WP Mail SMTP → Ferramentas → Eventos de depuração. <a href="'+SITE_URL+'/wp-admin/admin.php?page=wp-mail-smtp-tools&tab=debug-events" target="_blank" rel="noopener" style="color:var(--ouro)">abrir ↗</a><br>'+
+    '• <b>Avisos no celular:</b> com o app fechado, o robô confere site, loja, domínio, MX, DKIM e envio de e-mails a cada 15 min e avisa aqui no celular se algo sair do normal.<br>'+
     '• <b>Verificação em 2 etapas:</b> ativar na Hostinger, na Cloudflare e no WordPress.'+
   '</div></div>';
   // Mapa de acessos
